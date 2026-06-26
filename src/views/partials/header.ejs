@@ -28,56 +28,118 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link" href="/dashboard"><i class="fa-solid fa-gauge me-1"></i> Dashboard</a>
+              <a class="nav-link" href="/dashboard">
+                <div class="nav-icon-wrapper">
+                  <i class="fa-solid fa-gauge"></i>
+                </div>
+                <div class="nav-text-container">
+                  <span class="nav-label-main">Dashboard</span>
+                  <span class="nav-caption-sub">Halaman Utama</span>
+                </div>
+              </a>
             </li>
+            
             <li class="nav-item">
-              <a class="nav-link" href="/quran"><i class="fa-solid fa-book-quran me-1"></i> Baca Al-Qur'an</a>
+              <a class="nav-link" href="/quran">
+                <div class="nav-icon-wrapper">
+                  <i class="fa-solid fa-book-quran"></i>
+                </div>
+                <div class="nav-text-container">
+                  <span class="nav-label-main">Baca Al-Qur'an</span>
+                  <span class="nav-caption-sub">Mushaf & Tafsir</span>
+                </div>
+              </a>
             </li>
+            
             <li class="nav-item">
-              <a class="nav-link" href="/quran/bookmarks"><i class="fa-solid fa-bookmark me-1"></i> Bookmarks</a>
+              <a class="nav-link" href="/quran/bookmarks">
+                <div class="nav-icon-wrapper">
+                  <i class="fa-solid fa-bookmark"></i>
+                </div>
+                <div class="nav-text-container">
+                  <span class="nav-label-main">Bookmarks</span>
+                  <span class="nav-caption-sub">Ayat Tersimpan</span>
+                </div>
+              </a>
             </li>
+            
             <li class="nav-item">
-              <a class="nav-link" href="/tanya"><i class="fa-solid fa-comments me-1"></i> Tanya Yuk!</a>
+              <a class="nav-link" href="/tanya">
+                <div class="nav-icon-wrapper">
+                  <i class="fa-solid fa-comments"></i>
+                </div>
+                <div class="nav-text-container">
+                  <span class="nav-label-main">Tanya Yuk!</span>
+                  <span class="nav-caption-sub">Diskusi Agama</span>
+                </div>
+              </a>
             </li>
+            
             <li class="nav-item">
-              <a class="nav-link" href="/live"><i class="fa-solid fa-tower-broadcast me-1"></i> Kajian Live</a>
+              <a class="nav-link" href="/live">
+                <div class="nav-icon-wrapper">
+                  <i class="fa-solid fa-tower-broadcast"></i>
+                </div>
+                <div class="nav-text-container">
+                  <span class="nav-label-main">Kajian Live</span>
+                  <span class="nav-caption-sub">Streaming & Tanya</span>
+                </div>
+              </a>
             </li>
             
             <!-- PAI Teacher or Admin Actions -->
             <% if (currentUser.role === 'admin' || (currentUser.role === 'guru' && currentUser.is_guru_pai)) { %>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="evalDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-file-signature me-1"></i> Penilaian
+                  <div class="nav-icon-wrapper">
+                    <i class="fa-solid fa-file-signature"></i>
+                  </div>
+                  <div class="nav-text-container">
+                    <span class="nav-label-main">Penilaian</span>
+                    <span class="nav-caption-sub">Evaluasi Siswa</span>
+                  </div>
                 </a>
                 <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="evalDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
-                  <li><a class="dropdown-item rounded" href="/hafalan/input"><i class="fa-solid fa-microphone me-2 text-info"></i> Input Hafalan</a></li>
-                  <li><a class="dropdown-item rounded" href="/ibadah/input"><i class="fa-solid fa-hands-praying me-2 text-success"></i> Input Praktek Ibadah</a></li>
+                  <li><a class="dropdown-item rounded py-2" href="/hafalan/input"><i class="fa-solid fa-microphone me-2 text-info"></i> Input Hafalan</a></li>
+                  <li><a class="dropdown-item rounded py-2" href="/ibadah/input"><i class="fa-solid fa-hands-praying me-2 text-success"></i> Input Praktek Ibadah</a></li>
                 </ul>
               </li>
             <% } %>
-
+ 
             <!-- Admin Controls -->
             <% if (currentUser.role === 'admin') { %>
               <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle text-accent" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-user-shield me-1"></i> Admin Panel
+                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <div class="nav-icon-wrapper">
+                    <i class="fa-solid fa-user-shield text-accent"></i>
+                  </div>
+                  <div class="nav-text-container">
+                    <span class="nav-label-main">Admin Panel</span>
+                    <span class="nav-caption-sub">Kelola Sistem</span>
+                  </div>
                 </a>
                 <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="adminDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
-                  <li><a class="dropdown-item rounded" href="/admin/users"><i class="fa-solid fa-users me-2"></i> Kelola User</a></li>
-                  <li><a class="dropdown-item rounded" href="/admin/kelas"><i class="fa-solid fa-school me-2"></i> Kelola Kelas</a></li>
-                  <li><a class="dropdown-item rounded" href="/admin/ibadah"><i class="fa-solid fa-list-check me-2"></i> Kelola Jenis Ibadah</a></li>
+                  <li><a class="dropdown-item rounded py-2" href="/admin/users"><i class="fa-solid fa-users me-2 text-primary"></i> Kelola User</a></li>
+                  <li><a class="dropdown-item rounded py-2" href="/admin/kelas"><i class="fa-solid fa-school me-2 text-success"></i> Kelola Kelas</a></li>
+                  <li><a class="dropdown-item rounded py-2" href="/admin/ibadah"><i class="fa-solid fa-list-check me-2 text-warning"></i> Kelola Jenis Ibadah</a></li>
                 </ul>
               </li>
             <% } %>
-
+ 
             <!-- History log lookup (open to all) -->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="historyDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fa-solid fa-history me-1"></i> Riwayat
+                <div class="nav-icon-wrapper">
+                  <i class="fa-solid fa-history"></i>
+                </div>
+                <div class="nav-text-container">
+                  <span class="nav-label-main">Riwayat</span>
+                  <span class="nav-caption-sub">Log Aktivitas</span>
+                </div>
               </a>
               <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="historyDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
-                <li><a class="dropdown-item rounded" href="/hafalan/riwayat"><i class="fa-solid fa-book-open me-2"></i> Hafalan Qur'an</a></li>
-                <li><a class="dropdown-item rounded" href="/ibadah/riwayat"><i class="fa-solid fa-person-praying me-2"></i> Praktek Ibadah</a></li>
+                <li><a class="dropdown-item rounded py-2" href="/hafalan/riwayat"><i class="fa-solid fa-book-open me-2 text-info"></i> Hafalan Qur'an</a></li>
+                <li><a class="dropdown-item rounded py-2" href="/ibadah/riwayat"><i class="fa-solid fa-person-praying me-2 text-success"></i> Praktek Ibadah</a></li>
               </ul>
             </li>
           </ul>

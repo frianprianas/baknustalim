@@ -142,6 +142,107 @@ body {
   color: var(--accent-color) !important;
 }
 
+/* Premium Navbar Extensions */
+@media (min-width: 992px) {
+  .navbar-nav {
+    align-items: center;
+  }
+}
+@media (max-width: 991.98px) {
+  .navbar-nav {
+    align-items: stretch;
+    gap: 6px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  .navbar-nav .nav-item {
+    margin: 0;
+  }
+}
+
+.navbar-nav .nav-item {
+  margin: 0 4px;
+}
+.navbar-nav .nav-link {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 0.5rem 0.8rem !important;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+}
+.navbar-nav .nav-link:hover, 
+.navbar-nav .nav-link.active,
+.navbar-nav .show > .nav-link {
+  background-color: var(--bg-tertiary);
+  border-color: var(--glass-border);
+  color: var(--accent-color) !important;
+}
+
+/* Nav Icon Wrapper */
+.nav-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+.navbar-nav .nav-link:hover .nav-icon-wrapper,
+.navbar-nav .nav-link.active .nav-icon-wrapper,
+.navbar-nav .show > .nav-link .nav-icon-wrapper {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  border-color: var(--accent-color);
+  transform: scale(1.05);
+}
+
+/* Label & Subtitle Text Layout */
+.nav-text-container {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  text-align: left;
+}
+.nav-label-main {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: color 0.2s ease;
+}
+.nav-link:hover .nav-label-main,
+.nav-link.active .nav-label-main {
+  color: var(--accent-color);
+}
+.nav-caption-sub {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 1px;
+}
+.nav-link:hover .nav-caption-sub,
+.nav-link.active .nav-caption-sub {
+  color: var(--text-secondary);
+}
+
+/* Adjust dropdown toggle arrow alignment */
+.navbar-nav .dropdown-toggle::after {
+  margin-left: auto;
+  vertical-align: middle;
+}
+@media (min-width: 992px) {
+  .navbar-nav .dropdown-toggle::after {
+    margin-left: 0.4em;
+  }
+}
+
 /* Typography & Badges */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
