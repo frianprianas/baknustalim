@@ -1,0 +1,163 @@
+<%- include('../partials/header') %>
+
+<div class="row justify-content-center animate__animated animate__fadeIn">
+  <div class="col-lg-8 col-md-10">
+
+    <div class="d-flex align-items-center mb-4">
+      <a href="/dashboard" class="btn btn-outline-light rounded-circle me-3" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div>
+        <h1 class="h2 mb-1"><i class="fa-solid fa-microphone me-2 text-accent"></i> Penilaian Hafalan Al-Qur'an</h1>
+        <p class="text-secondary mb-0">Input perkembangan setoran hafalan Al-Qur'an siswa kelas diampu.</p>
+      </div>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-danger border-0 small text-center mb-4 py-2" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2) !important;">
+        <i class="fa-solid fa-triangle-exclamation me-1"></i> <%= error %>
+      </div>
+    <% } %>
+
+    <div class="card-glass p-4 p-md-5">
+      <form action="/hafalan/input" method="POST">
+        
+        <!-- Siswa select -->
+        <div class="mb-4">
+          <label for="student_id" class="form-label">Pilih Siswa</label>
+          <select class="form-select border-secondary" id="student_id" name="student_id" required>
+            <option value="">-- Pilih Siswa yang Diuji --</option>
+            <% students.forEach(s => { %>
+              <option value="<%= s._id %>">
+                <%= s.nama %> (<%= s.nis || 'NIS Kosong' %>) - <%= s.kelas_id ? s.kelas_id.nama_kelas : 'Belum ada kelas' %>
+              </option>
+            <% }) %>
+          </select>
+          <div class="form-text text-muted small" style="font-size: 0.72rem;">Daftar siswa disaring hanya dari kelas yang Anda ampu sebagai Guru PAI.</div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <!-- Surah select -->
+          <div class="col-md-6">
+            <label for="surah_number" class="form-label">Pilih Surah</label>
+            <select class="form-select border-secondary" id="surah_number" name="surah_number" required>
+              <option value="">-- Pilih Surah --</option>
+              <% surahs.forEach(s => { %>
+                <option value="<%= s.number %>">
+                  <%= s.number %>. <%= s.name_latin %> (<%= s.name_arabic %>) - <%= s.jumlah_ayat %> Ayat
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <!-- Date picker -->
+          <div class="col-md-6">
+            <label for="tanggal" class="form-label">Tanggal Penilaian</label>
+            <input type="date" class="form-control border-secondary" id="tanggal" name="tanggal" value="<%= new Date().toISOString().split('T')[0] %>" required>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-4">
+          <label class="form-label d-block">Hasil Evaluasi / Status Kelulusan</label>
+          <div class="d-flex gap-3">
+            <input type="radio" class="btn-check" name="status" id="status_kompeten" value="Kompeten" checked autocomplete="off">
+            <label class="btn btn-outline-success px-4 py-2 border-secondary rounded-pill w-50" for="status_kompeten" style="border-width: 1px;">
+              <i class="fa-solid fa-circle-check me-2"></i> Kompeten (Lulus)
+            </label>
+
+            <input type="radio" class="btn-check" name="status" id="status_belum" value="Belum Kompeten" autocomplete="off">
+            <label class="btn btn-outline-danger px-4 py-2 border-secondary rounded-pill w-50" for="status_belum" style="border-width: 1px;">
+              <i class="fa-solid fa-circle-xmark me-2"></i> Belum Kompeten
+            </label>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label for="catatan" class="form-label mb-0">Catatan Tambahan (Opsional)</label>
+            <button type="button" class="btn btn-outline-info btn-xs py-1 px-2.5 rounded-pill" style="font-size: 0.72rem;" id="btnGenFeedback" onclick="generateAiFeedback()">
+              <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Buat Catatan Motivasi (AI)
+            </button>
+          </div>
+          <textarea class="form-control border-secondary" id="catatan" name="catatan" rows="3" placeholder="Masukkan catatan singkat Anda dulu, lalu klik tombol AI di atas untuk mengubahnya jadi kalimat motivasi yang ramah..."></textarea>
+        </div>
+
+        <!-- Submit actions -->
+        <div class="d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
+          <a href="/dashboard" class="btn btn-secondary-custom">Batal</a>
+          <button type="submit" class="btn btn-primary-custom">
+            <i class="fa-solid fa-paper-plane me-1"></i> Simpan Penilaian
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  async function generateAiFeedback() {
+    const studentSelect = document.getElementById('student_id');
+    const selectedOption = studentSelect.options[studentSelect.selectedIndex];
+    const surahSelect = document.getElementById('surah_number');
+    const selectedSurahOption = surahSelect.options[surahSelect.selectedIndex];
+    
+    if (!studentSelect.value) {
+      alert('Pilih siswa terlebih dahulu.');
+      return;
+    }
+    if (!surahSelect.value) {
+      alert('Pilih surah terlebih dahulu.');
+      return;
+    }
+
+    // Extract student name (ignoring NIS and Class suffix in option text)
+    const fullOptionText = selectedOption.text;
+    const studentName = fullOptionText.split(' (')[0].trim();
+    const surahName = selectedSurahOption.text.trim();
+    
+    // Status
+    const statusRadio = document.querySelector('input[name="status"]:checked');
+    const status = statusRadio ? statusRadio.value : 'Kompeten';
+    
+    const notesTextarea = document.getElementById('catatan');
+    const notes = notesTextarea.value.trim();
+
+    const btn = document.getElementById('btnGenFeedback');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Menulis...`;
+
+    try {
+      const response = await fetch('/ai/generate-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'Hafalan Al-Qur\'an',
+          item: `Surah ${surahName}`,
+          status: status,
+          notes: notes,
+          nama_siswa: studentName
+        })
+      });
+
+      const data = await response.json();
+      if (data.success && data.feedback) {
+        notesTextarea.value = data.feedback;
+      } else {
+        alert('Gagal menghasilkan catatan motivasi: ' + (data.message || 'Terjadi kesalahan.'));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Gagal menghubungi Server AI: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

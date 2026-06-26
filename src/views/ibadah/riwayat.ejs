@@ -1,0 +1,136 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 animate__animated animate__fadeIn">
+  <div>
+    <h1 class="h2 mb-1"><i class="fa-solid fa-hands-praying me-2 text-accent"></i> Riwayat Praktek Ibadah</h1>
+    <p class="text-secondary mb-0">Catatan riwayat evaluasi praktek ibadah harian atau ujian fiqih siswa.</p>
+  </div>
+  <% if (currentUser.role === 'admin' || (currentUser.role === 'guru' && currentUser.is_guru_pai)) { %>
+    <div class="mt-3 mt-md-0">
+      <a href="/ibadah/input" class="btn btn-primary-custom">
+        <i class="fa-solid fa-plus me-1"></i> Input Penilaian Baru
+      </a>
+    </div>
+  <% } %>
+</div>
+
+<!-- Filters (Hidden for Siswa since they only see their own) -->
+<% if (currentUser.role !== 'siswa') { %>
+  <div class="card-glass p-4 mb-4">
+    <form action="/ibadah/riwayat" method="GET" class="row g-3">
+      <div class="col-md-3">
+        <label for="class_id" class="form-label">Filter Kelas</label>
+        <select class="form-select border-secondary" id="class_id" name="class_id" onchange="this.form.submit()">
+          <option value="">-- Semua Kelas --</option>
+          <% classes.forEach(c => { %>
+            <option value="<%= c._id %>" <%= selectedClass === c._id.toString() ? 'selected' : '' %>>
+              <%= c.nama_kelas %> (<%= c.tahun_ajaran %>)
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label for="jenis_ibadah_id" class="form-label">Filter Jenis Ibadah</label>
+        <select class="form-select border-secondary" id="jenis_ibadah_id" name="jenis_ibadah_id" onchange="this.form.submit()">
+          <option value="">-- Semua Jenis Ibadah --</option>
+          <% ibadahCategories.forEach(ib => { %>
+            <option value="<%= ib._id %>" <%= selectedIbadah === ib._id.toString() ? 'selected' : '' %>>
+              <%= ib.nama_ibadah %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label for="status" class="form-label">Filter Status</label>
+        <select class="form-select border-secondary" id="status" name="status" onchange="this.form.submit()">
+          <option value="">-- Semua Status --</option>
+          <option value="Kompeten" <%= selectedStatus === 'Kompeten' ? 'selected' : '' %>>Kompeten</option>
+          <option value="Belum Kompeten" <%= selectedStatus === 'Belum Kompeten' ? 'selected' : '' %>>Belum Kompeten</option>
+        </select>
+      </div>
+      
+      <div class="col-md-2">
+        <label for="search" class="form-label">Cari Nama Siswa</label>
+        <input type="text" class="form-control border-secondary" id="search" name="search" placeholder="Cari..." value="<%= searchQuery %>">
+      </div>
+
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-secondary-custom w-100 py-2">
+          <i class="fa-solid fa-filter me-1"></i> Filter
+        </button>
+      </div>
+    </form>
+  </div>
+<% } %>
+
+<!-- History Table -->
+<div class="card-glass p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0"><i class="fa-solid fa-list-ol me-2 text-accent"></i> Daftar Catatan Evaluasi</h5>
+    <span class="badge" style="background-color: var(--bg-tertiary) !important; color: var(--accent-color) !important; border: 1px solid var(--glass-border) !important; font-size: 0.85rem;"><%= history.length %> Catatan</span>
+  </div>
+
+  <% if (history && history.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table table-custom align-middle">
+        <thead>
+          <tr>
+            <% if (currentUser.role !== 'siswa') { %>
+              <th>Siswa</th>
+              <th>Kelas</th>
+            <% } %>
+            <th>Praktek Ibadah</th>
+            <th>Hasil Status</th>
+            <th>Tanggal Diuji</th>
+            <th>Penilai (NIP)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% history.forEach(r => { %>
+            <tr>
+              <% if (currentUser.role !== 'siswa') { %>
+                <td>
+                  <strong><%= r.siswa ? r.siswa.nama : 'Siswa Terhapus' %></strong>
+                  <div class="text-accent small font-monospace"><%= r.nis %></div>
+                </td>
+                <td>
+                  <span class="badge" style="background-color: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--glass-border);"><%= (r.siswa && r.siswa.kelas_id) ? r.siswa.kelas_id.nama_kelas : 'Tanpa Kelas' %></span>
+                </td>
+              <% } %>
+              <td>
+                <strong class="text-primary"><%= r.jenis_ibadah_id ? r.jenis_ibadah_id.nama_ibadah : 'Ibadah' %></strong>
+                <div class="text-muted small"><%= r.jenis_ibadah_id ? r.jenis_ibadah_id.deskripsi : '' %></div>
+              </td>
+              <td>
+                <span class="<%= r.status === 'Kompeten' ? 'badge-kompeten' : 'badge-belum' %>"><%= r.status %></span>
+              </td>
+              <td>
+                <span class="small text-secondary fw-medium"><%= new Date(r.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) %></span>
+              </td>
+              <td>
+                <span class="text-secondary small"><%= r.guru_id ? r.guru_id.nama : 'Guru' %></span>
+                <div class="text-muted small font-monospace" style="font-size: 0.72rem;"><%= r.guru_id ? (r.guru_id.nip || r.guru_id.mailcow_email.split('@')[0]) : '-' %></div>
+              </td>
+            </tr>
+            <% if (r.catatan) { %>
+              <tr style="background: rgba(21, 128, 61, 0.02);">
+                <td colspan="<%= currentUser.role !== 'siswa' ? 6 : 4 %>" class="pt-0 pb-3 ps-4 text-muted small">
+                  <i class="fa-solid fa-comment-dots text-accent me-1"></i> <em>Catatan Penilai: "<%= r.catatan %>"</em>
+                </td>
+              </tr>
+            <% } %>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="text-center py-5 text-secondary">
+      <i class="fa-solid fa-hands-praying fa-3x mb-3 text-muted"></i>
+      <p class="mb-0">Tidak ada riwayat praktek ibadah ditemukan.</p>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

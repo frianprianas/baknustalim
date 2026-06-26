@@ -1,0 +1,193 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4 animate__animated animate__fadeIn">
+  <!-- Profile & Welcome -->
+  <div class="col-12">
+    <div class="card-glass p-3 p-sm-4 mb-4" style="background: linear-gradient(135deg, rgba(21, 128, 61, 0.08) 0%, rgba(21, 128, 61, 0.16) 100%);">
+      <div class="row align-items-center">
+        <div class="col-auto mb-3 mb-md-0">
+          <div class="d-flex align-items-center justify-content-center rounded-circle border border-2 border-success shadow-sm text-white fw-bold fs-2" style="width: 70px; height: 70px; background-color: #15803d; overflow: hidden; flex-shrink: 0; box-shadow: 0 0 20px rgba(21, 128, 61, 0.15);">
+            <img src="https://baknusmail.smkbn666.sch.id/api/auth/avatar/<%= currentUser.mailcow_email %>"
+                 alt="Avatar"
+                 style="width: 100%; height: 100%; object-fit: cover;"
+                 onerror="this.style.display='none'; this.parentElement.innerText='<%= (currentUser.nama || 'B').charAt(0).toUpperCase() %>';" />
+          </div>
+        </div>
+        <div class="col">
+          <span class="text-secondary text-uppercase small tracking-wider font-weight-bold">Selamat Datang di Administrator Panel</span>
+          <h1 class="h2 mb-1"><%= currentUser.profile && currentUser.profile.displayName ? currentUser.profile.displayName : currentUser.nama %></h1>
+          <p class="text-secondary mb-0">
+            <strong>Email:</strong> <%= currentUser.mailcow_email %> &bull; 
+            <strong>Hak Akses:</strong> Administrator Penuh
+            <% if (currentUser.profile && currentUser.profile.phoneNumber) { %>
+              &bull; <strong>HP:</strong> <%= currentUser.profile.phoneNumber %>
+              <% if (currentUser.profile.isPhoneVerified) { %>
+                <span class="badge rounded-pill ms-1 text-success" style="font-size: 0.65rem; background-color: rgba(22, 163, 74, 0.1); border: 1px solid rgba(22, 163, 74, 0.2);"><i class="fa-solid fa-circle-check"></i> Verified</span>
+              <% } %>
+            <% } %>
+          </p>
+        </div>
+        <div class="col-md-auto mt-3 mt-md-0">
+          <form action="/admin/users/sync" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-primary-custom">
+              <i class="fa-solid fa-sync me-1"></i> Sinkronisasi Mailcow
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Counter Grid -->
+<div class="row mb-4">
+  <!-- Siswa -->
+  <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+    <div class="card-glass stat-card success h-100">
+      <h5 class="text-secondary mb-2"><i class="fa-solid fa-graduation-cap me-2 text-success"></i> Siswa</h5>
+      <h2 class="mb-0 text-success font-weight-bold"><%= stats.totalSiswa %></h2>
+      <small class="text-muted">Total siswa disinkronkan</small>
+    </div>
+  </div>
+
+  <!-- Guru -->
+  <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+    <div class="card-glass stat-card h-100">
+      <h5 class="text-secondary mb-2"><i class="fa-solid fa-chalkboard-user me-2 text-accent"></i> Guru</h5>
+      <h2 class="mb-0 text-accent font-weight-bold"><%= stats.totalGuru %></h2>
+      <small class="text-muted"><%= stats.totalGuruPAI %> Berstatus Guru PAI</small>
+    </div>
+  </div>
+
+  <!-- TU -->
+  <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+    <div class="card-glass stat-card warning h-100">
+      <h5 class="text-secondary mb-2"><i class="fa-solid fa-user-tie me-2 text-warning"></i> Tata Usaha</h5>
+      <h2 class="mb-0 text-warning font-weight-bold"><%= stats.totalTU %></h2>
+      <small class="text-muted">Akses laporan administratif</small>
+    </div>
+  </div>
+
+  <!-- Kelas -->
+  <div class="col-md-3 col-sm-6">
+    <div class="card-glass stat-card danger h-100">
+      <h5 class="text-secondary mb-2"><i class="fa-solid fa-school me-2 text-danger"></i> Kelas</h5>
+      <h2 class="mb-0 text-danger font-weight-bold"><%= stats.totalKelas %></h2>
+      <small class="text-muted">Kelas aktif terdaftar</small>
+    </div>
+  </div>
+</div>
+
+<!-- Academic & Q&A Stats Recapitulation -->
+<h4 class="mb-3 font-weight-bold text-primary"><i class="fa-solid fa-chart-line me-2 text-accent"></i> Rekapitulasi Capaian & Diskusi</h4>
+<div class="row mb-4">
+  <!-- Hafalan Stats -->
+  <div class="col-md-4 mb-3 mb-md-0">
+    <div class="card-glass p-3 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h6 class="text-secondary mb-0"><i class="fa-solid fa-book-open me-2 text-accent"></i> Evaluasi Hafalan</h6>
+        <span class="badge px-2 py-1 small" style="background-color: rgba(22, 163, 74, 0.1); color: var(--accent-color); border: 1px solid rgba(22, 163, 74, 0.2);">Kompeten</span>
+      </div>
+      <div class="row align-items-center">
+        <div class="col-6 border-end border-light">
+          <h2 class="mb-0 text-primary font-weight-bold"><%= stats.totalHafalan %></h2>
+          <small class="text-muted">Total Setoran</small>
+        </div>
+        <div class="col-6 ps-3">
+          <h3 class="mb-0 text-success font-weight-bold">
+            <%= stats.totalHafalan > 0 ? Math.round((stats.kompetenHafalan / stats.totalHafalan) * 100) : 0 %>%
+          </h3>
+          <small class="text-muted"><%= stats.kompetenHafalan %> Setoran Lulus</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ibadah Stats -->
+  <div class="col-md-4 mb-3 mb-md-0">
+    <div class="card-glass p-3 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h6 class="text-secondary mb-0"><i class="fa-solid fa-hands-praying me-2 text-accent"></i> Praktek Ibadah</h6>
+        <span class="badge px-2 py-1 small" style="background-color: rgba(22, 163, 74, 0.1); color: var(--accent-color); border: 1px solid rgba(22, 163, 74, 0.2);">Kompeten</span>
+      </div>
+      <div class="row align-items-center">
+        <div class="col-6 border-end border-light">
+          <h2 class="mb-0 text-primary font-weight-bold"><%= stats.totalIbadah %></h2>
+          <small class="text-muted">Total Penilaian</small>
+        </div>
+        <div class="col-6 ps-3">
+          <h3 class="mb-0 text-success font-weight-bold">
+            <%= stats.totalIbadah > 0 ? Math.round((stats.kompetenIbadah / stats.totalIbadah) * 100) : 0 %>%
+          </h3>
+          <small class="text-muted"><%= stats.kompetenIbadah %> Uji Lulus</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q&A Stats -->
+  <div class="col-md-4">
+    <div class="card-glass p-3 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h6 class="text-secondary mb-0"><i class="fa-solid fa-comments me-2 text-accent"></i> Tanya Yuk! Q&A</h6>
+        <span class="badge px-2 py-1 small" style="background-color: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2);"><%= stats.unansweredQuestions %> Pending</span>
+      </div>
+      <div class="row align-items-center">
+        <div class="col-6 border-end border-light">
+          <h2 class="mb-0 text-primary font-weight-bold"><%= stats.totalQuestions %></h2>
+          <small class="text-muted">Total Diajukan</small>
+        </div>
+        <div class="col-6 ps-3">
+          <h3 class="mb-0 text-info font-weight-bold">
+            <%= stats.answeredQuestions %>
+          </h3>
+          <small class="text-muted">Telah Dijawab</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Links & Actions Grid -->
+<div class="row">
+  <div class="col-md-4 mb-4">
+    <div class="card-glass p-4 h-100 d-flex flex-column justify-content-between">
+      <div>
+        <div class="text-accent mb-3"><i class="fa-solid fa-users fa-2x"></i></div>
+        <h5>Kelola User & Sinkronisasi</h5>
+        <p class="text-secondary small">Tarik data user terbaru dari Mailcow, edit NIS/NIP manual jika tidak terisi, ubah role user (siswa, guru, TU, admin) secara lokal, dan set Guru PAI.</p>
+      </div>
+      <a href="/admin/users" class="btn btn-primary-custom w-100 mt-3">
+        Buka Manajemen User <i class="fa-solid fa-arrow-right ms-1"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-md-4 mb-4">
+    <div class="card-glass p-4 h-100 d-flex flex-column justify-content-between">
+      <div>
+        <div class="text-success mb-3"><i class="fa-solid fa-school fa-2x"></i></div>
+        <h5>Manajemen Kelas & Siswa</h5>
+        <p class="text-secondary small">Buat kelas untuk tahun ajaran baru, petakan siswa ke dalam kelas, dan tugaskan satu atau beberapa Guru PAI ke kelas tertentu (many-to-many).</p>
+      </div>
+      <a href="/admin/kelas" class="btn btn-primary-custom w-100 mt-3">
+        Buka Manajemen Kelas <i class="fa-solid fa-arrow-right ms-1"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-md-4 mb-4">
+    <div class="card-glass p-4 h-100 d-flex flex-column justify-content-between">
+      <div>
+        <div class="text-warning mb-3"><i class="fa-solid fa-list-check fa-2x"></i></div>
+        <h5>Master Jenis Ibadah</h5>
+        <p class="text-secondary small">Kelola parameter praktek ibadah yang dinilai (master data). Anda dapat menambah jenis ibadah (misal: "Wudhu", "Tahsin") atau menonaktifkannya.</p>
+      </div>
+      <a href="/admin/ibadah" class="btn btn-primary-custom w-100 mt-3">
+        Kelola Jenis Ibadah <i class="fa-solid fa-arrow-right ms-1"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

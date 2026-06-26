@@ -1,0 +1,149 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4 animate__animated animate__fadeIn">
+  <div class="col-12 text-center my-4">
+    <span class="text-accent text-uppercase small font-weight-bold">
+      <i class="fa-solid fa-tower-broadcast me-1"></i> Live Stream Kajian
+    </span>
+    <h1 class="h1 mb-2 font-weight-bold">Kajian Islami Live</h1>
+    <p class="text-secondary mx-auto" style="max-width: 600px;">
+      Simak langsung kajian agama, tadarus Al-Qur'an, dan bimbingan ibadah dari Guru PAI secara interaktif dan real-time.
+    </p>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+
+    <!-- Success & Error Alert Messages -->
+    <% if (successMessage) { %>
+      <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 shadow-sm mb-4" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i><%= successMessage %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
+    <% if (errorMessage) { %>
+      <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 shadow-sm mb-4" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i><%= errorMessage %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
+
+    <!-- PAI Teacher Broadcast Launcher -->
+    <% if (isGuruPAI) { %>
+      <div class="card-glass p-4 mb-5 border border-success" style="background: linear-gradient(135deg, rgba(21, 128, 61, 0.04) 0%, rgba(21, 128, 61, 0.1) 100%);">
+        <h4 class="text-primary font-weight-bold mb-3">
+          <i class="fa-solid fa-circle-play me-2 text-danger"></i> Mulai Kajian Live Anda
+        </h4>
+        <p class="text-secondary small">
+          Sebagai Guru PAI, Anda dapat menyiarkan video pembelajaran, kajian fiqih, atau sesi setoran hafalan secara langsung. Semua siswa dan guru lainnya akan mendapatkan notifikasi untuk masuk menyimak.
+        </p>
+        <form action="/live/start" method="POST" class="mt-4">
+          <div class="row align-items-end g-3">
+            <div class="col-md-9">
+              <label for="topik" class="form-label font-weight-bold">Topik / Tema Kajian Live</label>
+              <input type="text" class="form-control border-success" id="topik" name="topik" placeholder="Contoh: Belajar Hukum Tajwid QS. Al-Baqarah Ayat 1-10" required>
+            </div>
+            <div class="col-md-3">
+              <button type="submit" class="btn btn-primary-custom w-100 py-2.5">
+                <i class="fa-solid fa-tower-broadcast me-2"></i> Mulai Live
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    <% } %>
+
+    <!-- Active Live Sessions Grid -->
+    <div class="mb-5">
+      <h3 class="h4 font-weight-bold text-primary mb-4">
+        <i class="fa-solid fa-satellite-dish me-2 text-danger animate__animated animate__pulse animate__infinite"></i> Kajian Sedang Berlangsung (Live)
+      </h3>
+
+      <% if (activeSessions && activeSessions.length > 0) { %>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+          <% activeSessions.forEach(session => { %>
+            <div class="col">
+              <div class="card-glass h-100 p-4 border border-danger d-flex flex-column justify-content-between">
+                <div>
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="badge bg-danger rounded-pill px-3 py-1.5 animate__animated animate__flash animate__infinite">
+                      <i class="fa-solid fa-circle me-1" style="font-size: 0.75em;"></i> LIVE
+                    </span>
+                    <small class="text-muted">
+                      Mulai: <%= new Date(session.waktu_mulai).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) %> WIB
+                    </small>
+                  </div>
+                  <h4 class="text-primary font-weight-bold mb-2"><%= session.topik %></h4>
+                  <p class="text-secondary mb-3">
+                    <i class="fa-solid fa-user-tie me-2 text-accent"></i> <strong><%= session.nama_guru %></strong>
+                  </p>
+                </div>
+                <a href="/live/room/<%= session.nama_room %>" class="btn btn-danger w-100 py-2 mt-3" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); border: none;">
+                  <i class="fa-solid fa-video me-2"></i> Masuk Menyimak
+                </a>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="card-glass text-center py-5 text-secondary">
+          <i class="fa-solid fa-video-slash fa-3x mb-3 text-muted"></i>
+          <h5 class="font-weight-bold mb-1">Belum Ada Kajian Live</h5>
+          <p class="text-muted mb-0 small">Belum ada Guru PAI yang memulai siaran langsung saat ini.</p>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Recently Ended Sessions -->
+    <div>
+      <h3 class="h4 font-weight-bold text-primary mb-4">
+        <i class="fa-solid fa-clock-rotate-left me-2 text-accent"></i> Kajian Live Sebelumnya
+      </h3>
+
+      <% if (endedSessions && endedSessions.length > 0) { %>
+        <div class="card-glass p-0 overflow-hidden">
+          <div class="table-responsive">
+            <table class="table table-custom align-middle mb-0">
+              <thead>
+                <tr>
+                  <th class="ps-4">Guru Pengajar</th>
+                  <th>Topik Kajian</th>
+                  <th>Tanggal</th>
+                  <th class="text-end pe-4">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% endedSessions.forEach(session => { %>
+                  <tr>
+                    <td class="ps-4">
+                      <strong><%= session.nama_guru %></strong>
+                    </td>
+                    <td>
+                      <span class="text-secondary"><%= session.topik %></span>
+                    </td>
+                    <td>
+                      <span class="text-muted small">
+                        <%= new Date(session.waktu_mulai).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %>
+                      </span>
+                    </td>
+                    <td class="text-end pe-4">
+                      <span class="badge bg-secondary rounded-pill px-3">Selesai</span>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } else { %>
+        <div class="text-center py-4 text-secondary">
+          <p class="text-muted mb-0 small">Belum ada riwayat kajian live sebelumnya.</p>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

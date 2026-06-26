@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : "BaknusTa'lim" %></title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- FontAwesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <!-- Custom Style -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+    <nav class="navbar navbar-expand-lg navbar-light navbar-glass">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center text-decoration-none" href="/dashboard">
+          <i class="fa-solid fa-mosque me-1 me-sm-2 text-accent fs-4"></i>
+          <span class="arabic-title-highlight">بَاكْنُوسْ تَعْلِيمْ</span>
+          <span class="ms-2 text-secondary small d-none d-sm-inline" style="font-weight: 500; font-size: 0.8rem;">(BaknusTa'lim)</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="/dashboard"><i class="fa-solid fa-gauge me-1"></i> Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/quran"><i class="fa-solid fa-book-quran me-1"></i> Baca Al-Qur'an</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/quran/bookmarks"><i class="fa-solid fa-bookmark me-1"></i> Bookmarks</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/tanya"><i class="fa-solid fa-comments me-1"></i> Tanya Yuk!</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/live"><i class="fa-solid fa-tower-broadcast me-1"></i> Kajian Live</a>
+            </li>
+            
+            <!-- PAI Teacher or Admin Actions -->
+            <% if (currentUser.role === 'admin' || (currentUser.role === 'guru' && currentUser.is_guru_pai)) { %>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="evalDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fa-solid fa-file-signature me-1"></i> Penilaian
+                </a>
+                <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="evalDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
+                  <li><a class="dropdown-item rounded" href="/hafalan/input"><i class="fa-solid fa-microphone me-2 text-info"></i> Input Hafalan</a></li>
+                  <li><a class="dropdown-item rounded" href="/ibadah/input"><i class="fa-solid fa-hands-praying me-2 text-success"></i> Input Praktek Ibadah</a></li>
+                </ul>
+              </li>
+            <% } %>
+
+            <!-- Admin Controls -->
+            <% if (currentUser.role === 'admin') { %>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-accent" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fa-solid fa-user-shield me-1"></i> Admin Panel
+                </a>
+                <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="adminDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
+                  <li><a class="dropdown-item rounded" href="/admin/users"><i class="fa-solid fa-users me-2"></i> Kelola User</a></li>
+                  <li><a class="dropdown-item rounded" href="/admin/kelas"><i class="fa-solid fa-school me-2"></i> Kelola Kelas</a></li>
+                  <li><a class="dropdown-item rounded" href="/admin/ibadah"><i class="fa-solid fa-list-check me-2"></i> Kelola Jenis Ibadah</a></li>
+                </ul>
+              </li>
+            <% } %>
+
+            <!-- History log lookup (open to all) -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="historyDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-history me-1"></i> Riwayat
+              </a>
+              <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="historyDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
+                <li><a class="dropdown-item rounded" href="/hafalan/riwayat"><i class="fa-solid fa-book-open me-2"></i> Hafalan Qur'an</a></li>
+                <li><a class="dropdown-item rounded" href="/ibadah/riwayat"><i class="fa-solid fa-person-praying me-2"></i> Praktek Ibadah</a></li>
+              </ul>
+            </li>
+          </ul>
+
+          <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center justify-content-center rounded-circle border border-success text-white fw-bold d-none d-lg-inline-flex" style="width: 32px; height: 32px; background-color: #15803d; overflow: hidden; font-size: 0.9rem; flex-shrink: 0;">
+              <img src="https://baknusmail.smkbn666.sch.id/api/auth/avatar/<%= currentUser.mailcow_email %>"
+                   alt="Avatar"
+                   style="width: 100%; height: 100%; object-fit: cover;"
+                   onerror="this.style.display='none'; this.parentElement.innerText='<%= (currentUser.nama || 'B').charAt(0).toUpperCase() %>';" />
+            </div>
+            <span class="text-primary me-3 d-none d-lg-inline">
+              <small class="text-secondary">Login sebagai:</small> 
+              <strong><%= currentUser.profile && currentUser.profile.displayName ? currentUser.profile.displayName : currentUser.nama %></strong> 
+              <span class="badge rounded-pill text-uppercase" style="background-color: var(--bg-tertiary) !important; color: var(--accent-color) !important; border: 1px solid var(--glass-border) !important; font-size: 0.7rem;"><%= currentUser.role === 'guru' && currentUser.is_guru_pai ? 'Guru PAI' : currentUser.role %></span>
+            </span>
+            <a href="/auth/logout" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+              <i class="fa-solid fa-right-from-bracket me-1"></i> Keluar
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  <% } %>
+
+  <div class="container my-4 flex-grow-1">
+    
+    <!-- Success/Error alert systems -->
+    <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+      <div class="alert alert-success alert-dismissible fade show border-0 card-glass position-relative shadow" role="alert" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3) !important;">
+        <i class="fa-solid fa-circle-check me-2"></i> <%= successMessage %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
+
+    <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+      <div class="alert alert-danger alert-dismissible fade show border-0 card-glass position-relative shadow" role="alert" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3) !important;">
+        <i class="fa-solid fa-circle-exclamation me-2"></i> <%= errorMessage %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>

@@ -1,0 +1,89 @@
+<%- include('../../partials/header') %>
+
+<div class="row mb-4 animate__animated animate__fadeIn">
+  <div class="col-12">
+    <h1 class="h2 mb-1"><i class="fa-solid fa-school me-2 text-accent"></i> Manajemen Kelas</h1>
+    <p class="text-secondary mb-0">Kelola master kelas, penempatan tahun ajaran, penempatan siswa, dan guru PAI yang mengampu.</p>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Create Class Form (Left) -->
+  <div class="col-lg-4 mb-4">
+    <div class="card-glass p-4 sticky-top" style="top: 90px; z-index: 10;">
+      <h5 class="mb-4"><i class="fa-solid fa-plus-circle text-accent me-1"></i> Buat Kelas Baru</h5>
+      
+      <form action="/admin/kelas/create" method="POST">
+        <div class="mb-3">
+          <label for="nama_kelas" class="form-label">Nama Kelas</label>
+          <input type="text" class="form-control border-secondary" id="nama_kelas" name="nama_kelas" placeholder="Contoh: XII RPL 1, X TKJ 2..." required>
+        </div>
+
+        <div class="mb-4">
+          <label for="tahun_ajaran" class="form-label">Tahun Ajaran</label>
+          <input type="text" class="form-control border-secondary" id="tahun_ajaran" name="tahun_ajaran" placeholder="Contoh: 2025/2026, 2026/2027..." required>
+        </div>
+
+        <button type="submit" class="btn btn-primary-custom w-100">
+          <i class="fa-solid fa-save me-1"></i> Simpan Kelas
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Class List (Right) -->
+  <div class="col-lg-8 mb-4">
+    <div class="card-glass p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="fa-solid fa-table-list me-2 text-accent"></i> Daftar Kelas Terdaftar</h5>
+        <span class="badge bg-dark border border-secondary text-accent px-3 py-2"><%= classes.length %> Kelas</span>
+      </div>
+
+      <% if (classes && classes.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-custom align-middle">
+            <thead>
+              <tr>
+                <th>Nama Kelas</th>
+                <th>Tahun Ajaran</th>
+                <th class="text-end">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% classes.forEach(c => { %>
+                <tr>
+                  <td>
+                    <strong class="text-light"><%= c.nama_kelas %></strong>
+                  </td>
+                  <td>
+                    <span class="text-secondary"><%= c.tahun_ajaran %></span>
+                  </td>
+                  <td class="text-end">
+                    <div class="btn-group">
+                      <a href="/admin/kelas/edit/<%= c._id %>" class="btn btn-outline-info btn-sm me-2 rounded px-2.5">
+                        <i class="fa-solid fa-circle-info me-1"></i> Kelola Detail / Siswa
+                      </a>
+                      <form action="/admin/kelas/delete/<%= c._id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kelas ini? Tindakan ini akan mengosongkan penempatan kelas semua siswa di kelas ini.')" class="d-inline">
+                        <button type="submit" class="btn btn-outline-danger btn-sm rounded px-2.5">
+                          <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-secondary">
+          <i class="fa-solid fa-school-circle-xmark fa-3x mb-3 text-muted"></i>
+          <p class="mb-0">Belum ada kelas terdaftar.</p>
+          <small class="text-muted">Gunakan form di sebelah kiri untuk menambahkan kelas pertama Anda.</small>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('../../partials/footer') %>

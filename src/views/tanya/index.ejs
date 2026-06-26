@@ -1,0 +1,217 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4 animate__animated animate__fadeIn">
+  <div class="col-12">
+    <span class="text-accent text-uppercase small font-weight-bold"><i class="fa-solid fa-comments me-1"></i> Tanya Jawab Agama</span>
+    <h1 class="h2 mb-1">Tanya Yuk!</h1>
+    <p class="text-secondary mb-0">Tanyakan kemusykilan agama Anda kepada Guru PAI pilihan Anda, insya Allah akan dijawab secara syar'i.</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Left Column: Form Tanya (Open to All) -->
+  <div class="col-lg-4">
+    <div class="card-glass p-3 p-sm-4 position-sticky" style="top: 90px; background: linear-gradient(135deg, rgba(21, 128, 61, 0.04) 0%, rgba(21, 128, 61, 0.08) 100%);">
+      <h5 class="mb-3 font-weight-bold text-primary"><i class="fa-solid fa-pen-to-square me-2 text-accent"></i> Ajukan Pertanyaan</h5>
+      
+      <form action="/tanya" method="POST">
+        <!-- Select Guru PAI -->
+        <div class="mb-3">
+          <label for="guru_id" class="form-label text-secondary small fw-bold">Pilih Guru PAI Tujuan:</label>
+          <select 
+            class="form-select" 
+            id="guru_id" 
+            name="guru_id" 
+            style="background-color: var(--bg-secondary) !important; border: 1px solid var(--glass-border) !important; color: var(--text-primary) !important;"
+            required
+          >
+            <option value="" disabled selected>-- Pilih Guru PAI --</option>
+            <% if (guruPaiList && guruPaiList.length > 0) { %>
+              <% guruPaiList.forEach(g => { %>
+                <option value="<%= g._id %>"><%= g.nama %></option>
+              <% }) %>
+            <% } else { %>
+              <option value="" disabled>Belum ada Guru PAI aktif</option>
+            <% } %>
+          </select>
+        </div>
+
+        <!-- Question Textarea -->
+        <div class="mb-3">
+          <label for="pertanyaan" class="form-label text-secondary small fw-bold">Tuliskan Pertanyaan Anda:</label>
+          <textarea 
+            class="form-control" 
+            id="pertanyaan" 
+            name="pertanyaan" 
+            rows="5" 
+            placeholder="Contoh: Bagaimana hukum masbuq dalam shalat jama'ah jika tertinggal dua rakaat?"
+            style="background-color: var(--bg-secondary) !important; border: 1px solid var(--glass-border) !important; color: var(--text-primary) !important;"
+            required
+          ></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary-custom w-100 py-2">
+          <i class="fa-solid fa-paper-plane me-1"></i> Kirim Pertanyaan
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right Column: Daftar Pertanyaan -->
+  <div class="col-lg-8">
+    <div class="card-glass p-3 p-sm-4">
+      <h5 class="mb-4 font-weight-bold text-primary"><i class="fa-solid fa-list-ol me-2 text-accent"></i> Diskusi Tanya Jawab</h5>
+      
+      <% if (questions && questions.length > 0) { %>
+        <div class="d-flex flex-column gap-4">
+          <% questions.forEach(q => { %>
+            <div class="border-bottom border-light pb-4" id="question-<%= q._id %>">
+              
+              <!-- Question Header (User Info + Status Badge) -->
+              <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                <div class="d-flex align-items-center">
+                  <!-- User Avatar Wrapper -->
+                  <div class="d-flex align-items-center justify-content-center rounded-circle me-3" style="width: 40px; height: 40px; background-color: var(--bg-tertiary); border: 1px solid var(--glass-border);">
+                    <i class="fa-solid <%= q.user_id && q.user_id.role === 'siswa' ? 'fa-graduation-cap' : (q.user_id && q.user_id.role === 'guru' ? 'fa-chalkboard-user' : 'fa-user-gear') %> text-accent" style="font-size: 0.95rem;"></i>
+                  </div>
+                  <div>
+                    <strong class="text-primary d-block" style="font-size: 0.95rem;"><%= q.user_id ? q.user_id.nama : 'Akun Terhapus' %></strong>
+                    <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                      <span class="badge rounded-pill text-uppercase" style="font-size: 0.62rem; background-color: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--glass-border);">
+                        <%= q.user_id ? (q.user_id.role === 'guru' ? 'Guru' : (q.user_id.role === 'tu' ? 'Staf TU' : 'Siswa')) : 'User' %>
+                      </span>
+                      <span class="text-muted small" style="font-size: 0.72rem;">&bull; <%= new Date(q.createdAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) %></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Status & Action Buttons -->
+                <div class="d-flex align-items-center gap-2">
+                  <% if (q.status === 'dijawab') { %>
+                    <span class="badge-kompeten"><i class="fa-solid fa-circle-check me-1"></i> Terjawab</span>
+                  <% } else { %>
+                    <span class="badge-belum"><i class="fa-solid fa-clock me-1"></i> Menunggu Jawaban</span>
+                  <% } %>
+
+                  <!-- Delete button (for admin or creator) -->
+                  <% if (currentUser.role === 'admin' || (q.user_id && q.user_id._id.toString() === currentUser.id.toString())) { %>
+                    <form action="/tanya/<%= q._id %>/delete" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pertanyaan ini?')" class="d-inline">
+                      <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-0 d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px;" title="Hapus Pertanyaan">
+                        <i class="fa-solid fa-trash-can" style="font-size: 0.75rem;"></i>
+                      </button>
+                    </form>
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- Question Text -->
+              <div class="ps-5 mb-3">
+                <p class="text-primary mb-0 fw-medium" style="font-size: 1.05rem; line-height: 1.6;">
+                  "<%= q.pertanyaan %>"
+                </p>
+                <div class="mt-2 small text-secondary">
+                  <i class="fa-solid fa-arrow-right-to-bracket text-accent me-1"></i> Ditujukan kepada: <strong class="text-primary"><%= q.guru_id ? q.guru_id.nama : 'Guru PAI' %></strong>
+                </div>
+              </div>
+
+              <!-- Answer Segment -->
+              <div class="ps-5">
+                <% if (q.status === 'dijawab') { %>
+                  <!-- Answer Callout Box -->
+                  <div class="p-3 rounded border-start border-3 border-success" style="background: rgba(22, 163, 74, 0.05) !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <div class="small">
+                        <i class="fa-solid fa-comment-dots text-success me-1"></i>
+                        <span class="text-success fw-bold">Dijawab oleh: </span>
+                        <strong class="text-primary"><%= q.guru_id ? q.guru_id.nama : 'Guru PAI' %></strong>
+                        <span class="badge rounded-pill text-uppercase ms-1" style="font-size: 0.6rem; background-color: var(--bg-tertiary); color: var(--accent-color); border: 1px solid var(--glass-border);">Guru PAI</span>
+                      </div>
+                      <small class="text-muted" style="font-size: 0.7rem;"><%= new Date(q.tanggal_dijawab).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) %></small>
+                    </div>
+                    <p class="text-primary mb-0 small" style="line-height: 1.6; font-style: italic;">
+                      "<%= q.jawaban %>"
+                    </p>
+                  </div>
+                <% } else { %>
+                  <!-- Unanswered Placeholder / Answer input form for Guru PAI -->
+                  <% if (isGuruPaiOrAdmin) { %>
+                    <% if (currentUser.role === 'admin' || (q.guru_id && q.guru_id._id.toString() === currentUser.id.toString())) { %>
+                      <div class="p-3 rounded border border-warning" style="background: rgba(245, 158, 11, 0.03);">
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                          <div class="text-warning fw-bold small"><i class="fa-solid fa-circle-exclamation me-1"></i> Jawab Pertanyaan (Pilihan Anda / Admin):</div>
+                          <button type="button" class="btn btn-outline-info btn-xs py-1 px-2.5 rounded-pill" style="font-size: 0.72rem;" onclick="generateAiDraft('<%= q._id %>', '<%= q.pertanyaan.replace(/\\/g, '\\\\').replace(/'/g, '\\\'').replace(/\"/g, '\\\"').replace(/\n/g, ' ') %>')">
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Buat Draf AI
+                          </button>
+                        </div>
+                        <form action="/tanya/<%= q._id %>/jawab" method="POST">
+                          <div class="mb-2">
+                            <textarea 
+                              class="form-control form-control-sm" 
+                              id="jawaban-<%= q._id %>"
+                              name="jawaban" 
+                              rows="4" 
+                              placeholder="Tuliskan jawaban dalil dan penjelasan syariat di sini..."
+                              style="background-color: var(--bg-secondary) !important; border: 1px solid var(--glass-border) !important; color: var(--text-primary) !important;"
+                              required
+                            ></textarea>
+                          </div>
+                          <button type="submit" class="btn btn-success btn-sm rounded-pill px-3">
+                            <i class="fa-solid fa-check me-1"></i> Kirim Jawaban
+                          </button>
+                        </form>
+                      </div>
+                    <% } else { %>
+                      <span class="text-muted small style-italic"><i class="fa-solid fa-clock me-1"></i> Menunggu tinjauan & jawaban dari <%= q.guru_id ? q.guru_id.nama : 'Guru PAI' %>.</span>
+                    <% } %>
+                  <% } else { %>
+                    <span class="text-muted small style-italic"><i class="fa-solid fa-spinner fa-spin me-1"></i> Menunggu tinjauan & jawaban dari <%= q.guru_id ? q.guru_id.nama : 'Guru PAI' %>.</span>
+                  <% } %>
+                <% } %>
+              </div>
+
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-secondary">
+          <i class="fa-solid fa-comments fa-3x mb-3 text-muted"></i>
+          <p class="mb-0">Belum ada pertanyaan diajukan. Jadilah yang pertama bertanya!</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function generateAiDraft(questionId, questionText) {
+    const btn = event.currentTarget;
+    const textarea = document.getElementById(`jawaban-${questionId}`);
+    if (!textarea) return;
+
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Menulis Draf...`;
+
+    try {
+      const response = await fetch('/ai/draft-answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pertanyaan: questionText })
+      });
+
+      const data = await response.json();
+      if (data.success && data.draft) {
+        textarea.value = data.draft;
+      } else {
+        alert('Gagal menghasilkan draf: ' + (data.message || 'Terjadi kesalahan.'));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Gagal menghubungi Server AI: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

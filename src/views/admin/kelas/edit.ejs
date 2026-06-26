@@ -1,0 +1,177 @@
+<%- include('../../partials/header') %>
+
+<div class="d-flex align-items-center mb-4 animate__animated animate__fadeIn">
+  <a href="/admin/kelas" class="btn btn-outline-light rounded-circle me-3" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+    <i class="fa-solid fa-arrow-left"></i>
+  </a>
+  <div>
+    <h1 class="h2 mb-1">Kelola Detail Kelas: <%= kelas.nama_kelas %></h1>
+    <p class="text-secondary mb-0">Atur atribut kelas, keanggotaan siswa, dan penugasan Guru PAI.</p>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Class Metadata Form (Top/Full) -->
+  <div class="col-12 mb-4">
+    <div class="card-glass p-4">
+      <h5 class="mb-3 text-secondary"><i class="fa-solid fa-pen-to-square me-1"></i> Edit Detail Kelas</h5>
+      <form action="/admin/kelas/edit/<%= kelas._id %>" method="POST" class="row g-3">
+        <div class="col-md-5">
+          <label for="nama_kelas" class="form-label">Nama Kelas</label>
+          <input type="text" class="form-control border-secondary" id="nama_kelas" name="nama_kelas" value="<%= kelas.nama_kelas %>" required>
+        </div>
+        <div class="col-md-5">
+          <label for="tahun_ajaran" class="form-label">Tahun Ajaran</label>
+          <input type="text" class="form-control border-secondary" id="tahun_ajaran" name="tahun_ajaran" value="<%= kelas.tahun_ajaran %>" required>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary-custom w-100 py-2">
+            <i class="fa-solid fa-save me-1"></i> Update
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  
+  <!-- STUDENTS PANEL (Left) -->
+  <div class="col-lg-6 mb-4">
+    <div class="card-glass p-4 h-100 d-flex flex-column justify-content-between">
+      <div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="mb-0"><i class="fa-solid fa-graduation-cap text-accent me-2"></i> Siswa di Kelas Ini</h5>
+          <span class="badge bg-dark border border-secondary text-accent px-2 py-1.5"><%= studentsInClass.length %> Siswa</span>
+        </div>
+
+        <% if (studentsInClass && studentsInClass.length > 0) { %>
+          <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+            <table class="table table-custom align-middle">
+              <thead>
+                <tr>
+                  <th>NIS</th>
+                  <th>Nama Siswa</th>
+                  <th class="text-end">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% studentsInClass.forEach(s => { %>
+                  <tr>
+                    <td><span class="font-monospace small text-accent"><%= s.nis || '-' %></span></td>
+                    <td><%= s.nama %></td>
+                    <td class="text-end">
+                      <form action="/admin/kelas/<%= kelas._id %>/remove-student" method="POST" class="d-inline">
+                        <input type="hidden" name="student_id" value="<%= s._id %>">
+                        <button type="submit" class="btn btn-outline-danger btn-sm rounded" title="Keluarkan dari kelas">
+                          <i class="fa-solid fa-user-minus"></i> Keluarkan
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-center py-5 text-secondary">
+            <i class="fa-solid fa-users-viewfinder fa-3x mb-3 text-muted"></i>
+            <p class="mb-0">Belum ada siswa di kelas ini.</p>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Add Student to Class Form -->
+      <div class="mt-4 pt-3 border-top border-secondary">
+        <h6 class="mb-3 text-light"><i class="fa-solid fa-user-plus me-1 text-accent"></i> Tambahkan Siswa ke Kelas</h6>
+        <form action="/admin/kelas/<%= kelas._id %>/assign-student" method="POST" class="row g-2">
+          <div class="col-8">
+            <select class="form-select border-secondary" name="student_id" required>
+              <option value="">-- Pilih Siswa Tanpa Kelas --</option>
+              <% unassignedStudents.forEach(s => { %>
+                <option value="<%= s._id %>"><%= s.nama %> (<%= s.nis || 'NIS Kosong' %>)</option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary-custom w-100 py-2">
+              <i class="fa-solid fa-plus"></i> Tambah
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TEACHERS PANEL (Right) -->
+  <div class="col-lg-6 mb-4">
+    <div class="card-glass p-4 h-100 d-flex flex-column justify-content-between">
+      <div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="mb-0"><i class="fa-solid fa-chalkboard-user text-warning me-2"></i> Guru PAI Pengampu</h5>
+          <span class="badge bg-dark border border-secondary text-warning px-2 py-1.5"><%= assignedTeachers.length %> Guru</span>
+        </div>
+
+        <% if (assignedTeachers && assignedTeachers.length > 0) { %>
+          <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+            <table class="table table-custom align-middle">
+              <thead>
+                <tr>
+                  <th>NIP / Username</th>
+                  <th>Nama Guru</th>
+                  <th class="text-end">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% assignedTeachers.forEach(t => { %>
+                  <tr>
+                    <td><span class="font-monospace small text-warning"><%= t.nip || t.mailcow_email.split('@')[0] %></span></td>
+                    <td><%= t.nama %></td>
+                    <td class="text-end">
+                      <form action="/admin/kelas/<%= kelas._id %>/remove-guru" method="POST" class="d-inline">
+                        <input type="hidden" name="guru_id" value="<%= t._id %>">
+                        <button type="submit" class="btn btn-outline-danger btn-sm rounded" title="Hapus tugas mengajar">
+                          <i class="fa-solid fa-trash-can"></i> Hapus Tugas
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-center py-5 text-secondary">
+            <i class="fa-solid fa-person-chalkboard fa-3x mb-3 text-muted"></i>
+            <p class="mb-0">Belum ada Guru PAI yang ditugaskan mengampu kelas ini.</p>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Assign PAI Teacher Form -->
+      <div class="mt-4 pt-3 border-top border-secondary">
+        <h6 class="mb-3 text-light"><i class="fa-solid fa-circle-plus me-1 text-warning"></i> Tugaskan Guru PAI Baru</h6>
+        <form action="/admin/kelas/<%= kelas._id %>/assign-guru" method="POST" class="row g-2">
+          <div class="col-8">
+            <select class="form-select border-secondary" name="guru_id" required>
+              <option value="">-- Pilih Guru --</option>
+              <% unassignedTeachers.forEach(t => { %>
+                <option value="<%= t._id %>"><%= t.nama %> (<%= t.nip || t.mailcow_email.split('@')[0] %>)</option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary-custom w-100 py-2" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #0b0f19;">
+              <i class="fa-solid fa-plus"></i> Tugaskan
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<%- include('../../partials/footer') %>

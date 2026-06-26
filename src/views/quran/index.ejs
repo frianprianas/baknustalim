@@ -1,0 +1,72 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4 animate__animated animate__fadeIn">
+  <div class="col-12 text-center my-4">
+    <span class="text-accent text-uppercase small font-weight-bold"><i class="fa-solid fa-star-and-crescent me-1"></i> Portal Al-Qur'an Digital</span>
+    <h1 class="h1 mb-2 font-weight-bold">Al-Qur'anul Karim</h1>
+    <p class="text-secondary mx-auto" style="max-width: 600px;">Bacalah Al-Qur'an lengkap dengan terjemahan Bahasa Indonesia. Anda juga dapat memberi bookmark/penanda pada ayat tertentu.</p>
+  </div>
+</div>
+
+<!-- Search Input (Instant client-side filter) -->
+<div class="row justify-content-center mb-5">
+  <div class="col-md-8 col-lg-6">
+    <div class="input-group card-glass p-1">
+      <span class="input-group-text bg-transparent border-0 text-secondary"><i class="fa-solid fa-magnifying-glass ms-2"></i></span>
+      <input type="text" id="surahSearch" class="form-control bg-transparent border-0 text-primary py-2" style="box-shadow: none;" placeholder="Cari nama surah (misal: Al-Baqarah)...">
+    </div>
+  </div>
+</div>
+
+<!-- Surah Grid -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="surahGrid">
+  <% surahs.forEach(s => { %>
+    <div class="col surah-card-container" data-name="<%= s.name_latin.toLowerCase() %>" data-number="<%= s.number %>">
+      <a href="/quran/surah/<%= s.number %>" class="text-decoration-none">
+        <div class="card-glass h-100 p-3.5 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <!-- Surah Number badge with custom shape -->
+            <div class="d-flex align-items-center justify-content-center fw-bold rounded-3 me-3" style="width: 45px; height: 45px; min-width: 45px; background-color: var(--bg-tertiary) !important; border: 1px solid var(--glass-border) !important; color: var(--accent-color) !important;">
+              <%= s.number %>
+            </div>
+            <div>
+              <h5 class="text-primary mb-0 font-weight-bold"><%= s.name_latin %></h5>
+              <small class="text-secondary" style="font-size: 0.78rem;"><%= s.translation_id %> &bull; <%= s.jumlah_ayat %> Ayat</small>
+            </div>
+          </div>
+          
+          <div class="text-end">
+            <!-- Arabic Calligraphic Title -->
+            <span class="font-arabic text-accent fw-bold mb-1 d-block" style="font-size: 1.6rem; line-height: 1.8rem;"><%= s.name_arabic %></span>
+            <span class="badge rounded-pill text-uppercase" style="font-size: 0.65rem; background-color: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--glass-border);">
+              <%= s.revelation_place === 'makkah' ? 'Makkiyah' : 'Madaniyah' %>
+            </span>
+          </div>
+        </div>
+      </a>
+    </div>
+  <% }) %>
+</div>
+
+<script>
+  // Simple client-side search script
+  const searchInput = document.getElementById('surahSearch');
+  const cards = document.querySelectorAll('.surah-card-container');
+
+  searchInput.addEventListener('input', function() {
+    const query = this.value.toLowerCase().trim();
+    
+    cards.forEach(card => {
+      const name = card.getAttribute('data-name');
+      const number = card.getAttribute('data-number');
+      
+      if (name.includes(query) || number.includes(query)) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+</script>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,113 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4 animate__animated animate__fadeIn">
+  <div class="col-12">
+    <h1 class="h2 mb-1"><i class="fa-solid fa-bookmark me-2 text-accent"></i> Bookmark Saya</h1>
+    <p class="text-secondary mb-0">Daftar penanda ayat Al-Qur'an pilihan Anda lengkap dengan catatan pribadi.</p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    
+    <% if (bookmarks && bookmarks.length > 0) { %>
+      <div class="row g-4">
+        <% bookmarks.forEach(b => { %>
+          <div class="col-12" id="bookmark-card-<%= b._id %>">
+            <div class="card-glass p-4 position-relative">
+              
+              <!-- Bookmark Metadata Header -->
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom border-secondary pb-3 mb-3">
+                <div>
+                  <h5 class="mb-1 text-primary fw-bold">
+                    <%= b.surah_name %> 
+                    <span class="font-arabic text-accent ms-2" style="font-size: 1.2rem;"><%= b.surah_arabic %></span>
+                    <span class="text-secondary font-weight-normal fs-6 ms-2">Ayat <%= b.ayat_number %></span>
+                  </h5>
+                  <small class="text-muted" style="font-size: 0.72rem;">
+                    Dibuat pada: <%= new Date(b.createdAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute:'2-digit'}) %>
+                  </small>
+                </div>
+                <div class="mt-2 mt-md-0 d-flex gap-2">
+                  <a href="/quran/surah/<%= b.surah_number %>#ayat-<%= b.ayat_number %>" class="btn btn-outline-info btn-sm rounded-pill px-3">
+                    <i class="fa-solid fa-eye me-1"></i> Baca Ayat Lengkap
+                  </a>
+                  <button onclick="removeBookmarkItem('<%= b._id %>', <%= b.surah_number %>, <%= b.ayat_number %>)" class="btn btn-outline-danger btn-sm rounded-circle" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="Hapus Bookmark">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Verse content preview -->
+              <div class="mb-3 text-end">
+                <div class="font-arabic text-primary mb-2" style="font-size: 1.8rem; line-height: 3.5rem; direction: rtl;"><%= b.teks_arab %></div>
+              </div>
+              <div class="mb-3 text-secondary translation-text" style="font-size: 0.95rem;">
+                <%= b.teks_terjemahan %>
+              </div>
+
+              <!-- Personal Notes -->
+              <% if (b.catatan) { %>
+                <div class="p-3 rounded border-start border-3 border-success" style="background: rgba(22, 163, 74, 0.05) !important;">
+                  <div class="text-success fw-bold small mb-1"><i class="fa-solid fa-note-sticky me-1"></i> Catatan Pribadi:</div>
+                  <p class="text-primary mb-0 small" style="font-style: italic;">"<%= b.catatan %>"</p>
+                </div>
+              <% } %>
+
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="card-glass text-center py-5 text-secondary">
+        <div class="mb-3 text-muted">
+          <i class="fa-solid fa-bookmark fa-4x"></i>
+        </div>
+        <h5>Belum Ada Bookmark Tersimpan</h5>
+        <p class="text-secondary small mx-auto" style="max-width: 400px;">Buka portal Baca Al-Qur'an dan klik ikon penanda (bookmark) pada ayat pilihan Anda untuk menyimpannya di sini.</p>
+        <a href="/quran" class="btn btn-primary-custom mt-3">
+          <i class="fa-solid fa-book-quran me-1"></i> Baca Al-Qur'an Sekarang
+        </a>
+      </div>
+    <% } %>
+
+  </div>
+</div>
+
+<script>
+  async function removeBookmarkItem(bookmarkId, surahNum, ayatNum) {
+    if (confirm(`Apakah Anda yakin ingin menghapus bookmark untuk surah ini?`)) {
+      try {
+        const res = await fetch('/quran/bookmark/remove', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ surah_number: surahNum, ayat_number: ayatNum })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const card = document.getElementById(`bookmark-card-${bookmarkId}`);
+          if (card) {
+            // Animate card removal nicely
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+              card.remove();
+              // If no cards left, reload to show empty state
+              if (document.querySelectorAll('[id^="bookmark-card-"]').length === 0) {
+                window.location.reload();
+              }
+            }, 500);
+          }
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Gagal menghapus bookmark.');
+      }
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

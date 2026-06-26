@@ -1,0 +1,117 @@
+<%- include('../../partials/header') %>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+  <div>
+    <h1 class="h2 mb-1"><i class="fa-solid fa-users me-2 text-accent"></i> Manajemen User</h1>
+    <p class="text-secondary mb-0">Kelola informasi user, kelas, NIS/NIP, dan sinkronisasi dengan Mailcow.</p>
+  </div>
+  <div class="mt-3 mt-md-0">
+    <form action="/admin/users/sync" method="POST" class="d-inline">
+      <button type="submit" class="btn btn-primary-custom">
+        <i class="fa-solid fa-arrows-rotate me-1"></i> Sinkronkan User Mailcow
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card-glass p-4 mb-4">
+  <form action="/admin/users" method="GET" class="row g-3">
+    <div class="col-md-4">
+      <label for="role" class="form-label">Filter Role</label>
+      <select class="form-select" id="role" name="role" onchange="this.form.submit()">
+        <option value="">-- Semua Role --</option>
+        <option value="siswa" <%= roleFilter === 'siswa' ? 'selected' : '' %>>Siswa</option>
+        <option value="guru" <%= roleFilter === 'guru' ? 'selected' : '' %>>Guru</option>
+        <option value="tu" <%= roleFilter === 'tu' ? 'selected' : '' %>>Tata Usaha (TU)</option>
+        <option value="admin" <%= roleFilter === 'admin' ? 'selected' : '' %>>Administrator</option>
+      </select>
+    </div>
+    
+    <div class="col-md-6">
+      <label for="search" class="form-label">Cari Nama / Email / NIS / NIP</label>
+      <input type="text" class="form-control" id="search" name="search" placeholder="Cari user..." value="<%= searchQuery %>">
+    </div>
+
+    <div class="col-md-2 d-flex align-items-end">
+      <button type="submit" class="btn btn-secondary-custom w-100 py-2">
+        <i class="fa-solid fa-magnifying-glass me-1"></i> Cari
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- User Table -->
+<div class="card-glass p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0"><i class="fa-solid fa-table-list me-2 text-accent"></i> Daftar User Terdaftar</h5>
+    <span class="badge bg-dark border border-secondary text-accent px-3 py-2"><%= users.length %> User Ditemukan</span>
+  </div>
+
+  <% if (users && users.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table table-custom align-middle">
+        <thead>
+          <tr>
+            <th>Email Mailcow</th>
+            <th>Nama Lengkap</th>
+            <th>Role</th>
+            <th>NIS / NIP</th>
+            <th>Kelas / Guru PAI</th>
+            <th>Terakhir Sinkron</th>
+            <th class="text-end">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(u => { %>
+            <tr>
+              <td>
+                <span class="text-light fw-medium"><%= u.mailcow_email %></span>
+              </td>
+              <td><%= u.nama %></td>
+              <td>
+                <span class="badge text-uppercase bg-dark border border-secondary text-light small"><%= u.role %></span>
+              </td>
+              <td>
+                <% if (u.role === 'siswa') { %>
+                  <span class="text-accent small font-monospace"><%= u.nis || 'NIS Kosong' %></span>
+                <% } else { %>
+                  <span class="text-warning small font-monospace"><%= u.nip || 'NIP Kosong' %></span>
+                <% } %>
+              </td>
+              <td>
+                <% if (u.role === 'siswa') { %>
+                  <span class="small text-secondary"><%= u.kelas_id ? u.kelas_id.nama_kelas : 'Belum ada kelas' %></span>
+                <% } else if (u.role === 'guru') { %>
+                  <% if (u.is_guru_pai) { %>
+                    <span class="badge bg-success-glow border border-success text-success small" style="background: rgba(16, 185, 129, 0.15);"><i class="fa-solid fa-circle-check me-1"></i> Guru PAI</span>
+                  <% } else { %>
+                    <span class="text-muted small">Guru Non-PAI</span>
+                  <% } %>
+                <% } else { %>
+                  <span class="text-muted small">-</span>
+                <% } %>
+              </td>
+              <td>
+                <span class="small text-muted" style="font-size: 0.75rem;"><%= new Date(u.last_synced_at).toLocaleString('id-ID', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}) %></span>
+              </td>
+              <td class="text-end">
+                <a href="/admin/users/edit/<%= u._id %>" class="btn btn-outline-info btn-sm rounded px-2.5">
+                  <i class="fa-solid fa-pen-to-square me-1"></i> Edit
+                </a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="text-center py-5 text-secondary">
+      <i class="fa-solid fa-users-slash fa-3x mb-3 text-muted"></i>
+      <p class="mb-0">Tidak ada user ditemukan.</p>
+      <small class="text-muted">Cobalah untuk mengeklik tombol "Sinkronkan User Mailcow" untuk memperbarui database.</small>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../../partials/footer') %>

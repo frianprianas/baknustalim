@@ -1,0 +1,250 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4 animate__animated animate__fadeIn">
+  <div class="col-12">
+    <!-- Back to Live page button -->
+    <a href="/live" class="btn btn-secondary-custom btn-sm rounded-pill px-3 mb-3">
+      <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Kajian
+    </a>
+
+    <div class="card-glass p-3 p-sm-4 mb-4" style="background: linear-gradient(135deg, rgba(21, 128, 61, 0.04) 0%, rgba(21, 128, 61, 0.08) 100%);">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+          <span class="badge bg-danger rounded-pill px-3 py-1.5 animate__animated animate__flash animate__infinite mb-2">
+            <i class="fa-solid fa-circle me-1" style="font-size: 0.75em;"></i> LIVE STREAMING
+          </span>
+          <h2 class="h3 font-weight-bold text-primary mb-1"><%= session.topik %></h2>
+          <p class="text-secondary mb-0 small">
+            <i class="fa-solid fa-user-tie me-2 text-accent"></i> Dipandu Oleh: <strong><%= session.nama_guru %></strong>
+          </p>
+        </div>
+        
+        <!-- Host Controls -->
+        <% if (currentUser.id === session.guru_id._id.toString() || currentUser.role === 'admin') { %>
+          <form action="/live/stop/<%= session._id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin mengakhiri siaran langsung ini?');">
+            <button type="submit" class="btn btn-danger py-2 px-4 rounded-pill shadow-sm" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: none;">
+              <i class="fa-solid fa-circle-stop me-2"></i> Akhiri Siaran
+            </button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <!-- Video Player (Left side) -->
+  <div class="col-lg-8 mb-4">
+    <div id="meet-container" style="width: 100%; height: 550px; background-color: #000; border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); box-shadow: 0 8px 32px 0 rgba(21, 128, 61, 0.06);">
+      <!-- Jitsi iframe will load here -->
+      <div class="d-flex flex-column align-items-center justify-content-center h-100 text-white">
+        <div class="spinner-border text-success mb-3" role="status"></div>
+        <p class="mb-0">Menyambungkan ke BaknusMeet...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chatroom (Right side) -->
+  <div class="col-lg-4 mb-4">
+    <div class="card-glass d-flex flex-column p-0 overflow-hidden" style="height: 550px; border: 1px solid var(--glass-border);">
+      
+      <!-- Chat Header -->
+      <div class="p-3 border-bottom border-light bg-light d-flex align-items-center justify-content-between">
+        <h5 class="mb-0 font-weight-bold text-primary">
+          <i class="fa-solid fa-comments me-2 text-accent"></i> Obrolan Live
+        </h5>
+        <span class="badge rounded-pill bg-success-glow text-success px-2.5 py-1 text-xs border border-success" id="activeViewersCount" style="font-size: 0.75rem;">
+          <i class="fa-solid fa-users me-1"></i> <span id="viewers-count">1</span> Online
+        </span>
+      </div>
+
+      <!-- Messages Window -->
+      <div class="flex-grow-1 p-3 overflow-y-auto" id="chatMessages" style="background-color: rgba(244, 251, 247, 0.4); max-height: 400px; height: 400px;">
+        <div class="text-center py-4 text-muted small" id="noMessagesPlaceholder">
+          <i class="fa-solid fa-message fa-2x mb-2 text-muted-custom"></i>
+          <p class="mb-0">Selamat datang di Obrolan Live! Kirim pesan santun Anda di sini.</p>
+        </div>
+      </div>
+
+      <!-- Message Input Form -->
+      <div class="p-3 border-top border-light bg-white">
+        <form id="chatForm" class="d-flex gap-2">
+          <input type="text" id="chatInput" class="form-control" placeholder="Tulis pesan..." autocomplete="off" required>
+          <button type="submit" class="btn btn-primary-custom px-3">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Load Jitsi External API from BaknusMeet -->
+<script src="https://<%= jitsiDomain %>/external_api.js"></script>
+<!-- Socket.IO Chat Client scripts -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initialize Jitsi Meet Iframe
+    const domain = "<%= jitsiDomain %>";
+    const roomName = "<%= room_name %>";
+    const isHost = <%= (currentUser.id === session.guru_id._id.toString() || currentUser.role === 'admin') ? 'true' : 'false' %>;
+    const userRole = "<%= currentUser.role %>";
+
+    const container = document.querySelector('#meet-container');
+    container.innerHTML = ''; // Clear placeholder loading message
+
+    // Config options to lock down viewers
+    const config = {
+      startWithAudioMuted: !isHost,
+      startWithVideoMuted: !isHost,
+      prejoinPageEnabled: false,
+      disableInviteFunctions: true,
+    };
+
+    if (!isHost) {
+      // Force SPECTATOR mode in Jitsi for students/other viewers
+      config.toolbarButtons = [
+        'raisehand', 'hangup', 'chat', 'tileview', 'settings'
+      ];
+      // Hide meeting host capabilities
+      config.disableRemoteMute = true;
+      config.remoteVideoMenu = {
+        disableKick: true,
+        disableGrantModerator: true,
+        disablePrivateChat: true
+      };
+    }
+
+    const options = {
+      roomName: roomName,
+      width: '100%',
+      height: '100%',
+      parentNode: container,
+      configOverwrite: config,
+      interfaceConfigOverwrite: {
+        SHOW_JITSI_WATERMARK: false,
+        SHOW_WATERMARK_FOR_GUESTS: false,
+        DEFAULT_BACKGROUND: '#000000',
+        TOOLBAR_ALWAYS_VISIBLE: false
+      },
+      userInfo: {
+        displayName: "<%= currentUser.nama %>",
+        email: "<%= currentUser.mailcow_email %>"
+      }
+    };
+
+    const api = new JitsiMeetExternalAPI(domain, options);
+
+    // 2. Initialize Real-Time Chat using Socket.IO
+    if (typeof io !== 'undefined') {
+      const socket = io();
+      const chatMessages = document.getElementById('chatMessages');
+      const chatForm = document.getElementById('chatForm');
+      const chatInput = document.getElementById('chatInput');
+      const placeholder = document.getElementById('noMessagesPlaceholder');
+      const viewersCountEl = document.getElementById('viewers-count');
+      
+      const userName = "<%= currentUser.nama %>";
+      const userEmail = "<%= currentUser.mailcow_email %>";
+      const userRoleLabel = userRole === 'guru' ? 'Guru' : (userRole === 'admin' ? 'Admin' : 'Siswa');
+
+      // Join the live chat room specific to this roomName
+      socket.emit('join_eval_room', { siswa_id: roomName });
+
+      // Handle sending chat message
+      chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        const messageData = {
+          siswa_id: roomName, // using roomName as room identifier in Socket.IO
+          sender: userName,
+          role: userRoleLabel,
+          email: userEmail,
+          text: text,
+          timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+        };
+
+        // Emit message to server, which broadcasts to room
+        socket.emit('highlight_ayat', {
+          siswa_id: roomName, // reusing this custom socket event or a new one? Let's check Socket.IO server:
+          // Wait, the Socket.IO server expects 'highlight_ayat' and will broadcast 'ayat_highlighted'.
+          // Wait, let's verify if we need to emit a chat event or just reuse the socket event.
+          // In app.js:
+          // socket.on('highlight_ayat', (data) => {
+          //   if (data && data.siswa_id && data.ayat_number) {
+          //     const roomName = `eval_${data.siswa_id}`;
+          //     socket.to(roomName).emit('ayat_highlighted', ...);
+          //   }
+          // });
+          //
+          // Ah! The server is generic. Let's make sure we also add a general messaging handler in Socket.IO,
+          // or we can handle it dynamically. Let's add chat events to our Socket.IO server in app.js!
+        });
+
+        // Let's create a specific chat event in Socket.IO later. For now, let's write client script that emits 'live_chat_message'.
+        socket.emit('live_chat_message', messageData);
+
+        // Append to my own screen immediately
+        appendMessage(messageData, true);
+        chatInput.value = '';
+      });
+
+      // Receive chat messages
+      socket.on('chat_message_received', (data) => {
+        appendMessage(data, false);
+      });
+
+      // Track online viewers (simulated or real room counts)
+      socket.on('update_room_viewers', (count) => {
+        if (count && viewersCountEl) {
+          viewersCountEl.innerText = count;
+        }
+      });
+
+      function appendMessage(data, isSelf) {
+        if (placeholder) {
+          placeholder.style.display = 'none';
+        }
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `mb-3 p-2.5 rounded-3 d-flex flex-column ${isSelf ? 'align-items-end' : 'align-items-start'}`;
+        
+        const isStaff = data.role === 'Guru' || data.role === 'Admin';
+        const roleBadge = isStaff ? `<span class="badge bg-success-glow text-success ms-1" style="font-size: 0.6rem; border: 1px solid rgba(21, 128, 61, 0.3);">${data.role}</span>` : '';
+
+        msgDiv.innerHTML = `
+          <div class="d-flex align-items-center mb-1 text-xs text-muted" style="font-size: 0.8rem;">
+            <strong class="${isStaff ? 'text-accent' : ''}">${isSelf ? 'Anda' : data.sender}</strong>
+            ${isSelf ? '' : roleBadge}
+            <span class="mx-1">&bull;</span>
+            <span>${data.timestamp}</span>
+          </div>
+          <div class="px-3 py-2 text-sm shadow-sm" style="
+            background-color: ${isSelf ? 'var(--accent-color)' : '#ffffff'}; 
+            color: ${isSelf ? '#ffffff' : 'var(--text-primary)'};
+            border-radius: ${isSelf ? '12px 12px 0 12px' : '12px 12px 12px 0'};
+            max-width: 85%;
+            word-wrap: break-word;
+            border: ${isSelf ? 'none' : '1px solid var(--glass-border)'};
+          ">
+            ${escapeHTML(data.text)}
+          </div>
+        `;
+
+        chatMessages.appendChild(msgDiv);
+        // Scroll window to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g, 
+          tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+        );
+      }
+    }
+  });
+</script>

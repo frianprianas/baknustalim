@@ -1,0 +1,333 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+:root {
+  --bg-primary: #f4fbf7;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e8f5e9;
+  --accent-color: #15803d;
+  --accent-color-hover: #166534;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(21, 128, 61, 0.15);
+  --success-glow: rgba(22, 163, 74, 0.1);
+  --error-glow: rgba(220, 38, 38, 0.1);
+  --primary-glow: rgba(21, 128, 61, 0.12);
+  --font-sans: 'Outfit', sans-serif;
+  --font-arabic: 'Amiri', serif;
+}
+
+/* App Highlighting Classes */
+.arabic-title-highlight {
+  background-color: rgba(21, 128, 61, 0.1);
+  color: var(--accent-color);
+  padding: 0.15rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(21, 128, 61, 0.2);
+  font-family: var(--font-arabic);
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  white-space: nowrap;
+}
+
+@media (min-width: 576px) {
+  .arabic-title-highlight {
+    font-size: 1.25rem;
+    padding: 0.15rem 0.6rem;
+  }
+}
+
+.arabic-title-large {
+  font-size: 1.7rem !important;
+  padding: 0.2rem 0.7rem !important;
+}
+
+@media (min-width: 576px) {
+  .arabic-title-large {
+    font-size: 2.2rem !important;
+    padding: 0.3rem 1rem !important;
+  }
+}
+
+.highlight-school {
+  background-color: rgba(21, 128, 61, 0.08);
+  border: 1px solid rgba(21, 128, 61, 0.22);
+  color: var(--accent-color) !important;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+.highlight-school:hover {
+  background-color: var(--accent-color);
+  color: #ffffff !important;
+}
+
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+/* Glassmorphism Cards */
+.card-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 8px 32px 0 rgba(21, 128, 61, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (min-width: 576px) {
+  .card-glass {
+    padding: 1.5rem;
+  }
+}
+.card-glass:hover {
+  transform: translateY(-4px);
+  border-color: rgba(21, 128, 61, 0.35);
+  box-shadow: 0 12px 40px 0 rgba(21, 128, 61, 0.12);
+}
+
+/* Header & Navbar */
+.navbar-glass {
+  background: rgba(244, 251, 247, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+.navbar-brand {
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-color-hover) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.nav-link {
+  color: var(--text-secondary) !important;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+.nav-link:hover, .nav-link.active {
+  color: var(--accent-color) !important;
+}
+
+/* Typography & Badges */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+}
+.text-accent {
+  color: var(--accent-color);
+}
+.text-muted-custom {
+  color: var(--text-secondary);
+}
+
+.badge-kompeten {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 0.5em 0.8em;
+  font-weight: 600;
+  border-radius: 8px;
+}
+.badge-belum {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 0.5em 0.8em;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+/* Forms & Inputs */
+.form-control, .form-select {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  transition: all 0.2s ease;
+}
+.form-control:focus, .form-select:focus {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+.form-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* Buttons */
+.btn-primary-custom {
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-color-hover) 100%);
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.65rem 1.5rem;
+  transition: all 0.2s ease;
+}
+.btn-primary-custom:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(21, 128, 61, 0.3);
+  color: #ffffff;
+}
+.btn-secondary-custom {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  font-weight: 500;
+  border-radius: 10px;
+  padding: 0.65rem 1.5rem;
+  transition: all 0.2s ease;
+}
+.btn-secondary-custom:hover {
+  background-color: rgba(21, 128, 61, 0.08);
+  color: var(--text-primary);
+}
+
+/* Tables */
+.table-custom {
+  color: var(--text-primary);
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+.table-custom tr {
+  background: rgba(21, 128, 61, 0.02);
+  transition: background 0.2s ease;
+}
+.table-custom tr:hover {
+  background: rgba(21, 128, 61, 0.06);
+}
+.table-custom th {
+  border: none;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+}
+.table-custom td {
+  border: none;
+  padding: 1rem;
+  vertical-align: middle;
+}
+.table-custom tr td:first-child, .table-custom tr th:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+.table-custom tr td:last-child, .table-custom tr th:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Quran Reader Styles */
+.arabic-text {
+  font-family: var(--font-arabic);
+  font-size: 1.8rem;
+  line-height: 3.8rem;
+  text-align: right;
+  direction: rtl;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+}
+@media (min-width: 576px) {
+  .arabic-text {
+    font-size: 2.2rem;
+    line-height: 4.5rem;
+  }
+}
+.translation-text {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  line-height: 1.8rem;
+}
+.ayat-container {
+  border-bottom: 1px solid var(--glass-border);
+  padding: 2.5rem 0;
+  transition: background-color 0.2s ease;
+}
+.ayat-container:hover {
+  background-color: rgba(21, 128, 61, 0.04);
+}
+.ayat-number {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Stats Cards */
+.stat-card {
+  border-left: 4px solid var(--accent-color);
+}
+.stat-card.success {
+  border-left-color: #10b981;
+}
+.stat-card.warning {
+  border-left-color: #f59e0b;
+}
+.stat-card.danger {
+  border-left-color: #ef4444;
+}
+
+/* Bookmark Icon Toggle */
+.bookmark-btn {
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.bookmark-btn:hover {
+  color: var(--accent-color);
+  transform: scale(1.1);
+}
+.bookmark-btn.active {
+  color: var(--accent-color);
+}

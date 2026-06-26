@@ -1,0 +1,159 @@
+<%- include('../../partials/header') %>
+
+<div class="row justify-content-center animate__animated animate__fadeIn">
+  <div class="col-lg-8">
+    
+    <div class="d-flex align-items-center mb-4">
+      <a href="/admin/users" class="btn btn-outline-light rounded-circle me-3" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div>
+        <h1 class="h2 mb-1">Edit Profil User</h1>
+        <p class="text-secondary mb-0">Sesuaikan data lokal user hasil sinkronisasi Mailcow.</p>
+      </div>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-danger border-0 small text-center mb-4 py-2" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2) !important;">
+        <i class="fa-solid fa-triangle-exclamation me-1"></i> <%= error %>
+      </div>
+    <% } %>
+
+    <div class="card-glass p-4 p-md-5">
+      <form action="/admin/users/edit/<%= user._id %>" method="POST" id="userForm">
+        
+        <div class="row g-3 mb-4">
+          <!-- Email (Read only) -->
+          <div class="col-md-6">
+            <label class="form-label">Email Mailcow (Source of Truth)</label>
+            <input type="text" class="form-control border-secondary text-muted" value="<%= user.mailcow_email %>" readonly disabled>
+            <div class="form-text text-muted small" style="font-size: 0.72rem;">Email tidak dapat diubah dari sini. Harus diubah di Mailcow.</div>
+          </div>
+
+          <!-- Nama -->
+          <div class="col-md-6">
+            <label for="nama" class="form-label">Nama Lengkap</label>
+            <input type="text" class="form-control border-secondary" id="nama" name="nama" value="<%= user.nama %>" required>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label for="role" class="form-label">Role Akses</label>
+          <select class="form-select border-secondary" id="role" name="role" required>
+            <option value="siswa" <%= user.role === 'siswa' ? 'selected' : '' %>>Siswa</option>
+            <option value="guru" <%= user.role === 'guru' ? 'selected' : '' %>>Guru</option>
+            <option value="tu" <%= user.role === 'tu' ? 'selected' : '' %>>Tata Usaha (TU)</option>
+            <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Administrator</option>
+          </select>
+        </div>
+
+        <!-- SISWA FIELDS GROUP -->
+        <div id="siswaFields" class="mb-4 p-3 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+          <h6 class="text-accent mb-3"><i class="fa-solid fa-graduation-cap me-1"></i> Atribut Siswa</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="nis" class="form-label">Nomor Induk Siswa (NIS)</label>
+              <input type="text" class="form-control border-secondary" id="nis" name="nis" value="<%= user.nis || '' %>" placeholder="Masukkan NIS...">
+            </div>
+            <div class="col-md-6">
+              <label for="kelas_id" class="form-label">Penempatan Kelas</label>
+              <select class="form-select border-secondary" id="kelas_id" name="kelas_id">
+                <option value="">-- Belum Ditempatkan --</option>
+                <% classes.forEach(c => { %>
+                  <option value="<%= c._id %>" <%= (user.kelas_id && user.kelas_id.toString() === c._id.toString()) ? 'selected' : '' %>>
+                    <%= c.nama_kelas %> (<%= c.tahun_ajaran %>)
+                  </option>
+                <% }) %>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- GURU FIELDS GROUP -->
+        <div id="guruFields" class="mb-4 p-3 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+          <h6 class="text-warning mb-3"><i class="fa-solid fa-chalkboard-user me-1"></i> Atribut Guru</h6>
+          <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+              <label for="nip" class="form-label">Nomor Induk Pegawai (NIP)</label>
+              <input type="text" class="form-control border-secondary" id="nip" name="nip" value="<%= user.nip || '' %>" placeholder="Masukkan NIP...">
+            </div>
+            <div class="col-md-6">
+              <div class="form-check mt-md-4">
+                <input class="form-check-input" type="checkbox" id="is_guru_pai" name="is_guru_pai" <%= user.is_guru_pai ? 'checked' : '' %>>
+                <label class="form-check-label text-light fw-medium" for="is_guru_pai">
+                  Beri Status Guru Agama Islam (PAI)
+                </label>
+                <div class="form-text text-muted small" style="font-size: 0.72rem;">Hanya Guru PAI yang dapat menginput hafalan & praktek ibadah siswa.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TU FIELDS GROUP -->
+        <div id="tuFields" class="mb-4 p-3 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+          <h6 class="text-info mb-3"><i class="fa-solid fa-user-tie me-1"></i> Atribut TU</h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="tu_nip" class="form-label">Nomor Induk Pegawai (NIP)</label>
+              <input type="text" class="form-control border-secondary" id="tu_nip" name="nip" value="<%= user.nip || '' %>" placeholder="Masukkan NIP...">
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit actions -->
+        <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top border-secondary">
+          <a href="/admin/users" class="btn btn-secondary-custom">Batal</a>
+          <button type="submit" class="btn btn-primary-custom">
+            <i class="fa-solid fa-circle-check me-1"></i> Simpan Perubahan
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Script to dynamically toggle inputs based on role selection
+  const roleSelect = document.getElementById('role');
+  const siswaFields = document.getElementById('siswaFields');
+  const guruFields = document.getElementById('guruFields');
+  const tuFields = document.getElementById('tuFields');
+
+  function toggleRoleFields() {
+    const role = roleSelect.value;
+    
+    const siswaInputs = siswaFields.querySelectorAll('input, select');
+    const guruInputs = guruFields.querySelectorAll('input, select');
+    const tuInputs = tuFields.querySelectorAll('input, select');
+
+    // Hide and disable all by default
+    siswaFields.style.display = 'none';
+    siswaInputs.forEach(i => i.disabled = true);
+
+    guruFields.style.display = 'none';
+    guruInputs.forEach(i => i.disabled = true);
+
+    tuFields.style.display = 'none';
+    tuInputs.forEach(i => i.disabled = true);
+
+    // Enable and show active role inputs
+    if (role === 'siswa') {
+      siswaFields.style.display = 'block';
+      siswaInputs.forEach(i => i.disabled = false);
+    } else if (role === 'guru') {
+      guruFields.style.display = 'block';
+      guruInputs.forEach(i => i.disabled = false);
+    } else if (role === 'tu') {
+      tuFields.style.display = 'block';
+      tuInputs.forEach(i => i.disabled = false);
+    }
+  }
+
+  // Bind on change & initial load
+  roleSelect.addEventListener('change', toggleRoleFields);
+  document.addEventListener('DOMContentLoaded', toggleRoleFields);
+</script>
+
+<%- include('../../partials/footer') %>

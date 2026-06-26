@@ -1,0 +1,221 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4 animate__animated animate__fadeIn">
+  <!-- Profile & Welcome -->
+  <div class="col-12">
+    <div class="card-glass p-3 p-sm-4 mb-4" style="background: linear-gradient(135deg, rgba(21, 128, 61, 0.08) 0%, rgba(21, 128, 61, 0.16) 100%);">
+      <div class="row align-items-center">
+        <div class="col-auto mb-3 mb-md-0">
+          <div class="d-flex align-items-center justify-content-center rounded-circle border border-2 border-success shadow-sm text-white fw-bold fs-2" style="width: 70px; height: 70px; background-color: #15803d; overflow: hidden; flex-shrink: 0; box-shadow: 0 0 20px rgba(21, 128, 61, 0.15);">
+            <img src="https://baknusmail.smkbn666.sch.id/api/auth/avatar/<%= currentUser.mailcow_email %>"
+                 alt="Avatar"
+                 style="width: 100%; height: 100%; object-fit: cover;"
+                 onerror="this.style.display='none'; this.parentElement.innerText='<%= (currentUser.nama || 'B').charAt(0).toUpperCase() %>';" />
+          </div>
+        </div>
+        <div class="col">
+          <span class="text-secondary text-uppercase small tracking-wider font-weight-bold d-flex align-items-center gap-2 flex-wrap">
+            Selamat Datang di <span class="arabic-title-highlight px-2 py-0.5" style="font-size: 1.15rem; font-weight: normal; line-height: 1.2;">بَاكْنُوسْ تَعْلِيمْ</span>
+          </span>
+          <h1 class="h2 mb-1"><%= currentUser.profile && currentUser.profile.displayName ? currentUser.profile.displayName : student.nama %></h1>
+          <p class="text-secondary mb-0">
+            <strong>NIS:</strong> <%= student.nis || '-' %> &bull; 
+            <strong>Kelas:</strong> <%= student.kelas_id ? student.kelas_id.nama_kelas : 'Belum Ditempatkan ke Kelas' %> 
+            <% if (student.kelas_id) { %>
+              (<%= student.kelas_id.tahun_ajaran %>)
+            <% } %>
+            <% if (currentUser.profile && currentUser.profile.phoneNumber) { %>
+              &bull; <strong>HP:</strong> <%= currentUser.profile.phoneNumber %>
+              <% if (currentUser.profile.isPhoneVerified) { %>
+                <span class="badge rounded-pill ms-1 text-success" style="font-size: 0.65rem; background-color: rgba(22, 163, 74, 0.1); border: 1px solid rgba(22, 163, 74, 0.2);"><i class="fa-solid fa-circle-check"></i> Verified</span>
+              <% } %>
+            <% } %>
+          </p>
+        </div>
+        <div class="col-md-auto mt-3 mt-md-0 d-flex gap-2">
+          <a href="/quran" class="btn btn-primary-custom">
+            <i class="fa-solid fa-book-quran me-1"></i> Mulai Membaca Qur'an
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Live Stream Alert Banner -->
+<% if (activeLiveSessions && activeLiveSessions.length > 0) { %>
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="alert alert-danger border-0 shadow-sm d-flex flex-wrap align-items-center justify-content-between p-3" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.15) 100%); border-left: 5px solid #ef4444 !important; border-radius: 12px;">
+        <div class="d-flex align-items-center gap-3">
+          <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; flex-shrink: 0; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);">
+            <i class="fa-solid fa-satellite-dish fa-lg animate__animated animate__pulse animate__infinite"></i>
+          </div>
+          <div>
+            <h5 class="alert-heading text-danger mb-0 font-weight-bold">Kajian Islami Sedang Live!</h5>
+            <p class="mb-0 text-secondary small">
+              <strong><%= activeLiveSessions[0].nama_guru %></strong> sedang membawakan kajian: <em>"<%= activeLiveSessions[0].topik %>"</em>
+            </p>
+          </div>
+        </div>
+        <a href="/live/room/<%= activeLiveSessions[0].nama_room %>" class="btn btn-danger btn-sm rounded-pill px-4 py-2 mt-2 mt-sm-0" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: none;">
+          <i class="fa-solid fa-video me-1"></i> Ikut Kajian
+        </a>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+<!-- Stats Counter Grid -->
+<div class="row mb-4">
+  <!-- Hafalan Stats -->
+  <div class="col-md-6 mb-3 mb-md-0">
+    <div class="card-glass stat-card success">
+      <h5 class="text-secondary mb-3"><i class="fa-solid fa-book-open me-2 text-success"></i> Hafalan Al-Qur'an</h5>
+      <div class="row text-center">
+        <div class="col-4 border-end border-secondary">
+          <h3 class="mb-0 text-accent"><%= stats.totalHafalan %></h3>
+          <small class="text-muted small">Total Diuji</small>
+        </div>
+        <div class="col-4 border-end border-secondary">
+          <h3 class="mb-0 text-success"><%= stats.kompetenHafalan %></h3>
+          <small class="text-muted small">Kompeten</small>
+        </div>
+        <div class="col-4">
+          <h3 class="mb-0 text-danger"><%= stats.belumHafalan %></h3>
+          <small class="text-muted small">Belum Lulus</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Worship Stats -->
+  <div class="col-md-6">
+    <div class="card-glass stat-card warning">
+      <h5 class="text-secondary mb-3"><i class="fa-solid fa-person-praying me-2 text-warning"></i> Praktek Ibadah</h5>
+      <div class="row text-center">
+        <div class="col-4 border-end border-secondary">
+          <h3 class="mb-0 text-accent"><%= stats.totalIbadah %></h3>
+          <small class="text-muted small">Total Diuji</small>
+        </div>
+        <div class="col-4 border-end border-secondary">
+          <h3 class="mb-0 text-success"><%= stats.kompetenIbadah %></h3>
+          <small class="text-muted small">Kompeten</small>
+        </div>
+        <div class="col-4">
+          <h3 class="mb-0 text-danger"><%= stats.belumIbadah %></h3>
+          <small class="text-muted small">Belum Lulus</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Records Lists -->
+<div class="row">
+  <!-- Recent Hafalan -->
+  <div class="col-lg-6 mb-4">
+    <div class="card-glass h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="fa-solid fa-microphone me-2 text-accent"></i> Hafalan Terbaru</h5>
+        <a href="/hafalan/riwayat" class="btn btn-link text-accent text-decoration-none btn-sm p-0">Semua Riwayat <i class="fa-solid fa-arrow-right ms-1"></i></a>
+      </div>
+
+      <% if (recentHafalan && recentHafalan.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-custom align-middle">
+            <thead>
+              <tr>
+                <th>Surah</th>
+                <th>Status</th>
+                <th>Tanggal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentHafalan.forEach(r => { %>
+                <tr>
+                  <td>
+                    <strong><%= r.surah_nama %></strong>
+                    <div class="text-muted small">Ayat/Surah #<%= r.surah_number %></div>
+                  </td>
+                  <td>
+                    <span class="<%= r.status === 'Kompeten' ? 'badge-kompeten' : 'badge-belum' %>"><%= r.status %></span>
+                  </td>
+                  <td>
+                    <span class="small text-secondary"><%= new Date(r.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></span>
+                  </td>
+                </tr>
+                <% if (r.catatan) { %>
+                  <tr style="background: rgba(255,255,255,0.005);">
+                    <td colspan="3" class="pt-0 pb-3 ps-3 text-muted small">
+                      <i class="fa-solid fa-comment-dots me-1 text-accent"></i> <em>Catatan Guru: "<%= r.catatan %>"</em>
+                    </td>
+                  </tr>
+                <% } %>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-secondary">
+          <i class="fa-solid fa-book-open fa-3x mb-3 text-muted"></i>
+          <p class="mb-0">Belum ada riwayat hafalan Al-Qur'an.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Recent Worship -->
+  <div class="col-lg-6 mb-4">
+    <div class="card-glass h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="fa-solid fa-hands-praying me-2 text-accent"></i> Praktek Ibadah Terbaru</h5>
+        <a href="/ibadah/riwayat" class="btn btn-link text-accent text-decoration-none btn-sm p-0">Semua Riwayat <i class="fa-solid fa-arrow-right ms-1"></i></a>
+      </div>
+
+      <% if (recentIbadah && recentIbadah.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-custom align-middle">
+            <thead>
+              <tr>
+                <th>Ibadah</th>
+                <th>Status</th>
+                <th>Tanggal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentIbadah.forEach(r => { %>
+                <tr>
+                  <td>
+                    <strong><%= r.jenis_ibadah_id ? r.jenis_ibadah_id.nama_ibadah : 'Ibadah' %></strong>
+                    <div class="text-muted small"><%= r.jenis_ibadah_id ? r.jenis_ibadah_id.deskripsi : '' %></div>
+                  </td>
+                  <td>
+                    <span class="<%= r.status === 'Kompeten' ? 'badge-kompeten' : 'badge-belum' %>"><%= r.status %></span>
+                  </td>
+                  <td>
+                    <span class="small text-secondary"><%= new Date(r.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></span>
+                  </td>
+                </tr>
+                <% if (r.catatan) { %>
+                  <tr style="background: rgba(255,255,255,0.005);">
+                    <td colspan="3" class="pt-0 pb-3 ps-3 text-muted small">
+                      <i class="fa-solid fa-comment-dots me-1 text-accent"></i> <em>Catatan Guru: "<%= r.catatan %>"</em>
+                    </td>
+                  </tr>
+                <% } %>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-secondary">
+          <i class="fa-solid fa-hands-praying fa-3x mb-3 text-muted"></i>
+          <p class="mb-0">Belum ada riwayat praktek ibadah.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

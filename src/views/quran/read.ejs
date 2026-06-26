@@ -1,0 +1,294 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4 animate__animated animate__fadeIn">
+  <div class="col-12">
+    <!-- Navigation Back link -->
+    <a href="/quran" class="btn btn-secondary-custom btn-sm rounded-pill mb-4 px-3">
+      <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Surah
+    </a>
+
+    <div class="card-glass p-4 text-center position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(21, 128, 61, 0.08) 0%, rgba(21, 128, 61, 0.16) 100%);">
+      <div class="position-absolute top-50 start-50 translate-middle w-100 h-100" style="background: radial-gradient(circle, rgba(21, 128, 61, 0.12) 0%, rgba(21, 128, 61, 0) 80%); pointer-events: none;"></div>
+      
+      <div class="position-relative z-3">
+        <h1 class="h2 mb-1"><%= surah.name_latin %></h1>
+        <h2 class="font-arabic text-accent my-2" style="font-size: 2.2rem; color: var(--accent-color) !important;"><%= surah.name_arabic %></h2>
+        <p class="text-secondary mb-0">
+          <strong>Arti:</strong> <%= surah.translation_id %> &bull; 
+          <strong>Tempat Turun:</strong> <span class="text-capitalize"><%= surah.revelation_place === 'makkah' ? 'Makkiyah' : 'Madaniyah' %></span> &bull; 
+          <strong>Jumlah:</strong> <%= surah.jumlah_ayat %> Ayat
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bismillah Banner (For all surahs except Al-Fatiha [1] and At-Tawbah [9]) -->
+<% if (surah.number !== 1 && surah.number !== 9) { %>
+  <div class="row my-4 justify-content-center">
+    <div class="col-auto text-center py-3">
+      <span class="font-arabic text-light" style="font-size: 2.5rem; letter-spacing: 0.5px;">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
+    </div>
+  </div>
+<% } %>
+
+<!-- Navigation Toolbar for Ayat -->
+<div class="row justify-content-center mb-4 sticky-top" style="top: 85px; z-index: 1020;">
+  <div class="col-lg-10">
+    <div class="card-glass py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2 shadow-sm border border-success" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+      <div class="d-flex align-items-center gap-2">
+        <a href="#ayat-1" class="btn btn-outline-success btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-angles-up me-1"></i> Ayat Pertama
+        </a>
+        <a href="#ayat-<%= surah.jumlah_ayat %>" class="btn btn-outline-success btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-angles-down me-1"></i> Ayat Terakhir
+        </a>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <label for="jumpAyat" class="small fw-bold text-secondary mb-0 text-nowrap d-none d-sm-block">Lompat ke:</label>
+        <div class="input-group input-group-sm w-auto">
+          <span class="input-group-text bg-success text-white border-success rounded-start-pill"><i class="fa-solid fa-list-ol"></i></span>
+          <select id="jumpAyat" class="form-select border-success rounded-end-pill pe-4" onchange="if(this.value) window.location.hash='ayat-'+this.value;" style="min-width: 120px;">
+            <option value="" disabled selected>Pilih Ayat...</option>
+            <% for(let i = 1; i <= surah.jumlah_ayat; i++) { %>
+              <option value="<%= i %>">Ayat <%= i %></option>
+            <% } %>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Verses Container -->
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <div class="card-glass p-4 p-md-5">
+      
+      <% ayahs.forEach(a => { %>
+        <!-- Single Verse row -->
+        <div class="ayat-container position-relative" id="ayat-<%= a.ayat_number %>">
+          
+          <div class="row align-items-start">
+            
+            <!-- Verse controls (Left) -->
+            <div class="col-md-2 mb-3 mb-md-0 d-flex flex-row flex-md-column align-items-center gap-3">
+              <!-- Verse Number badge -->
+              <span class="ayat-number"><%= a.ayat_number %></span>
+              
+              <!-- Bookmark toggle button -->
+              <% const isBookmarked = bookmarkedVerses.has(a.ayat_number); %>
+              <button 
+                class="btn border-0 p-0 bookmark-btn <%= isBookmarked ? 'active' : '' %>"
+                onclick="toggleBookmark(<%= surah.number %>, <%= a.ayat_number %>)"
+                id="bookmark-icon-<%= a.ayat_number %>"
+                title="<%= isBookmarked ? 'Hapus Bookmark' : 'Tambah Bookmark' %>"
+              >
+                <i class="<%= isBookmarked ? 'fa-solid' : 'fa-regular' %> fa-bookmark fa-xl"></i>
+              </button>
+            </div>
+
+            <!-- Verse Arabic & Indonesian texts (Right) -->
+            <div class="col-md-10">
+              <!-- Arabic Text -->
+              <div class="arabic-text">
+                <% 
+                  let text = a.teks_arab;
+                  // Strip Bismillah prefix from first verse of surah, if API includes it
+                  if (surah.number !== 1 && surah.number !== 9 && a.ayat_number === 1) {
+                    text = text.replace(/^(بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\s*)/, '');
+                  }
+                %>
+                <%= text %>
+              </div>
+              
+              <!-- Translation Text -->
+              <div class="translation-text">
+                <%= a.teks_terjemahan_id %>
+              </div>
+
+              <!-- Saved Bookmark note segment -->
+              <div 
+                id="bookmark-note-<%= a.ayat_number %>" 
+                class="mt-3 p-2 rounded small" 
+                style="background-color: var(--bg-tertiary) !important; border: 1px solid var(--glass-border) !important; color: var(--accent-color) !important; display: <%= isBookmarked && userBookmarks[a.ayat_number] && userBookmarks[a.ayat_number].catatan ? 'block' : 'none' %>;"
+              >
+                <i class="fa-solid fa-note-sticky me-1"></i> Catatan: 
+                <span id="note-text-<%= a.ayat_number %>"><%= (isBookmarked && userBookmarks[a.ayat_number]) ? userBookmarks[a.ayat_number].catatan : '' %></span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      <% }) %>
+
+    </div>
+  </div>
+</div>
+
+<!-- AJAX Client Side logic -->
+<script>
+  async function toggleBookmark(surahNum, ayatNum) {
+    const btn = document.getElementById(`bookmark-icon-${ayatNum}`);
+    const noteBox = document.getElementById(`bookmark-note-${ayatNum}`);
+    const noteSpan = document.getElementById(`note-text-${ayatNum}`);
+    const icon = btn.querySelector('i');
+    
+    const isActive = btn.classList.contains('active');
+    
+    if (isActive) {
+      // Remove Bookmark
+      if (confirm(`Apakah Anda yakin ingin menghapus bookmark untuk Ayat ${ayatNum}?`)) {
+        try {
+          const res = await fetch('/quran/bookmark/remove', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ surah_number: surahNum, ayat_number: ayatNum })
+          });
+          const data = await res.json();
+          if (data.success) {
+            btn.classList.remove('active');
+            icon.classList.replace('fa-solid', 'fa-regular');
+            noteBox.style.display = 'none';
+            noteSpan.innerText = '';
+            btn.title = 'Tambah Bookmark';
+          } else {
+            alert(data.message);
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Gagal menghapus bookmark.');
+        }
+      }
+    } else {
+      // Add Bookmark
+      const note = prompt('Masukkan catatan opsional untuk bookmark ayat ini:');
+      if (note !== null) { // User clicked OK (even with empty note)
+        try {
+          const res = await fetch('/quran/bookmark/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ surah_number: surahNum, ayat_number: ayatNum, catatan: note })
+          });
+          const data = await res.json();
+          if (data.success) {
+            btn.classList.add('active');
+            icon.classList.replace('fa-regular', 'fa-solid');
+            btn.title = 'Hapus Bookmark';
+            
+            if (note.trim() !== '') {
+              noteSpan.innerText = note;
+              noteBox.style.display = 'block';
+            } else {
+              noteBox.style.display = 'none';
+            }
+          } else {
+            alert(data.message);
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Gagal menyimpan bookmark.');
+        }
+      }
+    }
+  }
+</script>
+
+<!-- Socket.IO Real-time Pair Reading Logic -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check if socket.io is available (loaded properly)
+    if (typeof io !== 'undefined') {
+      const socket = io();
+      
+      const isStudent = <%= currentUser.role === 'siswa' ? 'true' : 'false' %>;
+      const isGuru = <%= currentUser.role === 'guru' ? 'true' : 'false' %>;
+      const currentUserId = "<%= currentUser.id %>";
+      
+      // If the teacher visits this page to watch a student, they can pass ?siswa_id=123 in the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetSiswaId = urlParams.get('siswa_id');
+
+      let roomSiswaId = null;
+      if (isStudent) {
+        roomSiswaId = currentUserId; // Student creates/joins their own room
+      } else if (isGuru && targetSiswaId) {
+        roomSiswaId = targetSiswaId; // Teacher joins the specific student's room
+        
+        // Show a UI indicator that the teacher is in Live Monitoring mode
+        const toolbar = document.querySelector('.sticky-top .card-glass');
+        if (toolbar) {
+          const liveBadge = document.createElement('span');
+          liveBadge.className = 'badge bg-danger animate__animated animate__pulse animate__infinite ms-2';
+          liveBadge.innerHTML = '<i class="fa-solid fa-tower-broadcast me-1"></i> LIVE MONITORING';
+          toolbar.firstElementChild.appendChild(liveBadge);
+        }
+      }
+
+      if (roomSiswaId) {
+        // Join the evaluation room
+        socket.emit('join_eval_room', { siswa_id: roomSiswaId });
+
+        // TEACHER LOGIC: Listen for highlight events from the student
+        if (isGuru) {
+          socket.on('ayat_highlighted', (data) => {
+            // Remove previous highlights
+            document.querySelectorAll('.ayat-container').forEach(el => {
+              el.style.backgroundColor = '';
+              el.style.boxShadow = 'none';
+            });
+
+            // Add highlight to the active ayat
+            const ayatEl = document.getElementById(`ayat-${data.ayat_number}`);
+            if (ayatEl) {
+              ayatEl.style.transition = 'all 0.3s ease';
+              ayatEl.style.backgroundColor = 'rgba(245, 158, 11, 0.15)'; // Amber highlight
+              ayatEl.style.boxShadow = 'inset 4px 0 0 #f59e0b';
+              
+              // Smooth scroll to the highlighted ayat
+              ayatEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          });
+        }
+      }
+
+      // STUDENT LOGIC: Add click/tap listeners to emit events
+      if (isStudent) {
+        const ayatContainers = document.querySelectorAll('.ayat-container');
+        ayatContainers.forEach(container => {
+          container.style.cursor = 'pointer'; // indicate it's clickable
+          
+          container.addEventListener('click', (e) => {
+            // Prevent emitting if clicking the bookmark button
+            if (e.target.closest('.bookmark-btn')) return;
+            
+            // Visual feedback for the student
+            document.querySelectorAll('.ayat-container').forEach(el => {
+              el.style.backgroundColor = '';
+              el.style.boxShadow = 'none';
+            });
+            container.style.transition = 'all 0.3s ease';
+            container.style.backgroundColor = 'rgba(21, 128, 61, 0.08)'; // Subtle green highlight
+            container.style.boxShadow = 'inset 4px 0 0 var(--accent-color)';
+            
+            const ayatNum = container.id.split('-')[1];
+            const surahNum = <%= surah.number %>;
+            
+            // Emit to teacher
+            if (roomSiswaId) {
+              socket.emit('highlight_ayat', {
+                siswa_id: roomSiswaId,
+                surah_number: surahNum,
+                ayat_number: parseInt(ayatNum)
+              });
+            }
+          });
+        });
+      }
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>
