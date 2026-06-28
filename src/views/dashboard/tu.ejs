@@ -15,7 +15,7 @@
         </div>
         <div class="col">
           <span class="text-secondary text-uppercase small tracking-wider font-weight-bold">Dashboard Tata Usaha (TU)</span>
-          <h1 class="h2 mb-1"><%= currentUser.profile && currentUser.profile.displayName ? currentUser.profile.displayName : currentUser.nama %></h1>
+          <h1 class="h2 mb-1"><%= currentUser.nama || (currentUser.profile && currentUser.profile.displayName) %></h1>
           <p class="text-secondary mb-0">
             <strong>Email:</strong> <%= currentUser.mailcow_email %> &bull; 
             <strong>Hak Akses:</strong> Staf Tata Usaha

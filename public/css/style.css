@@ -162,6 +162,18 @@ body::before {
   .navbar-nav {
     align-items: center;
   }
+  .nav-caption-sub {
+    display: none !important;
+  }
+  .navbar-nav .nav-link {
+    padding: 0.4rem 0.6rem !important;
+    gap: 8px !important;
+  }
+  .nav-icon-wrapper {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.85rem !important;
+  }
 }
 @media (max-width: 991.98px) {
   .navbar-nav {

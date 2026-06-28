@@ -24,12 +24,12 @@
 
         <form action="/auth/login" method="POST">
           <div class="mb-3">
-            <label for="email" class="form-label">Email Mailcow</label>
+            <label for="email" class="form-label">Username / Email Mailcow</label>
             <div class="input-group">
-              <span class="input-group-text bg-tertiary border-secondary text-secondary"><i class="fa-solid fa-envelope"></i></span>
-              <input type="email" class="form-control border-secondary" id="email" name="email" value="<%= email %>" placeholder="username@smk.baktinusantara666.sch.id" required autofocus>
+              <span class="input-group-text bg-tertiary border-secondary text-secondary"><i class="fa-solid fa-user"></i></span>
+              <input type="text" class="form-control border-secondary" id="email" name="email" value="<%= email %>" placeholder="Username (misal: dwi.lestari atau 222310123)" required autofocus>
             </div>
-            <div class="form-text text-muted small" style="font-size: 0.75rem;">Gunakan alamat email sekolah Anda yang terdaftar di Mailcow.</div>
+            <div class="form-text text-muted small" style="font-size: 0.75rem;">Cukup masukkan bagian depan email Anda (otomatis ditambahkan @smk.baktinusantara666.sch.id).</div>
           </div>
 
           <div class="mb-4">

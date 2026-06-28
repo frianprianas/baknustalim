@@ -17,7 +17,7 @@
           <span class="text-secondary text-uppercase small tracking-wider font-weight-bold d-flex align-items-center gap-2 flex-wrap">
             Selamat Datang di <span class="arabic-title-highlight px-2 py-0.5" style="font-size: 1.15rem; font-weight: normal; line-height: 1.2;">بَاكْنُوسْ تَعْلِيمْ</span>
           </span>
-          <h1 class="h2 mb-1"><%= currentUser.profile && currentUser.profile.displayName ? currentUser.profile.displayName : student.nama %></h1>
+          <h1 class="h2 mb-1"><%= student.nama || (currentUser.profile && currentUser.profile.displayName) %></h1>
           <p class="text-secondary mb-0">
             <strong>NIS:</strong> <%= student.nis || '-' %> &bull; 
             <strong>Kelas:</strong> <%= student.kelas_id ? student.kelas_id.nama_kelas : 'Belum Ditempatkan ke Kelas' %> 

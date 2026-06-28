@@ -21,7 +21,10 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const emailLower = email.trim().toLowerCase();
+    let emailLower = email.trim().toLowerCase();
+    if (!emailLower.includes('@')) {
+      emailLower = `${emailLower}@smk.baktinusantara666.sch.id`;
+    }
     
     // 1. Verify credentials via Mailcow (SMTP/IMAP)
     await mailcowService.authenticateUser(emailLower, password);

@@ -38,40 +38,22 @@
               </a>
             </li>
             
-            <li class="nav-item">
-              <a class="nav-link" href="/quran">
+            <!-- Dropdown Al-Qur'an -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="quranDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <div class="nav-icon-wrapper">
                   <i class="fa-solid fa-book-quran"></i>
                 </div>
                 <div class="nav-text-container">
-                  <span class="nav-label-main">Baca Al-Qur'an</span>
-                  <span class="nav-caption-sub">Mushaf & Tafsir</span>
+                  <span class="nav-label-main">Al-Qur'an</span>
+                  <span class="nav-caption-sub">Mushaf & Audio</span>
                 </div>
               </a>
-            </li>
-
-            <li class="nav-item">
-              <a class="nav-link" href="/quran/murottal">
-                <div class="nav-icon-wrapper">
-                  <i class="fa-solid fa-volume-high"></i>
-                </div>
-                <div class="nav-text-container">
-                  <span class="nav-label-main">Murottal Audio</span>
-                  <span class="nav-caption-sub">Putar Al-Qur'an</span>
-                </div>
-              </a>
-            </li>
-            
-            <li class="nav-item">
-              <a class="nav-link" href="/quran/bookmarks">
-                <div class="nav-icon-wrapper">
-                  <i class="fa-solid fa-bookmark"></i>
-                </div>
-                <div class="nav-text-container">
-                  <span class="nav-label-main">Bookmarks</span>
-                  <span class="nav-caption-sub">Ayat Tersimpan</span>
-                </div>
-              </a>
+              <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="quranDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
+                <li><a class="dropdown-item rounded py-2" href="/quran"><i class="fa-solid fa-book-open me-2 text-success"></i> Baca Al-Qur'an</a></li>
+                <li><a class="dropdown-item rounded py-2" href="/quran/murottal"><i class="fa-solid fa-volume-high me-2 text-info"></i> Murottal Audio</a></li>
+                <li><a class="dropdown-item rounded py-2" href="/quran/bookmarks"><i class="fa-solid fa-bookmark me-2 text-warning"></i> Bookmarks Saya</a></li>
+              </ul>
             </li>
             
             <li class="nav-item">
@@ -164,7 +146,7 @@
             </div>
             <span class="text-primary me-3 d-none d-lg-inline">
               <small class="text-secondary">Login sebagai:</small> 
-              <strong><%= currentUser.profile && currentUser.profile.displayName ? currentUser.profile.displayName : currentUser.nama %></strong> 
+              <strong><%= currentUser.nama || (currentUser.profile && currentUser.profile.displayName) %></strong> 
               <span class="badge rounded-pill text-uppercase" style="background-color: var(--bg-tertiary) !important; color: var(--accent-color) !important; border: 1px solid var(--glass-border) !important; font-size: 0.7rem;"><%= currentUser.role === 'guru' && currentUser.is_guru_pai ? 'Guru PAI' : currentUser.role %></span>
             </span>
             <a href="/auth/logout" class="btn btn-outline-danger btn-sm rounded-pill px-3">

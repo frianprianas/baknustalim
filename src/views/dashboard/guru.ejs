@@ -17,7 +17,7 @@
           <span class="text-secondary text-uppercase small tracking-wider font-weight-bold d-flex align-items-center gap-2 flex-wrap">
             Selamat Datang di <span class="arabic-title-highlight px-2 py-0.5" style="font-size: 1.15rem; font-weight: normal; line-height: 1.2;">بَاكْنُوسْ تَعْلِيمْ</span>
           </span>
-          <h1 class="h2 mb-1"><%= currentUser.profile && currentUser.profile.displayName ? currentUser.profile.displayName : currentUser.nama %></h1>
+          <h1 class="h2 mb-1"><%= currentUser.nama || (currentUser.profile && currentUser.profile.displayName) %></h1>
           <p class="text-secondary mb-0">
             <strong>NIP/Username:</strong> <%= currentUser.nip || currentUser.mailcow_email.split('@')[0] %> &bull; 
             <strong>Status:</strong> <%= currentUser.role === 'guru' && currentUser.is_guru_pai ? 'Guru Pendidikan Agama Islam (PAI)' : 'Guru' %>
@@ -94,7 +94,7 @@
   <div class="text-center border-bottom pb-3 mb-4">
     <h3 class="mb-1"><strong>SMK BAKTI NUSANTARA 666</strong></h3>
     <p class="mb-1 text-muted">LAPORAN REKAPITULASI CAPAIAN GURU PAI</p>
-    <p class="mb-1"><strong>Nama Guru:</strong> <%= currentUser.profile && currentUser.profile.displayName ? currentUser.profile.displayName : currentUser.nama %> &nbsp;|&nbsp; <strong>NIP:</strong> <%= currentUser.nip || '-' %></p>
+    <p class="mb-1"><strong>Nama Guru:</strong> <%= currentUser.nama || (currentUser.profile && currentUser.profile.displayName) %> &nbsp;|&nbsp; <strong>NIP:</strong> <%= currentUser.nip || '-' %></p>
     <small>Tanggal Cetak: <%= new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute:'2-digit'}) %></small>
   </div>
 </div>
