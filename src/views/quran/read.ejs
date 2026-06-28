@@ -107,6 +107,21 @@
                 <%= a.teks_terjemahan_id %>
               </div>
 
+              <!-- Tafsir collapsible segment -->
+              <% if (a.tafsir) { %>
+                <div class="mt-2 mb-3">
+                  <button class="btn btn-sm btn-outline-success rounded-pill py-1 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#tafsir-<%= a.ayat_number %>" aria-expanded="false" aria-controls="tafsir-<%= a.ayat_number %>" style="font-size: 0.78rem; font-weight: 500; border-color: rgba(21, 128, 61, 0.4);">
+                    <i class="fa-solid fa-book-open me-1"></i> Lihat Tafsir
+                  </button>
+                  <div class="collapse mt-2" id="tafsir-<%= a.ayat_number %>">
+                    <div class="p-3 rounded small" style="background-color: var(--bg-tertiary) !important; border: 1px solid var(--glass-border) !important; color: var(--text-secondary) !important; font-size: 0.85rem; line-height: 1.6; text-align: justify; white-space: pre-line;">
+                      <div class="fw-bold mb-2" style="font-size: 0.9rem; color: var(--accent-color) !important;"><i class="fa-solid fa-circle-info me-1"></i> Tafsir Ayat <%= a.ayat_number %> (Kemenag)</div>
+                      <%= a.tafsir %>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+
               <!-- Saved Bookmark note segment -->
               <div 
                 id="bookmark-note-<%= a.ayat_number %>" 

@@ -59,8 +59,32 @@ async function getSurahAyat(surahNumber) {
   }
 
   // 1. Check local cache
-  const cachedAyat = await QuranAyat.find({ surah_number: parsedNumber }).sort({ ayat_number: 1 });
+  let cachedAyat = await QuranAyat.find({ surah_number: parsedNumber }).sort({ ayat_number: 1 });
   if (cachedAyat && cachedAyat.length > 0) {
+    // If any cached verse doesn't have tafsir, backfill from EQuran.id
+    const needsTafsirBackfill = cachedAyat.some(a => !a.tafsir);
+    if (needsTafsirBackfill) {
+      try {
+        console.log(`Backfilling Tafsir for Surah ${parsedNumber} from EQuran.id...`);
+        const tafsirRes = await fetch(`https://equran.id/api/v2/tafsir/${parsedNumber}`);
+        if (tafsirRes.ok) {
+          const tafsirJson = await tafsirRes.json();
+          if (tafsirJson.data && tafsirJson.data.tafsir) {
+            const tafsirList = tafsirJson.data.tafsir;
+            for (const t of tafsirList) {
+              await QuranAyat.updateOne(
+                { surah_number: parsedNumber, ayat_number: t.ayat },
+                { $set: { tafsir: t.teks } }
+              );
+            }
+            // Reload from DB
+            cachedAyat = await QuranAyat.find({ surah_number: parsedNumber }).sort({ ayat_number: 1 });
+          }
+        }
+      } catch (err) {
+        console.warn(`Failed to backfill Tafsir for Surah ${parsedNumber}:`, err.message);
+      }
+    }
     return cachedAyat;
   }
 
@@ -82,19 +106,37 @@ async function getSurahAyat(surahNumber) {
     const arabicEdition = editions[0];
     const indonesianEdition = editions[1];
 
+    // Fetch Tafsir from EQuran.id
+    let tafsirMap = {};
+    try {
+      const tafsirRes = await fetch(`https://equran.id/api/v2/tafsir/${parsedNumber}`);
+      if (tafsirRes.ok) {
+        const tafsirJson = await tafsirRes.json();
+        if (tafsirJson.data && tafsirJson.data.tafsir) {
+          const tafsirList = tafsirJson.data.tafsir;
+          for (const t of tafsirList) {
+            tafsirMap[t.ayat] = t.teks;
+          }
+        }
+      }
+    } catch (tafsirErr) {
+      console.warn(`Failed to fetch Tafsir for Surah ${parsedNumber} during cache miss:`, tafsirErr.message);
+    }
+
     const ayahsToInsert = [];
-    const results = [];
 
     const totalAyahs = arabicEdition.ayahs.length;
     for (let i = 0; i < totalAyahs; i++) {
       const arAyah = arabicEdition.ayahs[i];
       const idAyah = indonesianEdition.ayahs[i];
+      const ayatNum = arAyah.numberInSurah;
 
       const ayatData = {
         surah_number: parsedNumber,
-        ayat_number: arAyah.numberInSurah,
+        ayat_number: ayatNum,
         teks_arab: arAyah.text,
-        teks_terjemahan_id: idAyah.text
+        teks_terjemahan_id: idAyah.text,
+        tafsir: tafsirMap[ayatNum] || ''
       };
 
       ayahsToInsert.push(ayatData);
@@ -102,7 +144,7 @@ async function getSurahAyat(surahNumber) {
 
     // Insert into DB and return
     const inserted = await QuranAyat.insertMany(ayahsToInsert);
-    console.log(`Successfully cached ${inserted.length} verses for Surah ${parsedNumber}.`);
+    console.log(`Successfully cached ${inserted.length} verses with Tafsir for Surah ${parsedNumber}.`);
     
     // Sort just in case insertMany response order is different
     return inserted.sort((a, b) => a.ayat_number - b.ayat_number);
