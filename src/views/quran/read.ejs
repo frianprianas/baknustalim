@@ -86,6 +86,16 @@
               >
                 <i class="<%= isBookmarked ? 'fa-solid' : 'fa-regular' %> fa-bookmark fa-xl"></i>
               </button>
+
+              <!-- Play Ayat Murottal button -->
+              <button 
+                class="btn border-0 p-0 play-ayat-btn text-muted"
+                onclick="playAyatAudio(<%= surah.number %>, <%= a.ayat_number %>, this)"
+                id="play-btn-<%= a.ayat_number %>"
+                title="Putar Murottal Ayat"
+              >
+                <i class="fa-solid fa-circle-play fa-xl"></i>
+              </button>
             </div>
 
             <!-- Verse Arabic & Indonesian texts (Right) -->
@@ -208,6 +218,82 @@
       }
     }
   }
+
+  // Murottal Play Ayat Audio Logic
+  let currentAudio = null;
+  let currentPlayBtn = null;
+
+  function playAyatAudio(surahNum, ayatNum, btn) {
+    const paddedSurah = String(surahNum).padStart(3, '0');
+    const paddedAyat = String(ayatNum).padStart(3, '0');
+    
+    // Default Qari is Misyari Rasyid Al-Afasi
+    const qari = "Misyari-Rasyid-Al-Afasi"; 
+    const audioUrl = `https://cdn.equran.id/audio-partial/${qari}/${paddedSurah}${paddedAyat}.mp3`;
+
+    // If already playing this verse, toggle pause/play
+    if (currentAudio && currentAudio.src === audioUrl) {
+      if (!currentAudio.paused) {
+        currentAudio.pause();
+        btn.querySelector('i').className = 'fa-solid fa-circle-play fa-xl';
+        btn.classList.add('text-muted');
+        btn.classList.remove('text-success');
+      } else {
+        currentAudio.play();
+        btn.querySelector('i').className = 'fa-solid fa-circle-pause fa-xl';
+        btn.classList.remove('text-muted');
+        btn.classList.add('text-success');
+      }
+      return;
+    }
+
+    // Stop currently playing audio
+    if (currentAudio) {
+      currentAudio.pause();
+      if (currentPlayBtn) {
+        currentPlayBtn.querySelector('i').className = 'fa-solid fa-circle-play fa-xl';
+        currentPlayBtn.classList.add('text-muted');
+        currentPlayBtn.classList.remove('text-success');
+      }
+    }
+
+    // Initialize new audio
+    currentAudio = new Audio(audioUrl);
+    currentPlayBtn = btn;
+    
+    btn.querySelector('i').className = 'fa-solid fa-spinner fa-spin fa-xl';
+    
+    currentAudio.addEventListener('canplaythrough', () => {
+      btn.querySelector('i').className = 'fa-solid fa-circle-pause fa-xl';
+      btn.classList.remove('text-muted');
+      btn.classList.add('text-success');
+    });
+
+    currentAudio.addEventListener('ended', () => {
+      btn.querySelector('i').className = 'fa-solid fa-circle-play fa-xl';
+      btn.classList.add('text-muted');
+      btn.classList.remove('text-success');
+      currentAudio = null;
+      currentPlayBtn = null;
+    });
+
+    currentAudio.addEventListener('error', () => {
+      alert('Gagal memuat audio murottal.');
+      btn.querySelector('i').className = 'fa-solid fa-circle-play fa-xl';
+      btn.classList.add('text-muted');
+      btn.classList.remove('text-success');
+      currentAudio = null;
+      currentPlayBtn = null;
+    });
+
+    currentAudio.play().catch(err => {
+      console.error('Audio play error:', err);
+      btn.querySelector('i').className = 'fa-solid fa-circle-play fa-xl';
+      btn.classList.add('text-muted');
+      currentAudio = null;
+      currentPlayBtn = null;
+    });
+  }
 </script>
 
 <!-- Socket.IO Real-time Pair Reading Logic -->
@@ -276,8 +362,13 @@
           container.style.cursor = 'pointer'; // indicate it's clickable
           
           container.addEventListener('click', (e) => {
-            // Prevent emitting if clicking the bookmark button
-            if (e.target.closest('.bookmark-btn')) return;
+            // Prevent emitting if clicking the bookmark button, play button, or collapse elements
+            if (
+              e.target.closest('.bookmark-btn') || 
+              e.target.closest('.play-ayat-btn') || 
+              e.target.closest('[data-bs-toggle="collapse"]') || 
+              e.target.closest('.collapse')
+            ) return;
             
             // Visual feedback for the student
             document.querySelectorAll('.ayat-container').forEach(el => {

@@ -7,6 +7,7 @@ const { requireAuth } = require('../middlewares/auth');
 router.use(requireAuth);
 
 router.get('/', quranController.listSurahs);
+router.get('/murottal', quranController.murottalPlayer);
 router.get('/surah/:number', quranController.readSurah);
 router.post('/bookmark/add', quranController.addBookmark);
 router.post('/bookmark/remove', quranController.removeBookmark);

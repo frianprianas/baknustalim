@@ -166,3 +166,17 @@ exports.listBookmarks = async (req, res) => {
     res.status(500).render('error', { title: 'Server Error', message: error.message, error });
   }
 };
+
+// Halaman Murottal Player
+exports.murottalPlayer = async (req, res) => {
+  try {
+    const surahs = await Surah.find().sort({ number: 1 });
+    res.render('quran/murottal', {
+      title: 'Murottal Audio Al-Qur\'an - BaknusTa\'lim',
+      surahs
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('error', { title: 'Server Error', message: error.message, error });
+  }
+};

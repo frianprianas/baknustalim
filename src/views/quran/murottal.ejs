@@ -1,0 +1,370 @@
+<%- include('../partials/header') %>
+
+<div class="row mb-4 animate__animated animate__fadeIn">
+  <div class="col-12 text-center text-md-start">
+    <h1 class="h2 mb-1"><i class="fa-solid fa-volume-high me-2 text-accent"></i> Murottal Audio</h1>
+    <p class="text-secondary mb-0">Dengarkan lantunan ayat suci Al-Qur'an dari berbagai qari ternama dunia secara langsung.</p>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <!-- Left Side: Player control panel -->
+  <div class="col-lg-5 col-md-6 mb-4">
+    <div class="card-glass p-4 text-center position-relative overflow-hidden h-100 d-flex flex-column justify-content-between">
+      
+      <!-- Premium background pattern glow -->
+      <div class="position-absolute start-50 top-50 translate-middle rounded-circle" style="width: 250px; height: 250px; background: radial-gradient(circle, rgba(21, 128, 61, 0.15) 0%, rgba(21, 128, 61, 0) 70%); z-index: 0; pointer-events: none;"></div>
+
+      <div style="z-index: 1;">
+        <h4 class="text-accent mb-4 fw-bold"><i class="fa-solid fa-compact-disc me-2"></i> Audio Player</h4>
+        
+        <!-- Rotating disc or Visualizer -->
+        <div class="d-flex justify-content-center align-items-center my-4 position-relative">
+          <div id="audioDisc" class="rounded-circle border border-success border-4 d-flex align-items-center justify-content-center shadow-lg" style="width: 160px; height: 160px; background-color: var(--bg-tertiary); transition: transform 0.8s ease;">
+            <i class="fa-solid fa-book-quran fa-4x text-accent"></i>
+          </div>
+          
+          <!-- Wave visualizer bars -->
+          <div class="visualizer-container position-absolute bottom-0 d-flex gap-1 justify-content-center w-100" style="height: 30px; opacity: 0; transition: opacity 0.3s;">
+            <div class="v-bar" style="animation-delay: 0.1s;"></div>
+            <div class="v-bar" style="animation-delay: 0.3s;"></div>
+            <div class="v-bar" style="animation-delay: 0.5s;"></div>
+            <div class="v-bar" style="animation-delay: 0.2s;"></div>
+            <div class="v-bar" style="animation-delay: 0.4s;"></div>
+            <div class="v-bar" style="animation-delay: 0.6s;"></div>
+          </div>
+        </div>
+
+        <!-- Surah Info Display -->
+        <div class="mb-4">
+          <h2 id="displaySurahName" class="fw-bold mb-1">-</h2>
+          <p id="displaySurahArabic" class="font-arabic text-accent fs-3 mb-1">-</p>
+          <span id="displaySurahInfo" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 text-uppercase small" style="font-size: 0.75rem;">0 Ayat</span>
+        </div>
+
+        <!-- Qari Info Display -->
+        <div class="mb-4 p-2 rounded" style="background: rgba(21, 128, 61, 0.05); border: 1px dashed var(--glass-border);">
+          <small class="text-muted d-block" style="font-size: 0.72rem;">Qari Pembaca:</small>
+          <span id="displayQariName" class="fw-semibold text-primary">Misyari Rasyid Al-Afasi</span>
+        </div>
+      </div>
+
+      <!-- Controls and slider -->
+      <div style="z-index: 1;" class="w-100 mt-4">
+        <!-- Progress Bar / Input Range -->
+        <div class="mb-2">
+          <input type="range" id="audioProgress" class="form-range custom-range" value="0" min="0" max="100" step="0.1">
+          <div class="d-flex justify-content-between text-muted small mt-1" style="font-size: 0.75rem;">
+            <span id="timeCurrent">00:00</span>
+            <span id="timeDuration">00:00</span>
+          </div>
+        </div>
+
+        <!-- Buttons Panel -->
+        <div class="d-flex justify-content-center align-items-center gap-3 my-3">
+          <button id="btnPrev" class="btn btn-outline-success rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 45px; height: 45px;" title="Surat Sebelumnya">
+            <i class="fa-solid fa-backward-step"></i>
+          </button>
+          
+          <button id="btnPlayPause" class="btn btn-success rounded-circle d-inline-flex align-items-center justify-content-center shadow" style="width: 65px; height: 65px; background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-color-hover) 100%); border: none;" title="Play/Pause">
+            <i id="playPauseIcon" class="fa-solid fa-play fa-2xl text-white"></i>
+          </button>
+
+          <button id="btnNext" class="btn btn-outline-success rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 45px; height: 45px;" title="Surat Berikutnya">
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+        </div>
+
+        <!-- Autoplay next toggle -->
+        <div class="form-check form-switch d-inline-flex align-items-center gap-2 mt-2">
+          <input class="form-check-input check-success" type="checkbox" id="switchAutoplay" checked>
+          <label class="form-check-input-label text-secondary small" for="switchAutoplay">Putar Otomatis Surat Berikutnya</label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Right Side: Selection panel -->
+  <div class="col-lg-5 col-md-6 mb-4">
+    <div class="card-glass p-4 h-100 d-flex flex-column justify-content-between">
+      <div>
+        <h4 class="text-accent mb-4 fw-bold"><i class="fa-solid fa-sliders me-2"></i> Pengaturan Audio</h4>
+
+        <!-- Select Qari -->
+        <div class="mb-4">
+          <label for="selectQari" class="form-label fw-semibold"><i class="fa-solid fa-microphone me-1 text-success"></i> Pilih Qari (Pembaca)</label>
+          <select id="selectQari" class="form-select border-success rounded-pill">
+            <option value="05" selected>Misyari Rasyid Al-Afasi (Populer)</option>
+            <option value="03">Abdurrahman as-Sudais (Imam Masjidil Haram)</option>
+            <option value="01">Abdullah Al-Juhany</option>
+            <option value="02">Abdul-Muhsin Al-Qasim</option>
+            <option value="04">Ibrahim Al-Dossari</option>
+            <option value="06">Yasser Al-Dosari</option>
+          </select>
+        </div>
+
+        <!-- Select Surah -->
+        <div class="mb-4">
+          <label for="selectSurah" class="form-label fw-semibold"><i class="fa-solid fa-book-open-reader me-1 text-success"></i> Pilih Surat</label>
+          <select id="selectSurah" class="form-select border-success rounded-pill" style="max-height: 250px;">
+            <% surahs.forEach(s => { %>
+              <option value="<%= s.number %>" data-arabic="<%= s.name_arabic %>" data-latin="<%= s.name_latin %>" data-ayat="<%= s.jumlah_ayat %>" data-place="<%= s.tempat_turun %>">
+                <%= s.number %>. <%= s.name_latin %> (<%= s.name_arabic %>)
+              </option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Tips -->
+      <div class="p-3 rounded border-start border-3 border-success" style="background: rgba(22, 163, 74, 0.04) !important;">
+        <h6 class="text-success fw-bold mb-1"><i class="fa-solid fa-lightbulb me-1"></i> Tips Menghafal</h6>
+        <p class="text-secondary mb-0 small text-justify">
+          Dengarkan murottal secara berulang-ulang untuk memperkuat memori hafalan Anda. Anda juga bisa mengklik tombol di bawah untuk membaca tafsir & teks Arab dari surat yang sedang diputar.
+        </p>
+      </div>
+
+      <!-- Link to read page -->
+      <a id="btnReadSurah" href="/quran/surah/1" class="btn btn-outline-success rounded-pill w-100 mt-4 py-2 fw-semibold">
+        <i class="fa-solid fa-book-quran me-1"></i> Baca Surat Ini & Lihat Tafsir
+      </a>
+
+    </div>
+  </div>
+</div>
+
+<!-- Hidden HTML5 Audio Element -->
+<audio id="murottalPlayer" preload="none"></audio>
+
+<style>
+  /* Premium Rotating disc animation */
+  .rotating {
+    animation: spin 16s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Audio visualizer animations */
+  .v-bar {
+    width: 4px;
+    height: 100%;
+    background-color: var(--accent-color);
+    border-radius: 2px;
+    animation: bounce 0.8s ease-in-out infinite alternate;
+    transform-origin: bottom;
+  }
+  @keyframes bounce {
+    0% { transform: scaleY(0.1); }
+    100% { transform: scaleY(1); }
+  }
+
+  /* Custom input range slider */
+  .custom-range::-webkit-slider-thumb {
+    background: var(--accent-color) !important;
+  }
+  .custom-range::-moz-range-thumb {
+    background: var(--accent-color) !important;
+  }
+  .check-success:checked {
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+  }
+</style>
+
+<script>
+  // Player state variables
+  const audio = document.getElementById('murottalPlayer');
+  const selectSurah = document.getElementById('selectSurah');
+  const selectQari = document.getElementById('selectQari');
+  
+  const displaySurahName = document.getElementById('displaySurahName');
+  const displaySurahArabic = document.getElementById('displaySurahArabic');
+  const displaySurahInfo = document.getElementById('displaySurahInfo');
+  const displayQariName = document.getElementById('displayQariName');
+  
+  const btnPlayPause = document.getElementById('btnPlayPause');
+  const playPauseIcon = document.getElementById('playPauseIcon');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const btnReadSurah = document.getElementById('btnReadSurah');
+  
+  const audioProgress = document.getElementById('audioProgress');
+  const timeCurrent = document.getElementById('timeCurrent');
+  const timeDuration = document.getElementById('timeDuration');
+  const switchAutoplay = document.getElementById('switchAutoplay');
+  
+  const audioDisc = document.getElementById('audioDisc');
+  const visualizer = document.querySelector('.visualizer-container');
+
+  // Load state or defaults
+  updateSurahDisplay();
+
+  // Handle Surah selection change
+  selectSurah.addEventListener('change', () => {
+    updateSurahDisplay();
+    loadAudioSource();
+  });
+
+  // Handle Qari selection change
+  selectQari.addEventListener('change', () => {
+    const qariName = selectQari.options[selectQari.selectedIndex].text.split(' (')[0];
+    displayQariName.innerText = qariName;
+    loadAudioSource();
+  });
+
+  // Update Surah display texts
+  function updateSurahDisplay() {
+    const selected = selectSurah.options[selectSurah.selectedIndex];
+    const surahNum = selected.value;
+    const arabic = selected.getAttribute('data-arabic');
+    const latin = selected.getAttribute('data-latin');
+    const ayatCount = selected.getAttribute('data-ayat');
+    const place = selected.getAttribute('data-place');
+
+    displaySurahName.innerText = latin;
+    displaySurahArabic.innerText = arabic;
+    displaySurahInfo.innerText = `${ayatCount} Ayat | ${place}`;
+    
+    // Update Baca link
+    btnReadSurah.href = `/quran/surah/${surahNum}`;
+  }
+
+  // Get Qari Folder name based on code value
+  function getQariFolder(code) {
+    const qariFolders = {
+      "01": "Abdullah-Al-Juhany",
+      "02": "Abdul-Muhsin-Al-Qasim",
+      "03": "Abdurrahman-as-Sudais",
+      "04": "Ibrahim-Al-Dossari",
+      "05": "Misyari-Rasyid-Al-Afasi",
+      "06": "Yasser-Al-Dosari"
+    };
+    return qariFolders[code] || "Misyari-Rasyid-Al-Afasi";
+  }
+
+  // Load audio source based on selections
+  function loadAudioSource() {
+    const wasPlaying = !audio.paused;
+    
+    const surahNum = selectSurah.value;
+    const paddedSurah = String(surahNum).padStart(3, '0');
+    const qariCode = selectQari.value;
+    const qariFolder = getQariFolder(qariCode);
+    
+    const audioUrl = `https://cdn.equran.id/audio-full/${qariFolder}/${paddedSurah}.mp3`;
+    
+    audio.src = audioUrl;
+    audio.load();
+    
+    audioProgress.value = 0;
+    timeCurrent.innerText = "00:00";
+    
+    if (wasPlaying) {
+      playAudio();
+    }
+  }
+
+  // Play/Pause Action
+  btnPlayPause.addEventListener('click', () => {
+    if (!audio.src) {
+      loadAudioSource();
+      playAudio();
+    } else if (audio.paused) {
+      playAudio();
+    } else {
+      pauseAudio();
+    }
+  });
+
+  function playAudio() {
+    audio.play().then(() => {
+      playPauseIcon.className = 'fa-solid fa-pause fa-2xl text-white';
+      audioDisc.classList.add('rotating');
+      visualizer.style.opacity = '1';
+    }).catch(err => {
+      console.error("Audio playback error:", err);
+      // If load error, re-load source
+      loadAudioSource();
+      audio.play().then(() => {
+        playPauseIcon.className = 'fa-solid fa-pause fa-2xl text-white';
+        audioDisc.classList.add('rotating');
+        visualizer.style.opacity = '1';
+      });
+    });
+  }
+
+  function pauseAudio() {
+    audio.pause();
+    playPauseIcon.className = 'fa-solid fa-play fa-2xl text-white';
+    audioDisc.classList.remove('rotating');
+    visualizer.style.opacity = '0';
+  }
+
+  // Prev / Next Actions
+  btnPrev.addEventListener('click', () => {
+    let currentIdx = selectSurah.selectedIndex;
+    if (currentIdx > 0) {
+      selectSurah.selectedIndex = currentIdx - 1;
+      selectSurah.dispatchEvent(new Event('change'));
+    }
+  });
+
+  btnNext.addEventListener('click', () => {
+    let currentIdx = selectSurah.selectedIndex;
+    if (currentIdx < selectSurah.options.length - 1) {
+      selectSurah.selectedIndex = currentIdx + 1;
+      selectSurah.dispatchEvent(new Event('change'));
+    }
+  });
+
+  // Time & Progress Syncing
+  audio.addEventListener('timeupdate', () => {
+    if (!isNaN(audio.duration)) {
+      const pct = (audio.currentTime / audio.duration) * 100;
+      audioProgress.value = pct;
+      timeCurrent.innerText = formatTime(audio.currentTime);
+    }
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    timeDuration.innerText = formatTime(audio.duration);
+  });
+
+  // Scrubbing / Dragging Progress Bar
+  audioProgress.addEventListener('input', () => {
+    if (audio.duration) {
+      const seekTime = (audioProgress.value / 100) * audio.duration;
+      audio.currentTime = seekTime;
+    }
+  });
+
+  // Autoplay next Surah when ended
+  audio.addEventListener('ended', () => {
+    pauseAudio();
+    if (switchAutoplay.checked) {
+      // Go to next surah
+      let currentIdx = selectSurah.selectedIndex;
+      if (currentIdx < selectSurah.options.length - 1) {
+        selectSurah.selectedIndex = currentIdx + 1;
+        selectSurah.dispatchEvent(new Event('change'));
+        // Wait a brief moment before playing next to avoid browser block
+        setTimeout(() => {
+          playAudio();
+        }, 800);
+      }
+    }
+  });
+
+  // Helper function to format time (e.g. 132 -> "02:12")
+  function formatTime(seconds) {
+    if (isNaN(seconds)) return "00:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+</script>
+
+<%- include('../partials/footer') %>
