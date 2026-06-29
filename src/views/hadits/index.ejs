@@ -66,6 +66,81 @@
           </div>
         <% }) %>
       </div>
+
+      <!-- Pagination -->
+      <% if (pagination && pagination.total_pages > 1) { %>
+        <nav aria-label="Page navigation" class="mt-5">
+          <ul class="pagination justify-content-center flex-wrap gap-1">
+            
+            <!-- Previous Button -->
+            <% if (pagination.page > 1) { %>
+              <li class="page-item">
+                <a class="page-link shadow-sm border-0" href="/hadits?q=<%= q %>&page=<%= pagination.page - 1 %>" aria-label="Previous" style="border-radius: 8px; color: var(--accent-color); background: var(--bg-tertiary);">
+                  <i class="fa-solid fa-angle-left"></i>
+                </a>
+              </li>
+            <% } else { %>
+              <li class="page-item disabled">
+                <span class="page-link shadow-sm border-0" style="border-radius: 8px; background: var(--bg-tertiary); opacity: 0.5;">
+                  <i class="fa-solid fa-angle-left"></i>
+                </span>
+              </li>
+            <% } %>
+
+            <!-- Page Numbers -->
+            <% 
+              let startPage = Math.max(1, pagination.page - 2);
+              let endPage = Math.min(pagination.total_pages, pagination.page + 2);
+            %>
+            
+            <% if (startPage > 1) { %>
+              <li class="page-item">
+                <a class="page-link shadow-sm border-0" href="/hadits?q=<%= q %>&page=1" style="border-radius: 8px; color: var(--accent-color); background: var(--bg-tertiary);">1</a>
+              </li>
+              <% if (startPage > 2) { %>
+                <li class="page-item disabled"><span class="page-link border-0 bg-transparent">...</span></li>
+              <% } %>
+            <% } %>
+
+            <% for (let i = startPage; i <= endPage; i++) { %>
+              <% if (i === pagination.page) { %>
+                <li class="page-item active">
+                  <span class="page-link shadow-sm border-0" style="border-radius: 8px; background-color: var(--accent-color); color: white; font-weight: bold;"><%= i %></span>
+                </li>
+              <% } else { %>
+                <li class="page-item">
+                  <a class="page-link shadow-sm border-0" href="/hadits?q=<%= q %>&page=<%= i %>" style="border-radius: 8px; color: var(--accent-color); background: var(--bg-tertiary);"><%= i %></a>
+                </li>
+              <% } %>
+            <% } %>
+
+            <% if (endPage < pagination.total_pages) { %>
+              <% if (endPage < pagination.total_pages - 1) { %>
+                <li class="page-item disabled"><span class="page-link border-0 bg-transparent">...</span></li>
+              <% } %>
+              <li class="page-item">
+                <a class="page-link shadow-sm border-0" href="/hadits?q=<%= q %>&page=<%= pagination.total_pages %>" style="border-radius: 8px; color: var(--accent-color); background: var(--bg-tertiary);"><%= pagination.total_pages %></a>
+              </li>
+            <% } %>
+
+            <!-- Next Button -->
+            <% if (pagination.page < pagination.total_pages) { %>
+              <li class="page-item">
+                <a class="page-link shadow-sm border-0" href="/hadits?q=<%= q %>&page=<%= pagination.page + 1 %>" aria-label="Next" style="border-radius: 8px; color: var(--accent-color); background: var(--bg-tertiary);">
+                  <i class="fa-solid fa-angle-right"></i>
+                </a>
+              </li>
+            <% } else { %>
+              <li class="page-item disabled">
+                <span class="page-link shadow-sm border-0" style="border-radius: 8px; background: var(--bg-tertiary); opacity: 0.5;">
+                  <i class="fa-solid fa-angle-right"></i>
+                </span>
+              </li>
+            <% } %>
+
+          </ul>
+        </nav>
+      <% } %>
     <% } else if (!error) { %>
       <div class="alert bg-white shadow-sm border-0 text-center py-5 rounded-4" style="border: 1px solid var(--glass-border) !important;">
         <i class="fa-solid fa-book-open text-muted mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
