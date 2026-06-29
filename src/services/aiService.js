@@ -1,34 +1,76 @@
 const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://192.168.100.129:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma2:9b';
 
-// Helper function to call Ollama API without any timeouts
+// Use Node.js built-in http/https to bypass undici HeadersTimeout (UND_ERR_HEADERS_TIMEOUT)
+// which kills connections when local AI models take >30s to start responding.
+const http = require('http');
+const https = require('https');
+
+function callOllamaHttp(urlStr, bodyObj) {
+  return new Promise((resolve, reject) => {
+    const parsedUrl = new URL(urlStr);
+    const isHttps = parsedUrl.protocol === 'https:';
+    const driver = isHttps ? https : http;
+
+    const bodyString = JSON.stringify(bodyObj);
+
+    const options = {
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port || (isHttps ? 443 : 80),
+      path: parsedUrl.pathname,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(bodyString)
+      },
+      // No timeout set — wait as long as the local AI needs
+      timeout: 0
+    };
+
+    const req = driver.request(options, (res) => {
+      let raw = '';
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => { raw += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed.error) {
+            reject(new Error(`Ollama error: ${parsed.error}`));
+          } else {
+            resolve(parsed);
+          }
+        } catch (e) {
+          reject(new Error(`Failed to parse Ollama response: ${e.message}`));
+        }
+      });
+    });
+
+    req.on('error', (err) => {
+      reject(new Error(`Ollama connection error: ${err.message}`));
+    });
+
+    req.write(bodyString);
+    req.end();
+  });
+}
+
+// Helper function to call Ollama API — uses http module, NO timeouts
 async function callOllama(promptText, systemInstructions = '') {
   const url = `${OLLAMA_HOST}/api/generate`;
   
-  // Combine system instructions with prompt
   const fullPrompt = systemInstructions 
     ? `<start_of_turn>system\n${systemInstructions}<end_of_turn>\n<start_of_turn>user\n${promptText}<end_of_turn>\n<start_of_turn>model\n`
     : promptText;
 
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: OLLAMA_MODEL,
-        prompt: fullPrompt,
-        stream: false,
-        options: {
-          temperature: 0.7
-        }
-      })
+    console.log(`[AIService] Sending request to Ollama at ${OLLAMA_HOST} (no timeout)...`);
+    const data = await callOllamaHttp(url, {
+      model: OLLAMA_MODEL,
+      prompt: fullPrompt,
+      stream: false,
+      options: { temperature: 0.7 }
     });
-
-    if (!response.ok) {
-      throw new Error(`Ollama API responded with status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    console.log(`[AIService] Ollama responded successfully.`);
     return data.response;
   } catch (error) {
     console.error('[AIService] Error communicating with Ollama:', error.message);
@@ -68,24 +110,29 @@ Buatlah catatan evaluasi dan motivasi belajar yang ramah dan inspiratif untuk si
 
 // 3. Generate Answer for Q&A based on Hadith References (Tanya Hadits AI)
 exports.generateHaditsAnswer = async (question, hadiths) => {
-  const systemInstructions = `Anda adalah BaknusAI, asisten pintar berbasis kecerdasan buatan dari SMK Bakti Nusantara 666 yang ahli dalam Tafsir Hadits.
-Tugas Anda adalah menjawab pertanyaan user secara syar'i, bijaksana, dan ramah berdasarkan referensi hadits-hadits yang disediakan.
-Jika hadits yang disediakan tidak mendukung atau tidak relevan dengan pertanyaan, jawablah dengan jujur dan santun bahwa referensi hadits yang ada kurang mencukupi, namun tetap berikan pandangan umum keislaman yang sahih.
-Sebutkan nama perawi hadits (HR. Bukhari, HR. Muslim, dll) yang Anda gunakan untuk mendukung jawaban Anda di dalam teks jawaban secara santun (misal: "Berdasarkan hadits riwayat Muslim nomor...").
-Jangan gunakan format Markdown yang terlalu kompleks. Cukup gunakan spasi baris (linebreaks) dan tanda kutip untuk dalil. Tuliskan jawaban Anda secara langsung dengan ramah.`;
+  // Shorter system instruction reduces token processing load on local CPU
+  const systemInstructions = `Anda adalah BaknusAI dari SMK Bakti Nusantara 666, ahli Tafsir Hadits.
+Jawab pertanyaan user secara syar'i, bijaksana, dan ramah berdasarkan referensi hadits yang disediakan.
+Sebutkan perawi hadits (HR. Bukhari, HR. Muslim, dll) dalam jawaban. Jangan gunakan Markdown. Jawab langsung dan ringkas.`;
 
-  const contextText = hadiths.map(h => {
-    const cleanTerjemah = h.terjemah ? h.terjemah.replace(/<[^>]+>/g, '') : '';
+  // Limit to 3 hadits max and trim text to reduce prompt size significantly
+  // Large prompts on CPU-only machines cause very long generation times
+  const topHadiths = hadiths.slice(0, 3);
+  const contextText = topHadiths.map(h => {
+    const cleanTerjemah = h.terjemah ? h.terjemah.replace(/<[^>]+>/g, '').substring(0, 400) : '';
+    const cleanArab = h.arab ? h.arab.substring(0, 200) : '';
     const cleanKitab = h.kitab ? h.kitab.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '';
-    return `[Hadits HR. ${cleanKitab} No. ${h.nomor}]\nArab: ${h.arab}\nTerjemah: ${cleanTerjemah}`;
+    return `[HR. ${cleanKitab} No. ${h.nomor}]\nArab: ${cleanArab}\nTerjemah: ${cleanTerjemah}`;
   }).join('\n\n');
 
-  const prompt = `Pertanyaan User: "${question}"
+  const prompt = `Pertanyaan: "${question}"
 
-Referensi Hadits yang Ditemukan Sistem:
-${contextText || 'Tidak ada hadits referensi spesifik yang ditemukan di database.'}
+Referensi Hadits:
+${contextText || 'Tidak ada hadits referensi yang ditemukan.'}
 
-Jawablah pertanyaan tersebut secara komprehensif berdasarkan referensi hadits di atas:`;
+Jawablah pertanyaan di atas berdasarkan hadits referensi:`;
 
+  console.log(`[AIService] generateHaditsAnswer - prompt length: ${prompt.length} chars, hadiths used: ${topHadiths.length}`);
   return await callOllama(prompt, systemInstructions);
 };
+
