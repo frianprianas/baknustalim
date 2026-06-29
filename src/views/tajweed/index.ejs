@@ -1,0 +1,67 @@
+<%- include('../partials/header') %>
+
+<div class="row justify-content-center animate__animated animate__fadeIn">
+  <div class="col-lg-10 col-md-12">
+
+    <!-- Header Summary -->
+    <div class="card-glass p-4 mb-4" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.16) 100%);">
+      <div class="row align-items-center">
+        <div class="col-auto">
+          <div class="bg-primary text-white p-3 rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 55px; height: 55px;">
+            <i class="fa-solid fa-graduation-cap fs-4"></i>
+          </div>
+        </div>
+        <div class="col">
+          <span class="text-secondary text-uppercase small tracking-wider font-weight-bold">Modul Pembelajaran</span>
+          <h1 class="h3 mb-0">Belajar Ilmu Tajwid</h1>
+          <p class="text-secondary mb-0">Pelajari hukum-hukum membaca Al-Qur'an dengan baik, benar, dan tartil.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapters Grid -->
+    <div class="row g-4">
+      <% lessons.forEach((chapter, index) => { %>
+        <% 
+          // Harmonious colors for different chapters
+          const colors = ['border-success', 'border-info', 'border-warning'];
+          const textColors = ['text-success', 'text-info', 'text-warning'];
+          const bgColors = ['rgba(22, 163, 74, 0.05)', 'rgba(6, 182, 212, 0.05)', 'rgba(234, 179, 8, 0.05)'];
+          const icons = ['fa-mosque', 'fa-star-and-crescent', 'fa-volume-high'];
+          
+          const activeColor = colors[index % colors.length];
+          const activeTextColor = textColors[index % textColors.length];
+          const activeBgColor = bgColors[index % bgColors.length];
+          const activeIcon = icons[index % icons.length];
+        %>
+        <div class="col-md-6 col-lg-4">
+          <div class="card-glass h-100 p-4 border-top border-4 <%= activeColor %>" style="transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='none';">
+            
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; background: <%= activeBgColor %>; color: var(--accent-color);">
+                <i class="fa-solid <%= activeIcon %> fs-5 <%= activeTextColor %>"></i>
+              </div>
+              <h5 class="fw-bold mb-0 text-primary"><%= chapter.bab %></h5>
+            </div>
+            
+            <p class="text-secondary small mb-4"><%= chapter.deskripsi %></p>
+            
+            <!-- Sub-Bab List -->
+            <div class="list-group list-group-flush bg-transparent">
+              <% chapter.sub_bab.forEach(sub => { %>
+                <a href="/tajwid/materi/<%= sub.id %>" class="list-group-item list-group-item-action bg-transparent border-0 px-0 py-2.5 d-flex align-items-center justify-content-between text-secondary" style="font-size: 0.92rem; border-bottom: 1px dashed var(--glass-border) !important;">
+                  <span class="fw-semibold text-primary"><%= sub.topik %></span>
+                  <i class="fa-solid fa-chevron-right fs-7 text-muted"></i>
+                </a>
+              <% }) %>
+            </div>
+
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

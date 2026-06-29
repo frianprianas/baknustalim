@@ -1,0 +1,135 @@
+[
+  {
+    "id": "nun-sukun-tanwin",
+    "bab": "Hukum Nun Sukun dan Tanwin",
+    "deskripsi": "Aturan membaca nun mati (نْ) atau tanwin (ً  ٍ  ٌ) ketika bertemu dengan huruf-huruf hijaiyah.",
+    "sub_bab": [
+      {
+        "id": "idzhar-halqi",
+        "topik": "Idzhar Halqi",
+        "definisi": "Membaca huruf nun mati atau tanwin secara jelas dan terang tanpa dengung, apabila bertemu dengan salah satu dari 6 huruf tenggorokan (Halqi).",
+        "huruf": "ء (Alif), هـ (Ha), ع (Ain), ح (Ha), غ (Ghoin), خ (Kho)",
+        "cara_baca": "Nun mati atau tanwin diucapkan secara tegas dan cepat tanpa didengungkan.",
+        "contoh": [
+          { "arabic": "مِنْ خَوْفٍ", "latin": "Min khaufin", "arti": "Dari rasa takut" },
+          { "arabic": "عَذَابٌ أَلِيمٌ", "latin": "'Adzaabun aliim", "arti": "Siksa yang sangat pedih" },
+          { "arabic": "يَنْأَوْنَ", "latin": "Yan'auna", "arti": "Mereka menjauhkan diri" }
+        ]
+      },
+      {
+        "id": "idgham-bighunnah",
+        "topik": "Idgham Bighunnah (Ma'al Ghunnah)",
+        "definisi": "Memasukkan bunyi nun mati atau tanwin ke dalam huruf berikutnya disertai dengan dengung (ghunnah), apabila bertemu dengan salah satu dari 4 huruf berikut.",
+        "huruf": "ي (Ya), ن (Nun), م (Mim), و (Wau)",
+        "cara_baca": "Bunyi nun/tanwin dileburkan ke huruf di depannya dan ditahan selama 2-3 harakat dengan dengung melalui rongga hidung.",
+        "contoh": [
+          { "arabic": "مَنْ يَقُولُ", "latin": "May yaquulu", "arti": "Barang siapa berkata" },
+          { "arabic": "لَهَبٍ وَتَبَّ", "latin": "Lahabiw watabba", "arti": "Gejolak api dan binasa" },
+          { "arabic": "مِنْ مَاءٍ", "latin": "Mim maaa'in", "arti": "Dari air" }
+        ]
+      },
+      {
+        "id": "idgham-bilaghunnah",
+        "topik": "Idgham Bilaghunnah",
+        "definisi": "Memasukkan bunyi nun mati atau tanwin ke dalam huruf berikutnya tanpa disertai dengung, apabila bertemu dengan salah satu dari 2 huruf berikut.",
+        "huruf": "ل (Lam), ر (Ra)",
+        "cara_baca": "Bunyi nun/tanwin dileburkan langsung ke huruf Lam atau Ra secara bersih tanpa ada dengung atau penahanan suara.",
+        "contoh": [
+          { "arabic": "مِنْ لَدُنْهُ", "latin": "Mil ladunhu", "arti": "Dari sisi-Nya" },
+          { "arabic": "غَفُورٌ رَحِيمٌ", "latin": "Ghafuurur rahiim", "arti": "Maha Pengampun lagi Maha Penyayang" }
+        ]
+      },
+      {
+        "id": "iqlab",
+        "topik": "Iqlab",
+        "definisi": "Mengganti atau mengubah bunyi nun mati atau tanwin menjadi bunyi mim mati (م) disertai dengung, apabila bertemu dengan huruf Ba (ب).",
+        "huruf": "ب (Ba)",
+        "cara_baca": "Suara nun mati/tanwin berubah menjadi 'm' samar dan didengungkan sambil bibir merapat santai.",
+        "contoh": [
+          { "arabic": "مِنْ بَعْدِ", "latin": "Mim ba'di", "arti": "Setelah" },
+          { "arabic": "سَمِيعٌ بَصِيرٌ", "latin": "Samii'um bashiir", "arti": "Maha Mendengar lagi Maha Melihat" }
+        ]
+      },
+      {
+        "id": "ikhfa-haqiqi",
+        "topik": "Ikhfa Haqiqi",
+        "definisi": "Menyamarkan bunyi nun mati atau tanwin ketika bertemu dengan salah satu dari 15 huruf ikhfa.",
+        "huruf": "ت, ث, ج, د, ذ, ز, س, ش, ص, ض, ط, ظ, ف, ق, ك",
+        "cara_baca": "Bunyi nun mati/tanwin diucapkan samar-samar antara jelas dan dengung, condong ke arah makhraj huruf di depannya.",
+        "contoh": [
+          { "arabic": "مِنْ دُونِ", "latin": "Min duuni", "arti": "Dari selain" },
+          { "arabic": "يَنْصُرُكُمْ", "latin": "Yanshurukum", "arti": "Dia menolongmu" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mim-sukun",
+    "bab": "Hukum Mim Sukun",
+    "deskripsi": "Aturan membaca mim mati (مْ) ketika bertemu dengan huruf-huruf hijaiyah.",
+    "sub_bab": [
+      {
+        "id": "ikhfa-syafawi",
+        "topik": "Ikhfa Syafawi",
+        "definisi": "Menyamarkan bunyi mim mati disertai dengung di bibir, apabila bertemu dengan huruf Ba (ب).",
+        "huruf": "ب (Ba)",
+        "cara_baca": "Mim mati diucapkan samar dan didengungkan di bibir selama 2-3 harakat.",
+        "contoh": [
+          { "arabic": "تَرْمِيهِمْ بِحِجَارَةٍ", "latin": "Tarmiihim bihijaaratin", "arti": "Melempari mereka dengan batu" },
+          { "arabic": "وَمَا هُمْ بِمُؤْمِنِينَ", "latin": "Wamaa hum bimu'miniin", "arti": "Dan mereka bukanlah orang-orang yang beriman" }
+        ]
+      },
+      {
+        "id": "idgham-mimi",
+        "topik": "Idgham Mimi (Mithlain)",
+        "definisi": "Memasukkan bunyi mim mati ke dalam mim hidup di depannya disertai dengung, apabila bertemu dengan huruf Mim (م).",
+        "huruf": "م (Mim)",
+        "cara_baca": "Mim mati dimasukkan sepenuhnya ke mim berikutnya sehingga terdengar bertasydid dan didengungkan.",
+        "contoh": [
+          { "arabic": "فِي قُلُوبِهِمْ مَرَضٌ", "latin": "Fii quluubihim maradhun", "arti": "Dalam hati mereka ada penyakit" },
+          { "arabic": "خَلَقَ لَكُمْ مَا", "latin": "Khalaqa lakumma", "arti": "Menciptakan untukmu apa yang..." }
+        ]
+      },
+      {
+        "id": "idzhar-syafawi",
+        "topik": "Idzhar Syafawi",
+        "definisi": "Membaca mim mati secara jelas dan terang di bibir tanpa dengung, apabila bertemu dengan seluruh huruf hijaiyah selain Mim dan Ba.",
+        "huruf": "Semua huruf hijaiyah selain م dan ب",
+        "cara_baca": "Mim mati diucapkan secara tegas dan jelas, bibir merapat lalu segera terbuka untuk mengucapkan huruf berikutnya.",
+        "contoh": [
+          { "arabic": "لَعَلَّكُمْ تَتَّقُونَ", "latin": "La'allakum tattaquun", "arti": "Agar kamu bertakwa" },
+          { "arabic": "هُمْ فِيهَا", "latin": "Hum fiihaa", "arti": "Mereka di dalamnya" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "qalqalah",
+    "bab": "Qalqalah (Pantulan Suara)",
+    "deskripsi": "Memantulkan bunyi huruf-huruf tertentu ketika sukun (mati) atau berhenti (waqaf).",
+    "sub_bab": [
+      {
+        "id": "qalqalah-sughra",
+        "topik": "Qalqalah Sughra (Kecil)",
+        "definisi": "Pantulan suara yang terjadi di tengah kata karena huruf qalqalah asli berharakat sukun (mati).",
+        "huruf": "ق, ط, ب, ج, د (Baju Di Toko)",
+        "cara_baca": "Memantulkan suara huruf qalqalah secara ringan di tengah kalimat saat membacanya secara bersambung.",
+        "contoh": [
+          { "arabic": "يَقْطَعُونَ", "latin": "Yaqtha'uuna", "arti": "Mereka memotong" },
+          { "arabic": "يَجْعَلُونَ", "latin": "Yaj'aluuna", "arti": "Mereka menjadikan" }
+        ]
+      },
+      {
+        "id": "qalqalah-kubra",
+        "topik": "Qalqalah Kubra (Besar)",
+        "definisi": "Pantulan suara yang terjadi di akhir kata karena waqaf (berhenti), baik hurufnya memang sukun atau di-sukun-kan karena berhenti.",
+        "huruf": "ق, ط, ب, ج, د (Baju Di Toko)",
+        "cara_baca": "Memantulkan suara huruf qalqalah dengan kuat dan jelas setelah berhenti di akhir kalimat.",
+        "contoh": [
+          { "arabic": "قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ", "latin": "Qul a'uudzu birabbil falaq(i)", "arti": "Katakanlah aku berlindung kepada Tuhan yang menguasai subuh" },
+          { "arabic": "تَبَّتْ يَدَا أَبِي لَهَبٍ وَتَبَّ", "latin": "Tabbat yadaa abii lahabiw watabb(a)", "arti": "Binasalah kedua tangan Abu Lahab dan benar-benar binasa dia" }
+        ]
+      }
+    ]
+  }
+]

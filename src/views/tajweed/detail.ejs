@@ -1,0 +1,107 @@
+<%- include('../partials/header') %>
+
+<style>
+  .arabic-example {
+    font-family: 'Amiri', 'Traditional Arabic', serif;
+    font-size: 2.2rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    direction: rtl;
+    text-align: right;
+  }
+  .example-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+  }
+  .example-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateY(-1px);
+  }
+  .badge-letter {
+    font-size: 1.15rem;
+    padding: 0.5rem 1rem;
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--accent-color);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 8px;
+    font-weight: bold;
+  }
+</style>
+
+<div class="row justify-content-center animate__animated animate__fadeIn">
+  <div class="col-lg-8 col-md-10">
+
+    <!-- Header Navigation Back -->
+    <div class="d-flex align-items-center mb-4">
+      <a href="/tajwid" class="btn btn-outline-light rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div>
+        <span class="text-secondary small text-uppercase fw-bold"><%= babTitle %></span>
+        <h1 class="h2 mb-0 text-success"><%= lesson.topik %></h1>
+      </div>
+    </div>
+
+    <!-- Main Lesson Content Card -->
+    <div class="card-glass p-4 p-md-5 mb-4">
+      <!-- Definisi / Penjelasan -->
+      <div class="mb-4">
+        <h5 class="fw-bold text-primary mb-2"><i class="fa-solid fa-circle-info me-2"></i> Pengertian</h5>
+        <p class="text-secondary leading-relaxed" style="font-size: 1.05rem;"><%= lesson.definisi %></p>
+      </div>
+
+      <!-- Huruf-huruf Hijaiyah -->
+      <div class="mb-4">
+        <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-font me-2"></i> Huruf Tajwid</h5>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <% const letters = lesson.huruf.split(',') %>
+          <% letters.forEach(letter => { %>
+            <span class="badge-letter"><%= letter.trim() %></span>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Cara Membaca -->
+      <div class="mb-4">
+        <h5 class="fw-bold text-primary mb-2"><i class="fa-solid fa-bullhorn me-2"></i> Cara Membaca</h5>
+        <div class="p-3 rounded-3" style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border);">
+          <p class="text-secondary mb-0"><%= lesson.cara_baca %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contoh Lafadz / Examples -->
+    <h4 class="fw-bold mb-3 text-success"><i class="fa-solid fa-book-open-reader me-2"></i> Contoh Bacaan</h4>
+    <div class="d-flex flex-column gap-3 mb-5">
+      <% lesson.contoh.forEach((ex, idx) => { %>
+        <div class="example-card">
+          <div class="row align-items-center">
+            <!-- Number -->
+            <div class="col-auto">
+              <span class="badge rounded-circle bg-secondary text-dark d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; font-weight: bold;">
+                <%= idx + 1 %>
+              </span>
+            </div>
+            
+            <!-- Translation / Latin -->
+            <div class="col">
+              <span class="text-info fw-bold d-block mb-1" style="font-size: 1.1rem;"><%= ex.latin %></span>
+              <small class="text-secondary italic d-block">Arti: "<%= ex.arti %>"</small>
+            </div>
+            
+            <!-- Arabic Text -->
+            <div class="col-md-auto text-end mt-2 mt-md-0">
+              <div class="arabic-example"><%= ex.arabic %></div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
