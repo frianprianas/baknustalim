@@ -27,7 +27,7 @@
       </div>
       <div>
         <form action="/amalan" method="GET" class="d-flex gap-2">
-          <input type="date" class="form-control border-secondary form-control-sm" name="tanggal" value="<%= selectedDateStr %>" onchange="this.form.submit()">
+          <input type="date" class="form-control border-secondary form-control-sm" name="tanggal" value="<%= selectedDateStr %>" max="<%= new Date().toISOString().split('T')[0] %>" onchange="this.form.submit()">
         </form>
       </div>
     </div>

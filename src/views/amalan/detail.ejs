@@ -1,15 +1,120 @@
 <%- include('../partials/header') %>
 
+<!-- Custom Calendar Styles for Premium UI -->
+<style>
+  .calendar-container {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+  }
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    text-align: center;
+  }
+  .calendar-day-label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding: 8px 0;
+    text-transform: uppercase;
+  }
+  .calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-column: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    color: var(--text-primary);
+  }
+  .calendar-day:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  /* Different states */
+  .day-empty {
+    cursor: default;
+    background: transparent !important;
+    border: none !important;
+    pointer-events: none;
+  }
+  .day-no-log {
+    background-color: rgba(107, 114, 128, 0.05);
+    border: 1px dashed var(--glass-border);
+    color: var(--text-secondary);
+    opacity: 0.6;
+  }
+  .day-no-log:hover {
+    background-color: rgba(107, 114, 128, 0.1);
+    opacity: 0.9;
+  }
+  /* Punctual (Filled today): Solid Green */
+  .day-punctual {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);
+  }
+  .day-punctual:hover {
+    box-shadow: 0 6px 15px rgba(22, 163, 74, 0.4);
+  }
+  /* Late (Filled yesterday or earlier): Light Green */
+  .day-late {
+    background-color: rgba(22, 163, 74, 0.12);
+    border: 1.5px solid rgba(22, 163, 74, 0.4);
+    color: #16a34a !important;
+  }
+  .day-late:hover {
+    background-color: rgba(22, 163, 74, 0.18);
+  }
+  .day-today {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+  }
+  .log-indicator-dot {
+    width: 6px;
+    height: 6px;
+    background-color: currentColor;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 6px;
+  }
+  .legend-box {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    vertical-align: middle;
+  }
+</style>
+
 <div class="row justify-content-center animate__animated animate__fadeIn">
   <div class="col-lg-10 col-md-12">
 
+    <!-- Header / Navigation back -->
     <div class="d-flex align-items-center mb-4 d-print-none">
       <a href="/amalan/laporan" class="btn btn-outline-light rounded-circle me-3" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
         <i class="fa-solid fa-arrow-left"></i>
       </a>
       <div>
-        <h1 class="h2 mb-1"><i class="fa-solid fa-square-check me-2 text-success"></i> Detail Amalan: <%= student.nama %></h1>
-        <p class="text-secondary mb-0">Tinjau log aktivitas ibadah fardhu & sunnah harian secara detail.</p>
+        <h1 class="h2 mb-1"><i class="fa-solid fa-calendar-check me-2 text-success"></i> Kalender Amalan: <%= student.nama %></h1>
+        <p class="text-secondary mb-0">Klik pada tanggal yang berwarna untuk melihat detail amalan yang dikerjakan.</p>
       </div>
     </div>
 
@@ -34,7 +139,7 @@
         </div>
         <div class="col-md-auto mt-3 mt-md-0 d-print-none">
           <button onclick="window.print()" class="btn btn-outline-info rounded-pill">
-            <i class="fa-solid fa-print me-1"></i> Cetak Detail Siswa
+            <i class="fa-solid fa-print me-1"></i> Cetak Laporan Detail
           </button>
         </div>
       </div>
@@ -44,108 +149,296 @@
     <div class="d-none d-print-block mb-5 text-dark">
       <div class="text-center border-bottom pb-3 mb-4">
         <h3 class="mb-1"><strong>SMK BAKTI NUSANTARA 666</strong></h3>
-        <p class="mb-1 text-muted">LAPORAN DETAIL AMALAN YAUMI SISWA</p>
+        <p class="mb-1 text-muted">LAPORAN MONITORING AMALAN YAUMI SISWA (KALENDER)</p>
         <small>Nama Siswa: <%= student.nama %> | Kelas: <%= student.kelas_id ? student.kelas_id.nama_kelas : '-' %></small>
       </div>
     </div>
 
-    <!-- History Table -->
-    <div class="card-glass p-4">
-      <% if (history && history.length > 0) { %>
-        <div class="table-responsive">
-          <table class="table table-custom align-middle">
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th class="text-center">Salat Fardhu (Wajib)</th>
-                <th class="text-center">Salat Sunnah</th>
-                <th class="text-center">Puasa Sunnah</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% history.forEach(log => { %>
-                <tr>
-                  <td>
-                    <strong><%= new Date(log.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %></strong>
-                  </td>
-                  
-                  <!-- Salat Fardhu -->
-                  <td class="text-center">
-                    <div class="d-flex justify-content-center gap-1 flex-wrap">
-                      <% const fardus = [
-                        { key: 'subuh', label: 'S' },
-                        { key: 'dzuhur', label: 'D' },
-                        { key: 'ashar', label: 'A' },
-                        { key: 'maghrib', label: 'M' },
-                        { key: 'isya', label: 'I' }
-                      ] %>
-                      <% fardus.forEach(f => { %>
-                        <% const done = log.sholat_fardu && log.sholat_fardu[f.key] %>
-                        <span class="badge rounded-circle d-inline-flex align-items-center justify-content-center" 
-                              style="width: 25px; height: 25px; font-size: 0.72rem; 
-                                     background-color: <%= done ? 'rgba(22, 163, 74, 0.15)' : 'rgba(239, 68, 68, 0.08)' %>; 
-                                     color: <%= done ? '#16a34a' : '#ef4444' %>;
-                                     border: 1px solid <%= done ? 'rgba(22, 163, 74, 0.3)' : 'rgba(239, 68, 68, 0.2)' %>;" 
-                              title="<%= f.key.toUpperCase() %>: <%= done ? 'Telah Dikerjakan' : 'Belum/Tidak' %>">
-                          <%= f.label %>
-                        </span>
-                      <% }) %>
-                    </div>
-                  </td>
+    <!-- Interactive Calendar Card -->
+    <div class="calendar-container mb-4">
+      <div class="calendar-header">
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="prevMonth()">
+          <i class="fa-solid fa-chevron-left me-1"></i> Bulan Lalu
+        </button>
+        <h4 class="mb-0 fw-bold text-success" id="month-year-label">Juni 2026</h4>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="nextMonth()">
+          Bulan Depan <i class="fa-solid fa-chevron-right ms-1"></i>
+        </button>
+      </div>
 
-                  <!-- Salat Sunnah -->
-                  <td class="text-center">
-                    <% let sunnahList = [] %>
-                    <% if (log.sholat_sunnah && log.sholat_sunnah.tahajud) sunnahList.push('Tahajud') %>
-                    <% if (log.sholat_sunnah && log.sholat_sunnah.duha) sunnahList.push('Duha') %>
-                    <% if (log.sholat_sunnah && log.sholat_sunnah.rawatib) sunnahList.push('Rawatib') %>
-                    
-                    <% if (sunnahList.length > 0) { %>
-                      <div class="d-flex justify-content-center gap-1 flex-wrap">
-                        <% sunnahList.forEach(s => { %>
-                          <span class="badge bg-info-subtle text-info border border-info-subtle py-1 px-2 rounded-pill" style="font-size: 0.7rem;">
-                            <%= s %>
-                          </span>
-                        <% }) %>
-                      </div>
-                    <% } else { %>
-                      <span class="text-muted small">-</span>
-                    <% } %>
-                  </td>
+      <!-- Days Grid Header -->
+      <div class="calendar-grid mb-2">
+        <div class="calendar-day-label text-danger">Ahd</div>
+        <div class="calendar-day-label">Sen</div>
+        <div class="calendar-day-label">Sel</div>
+        <div class="calendar-day-label">Rab</div>
+        <div class="calendar-day-label">Kam</div>
+        <div class="calendar-day-label">Jum</div>
+        <div class="calendar-day-label text-info">Sab</div>
+      </div>
 
-                  <!-- Puasa -->
-                  <td class="text-center">
-                    <% let puasaList = [] %>
-                    <% if (log.puasa && log.puasa.senin) puasaList.push('Senin') %>
-                    <% if (log.puasa && log.puasa.kamis) puasaList.push('Kamis') %>
-                    <% if (log.puasa && log.puasa.ayyamul_bidh) puasaList.push('Ayyamul Bidh') %>
-                    
-                    <% if (puasaList.length > 0) { %>
-                      <div class="d-flex justify-content-center gap-1 flex-wrap">
-                        <% puasaList.forEach(p => { %>
-                          <span class="badge bg-warning-subtle text-warning border border-warning-subtle py-1 px-2 rounded-pill" style="font-size: 0.7rem;">
-                            <%= p %>
-                          </span>
-                        <% }) %>
-                      </div>
-                    <% } else { %>
-                      <span class="text-muted small">-</span>
-                    <% } %>
-                  </td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
+      <!-- Days Grid Items -->
+      <div class="calendar-grid" id="calendar-days">
+        <!-- Will be rendered dynamically via Javascript -->
+      </div>
+
+      <!-- Color Legend / Keterangan -->
+      <div class="mt-4 pt-3 border-top d-flex flex-wrap gap-3 justify-content-center" style="font-size: 0.85rem;">
+        <div class="d-flex align-items-center gap-2">
+          <span class="legend-box day-punctual"></span>
+          <span>Tepat Waktu (Diisi pada hari H)</span>
         </div>
-      <% } else { %>
-        <div class="text-center py-5 text-secondary">
-          <i class="fa-solid fa-folder-open fa-3x mb-3 text-muted"></i>
-          <p class="mb-0">Belum ada riwayat amalan tercatat untuk siswa ini.</p>
+        <div class="d-flex align-items-center gap-2">
+          <span class="legend-box day-late"></span>
+          <span>Terlambat / Rapel (Diisi hari berikutnya)</span>
         </div>
-      <% } %>
+        <div class="d-flex align-items-center gap-2">
+          <span class="legend-box day-no-log"></span>
+          <span>Belum Ada Log Checklist</span>
+        </div>
+      </div>
     </div>
 
   </div>
 </div>
+
+<!-- Bootstrap Modal for Daily Log Detail -->
+<div class="modal fade" id="logDetailModal" tabindex="-1" aria-labelledby="logDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content card-glass border-0" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-success" id="logDetailModalLabel">
+          <i class="fa-solid fa-circle-info me-2"></i> Rincian Amalan
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body py-4">
+        <!-- Date display -->
+        <div class="p-3 bg-success-subtle rounded-3 mb-4 text-center text-success border border-success-subtle">
+          <h5 class="mb-1 fw-bold" id="modal-date-title">Senin, 29 Juni 2026</h5>
+          <span class="small text-muted" id="modal-submit-time">Dicatat pada: -</span>
+        </div>
+
+        <!-- Fardhu Section -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-success border-bottom pb-1 mb-2"><i class="fa-solid fa-mosque me-2"></i> Salat Fardhu</h6>
+          <div class="d-flex flex-wrap gap-2" id="modal-fardhu-list">
+            <!-- Populated via Javascript -->
+          </div>
+        </div>
+
+        <!-- Sunnah Section -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-info border-bottom pb-1 mb-2"><i class="fa-solid fa-moon me-2"></i> Salat Sunnah</h6>
+          <div class="d-flex flex-wrap gap-2" id="modal-sunnah-list">
+            <!-- Populated via Javascript -->
+          </div>
+        </div>
+
+        <!-- Puasa Section -->
+        <div>
+          <h6 class="fw-bold text-warning border-bottom pb-1 mb-2"><i class="fa-solid fa-droplet-slash me-2"></i> Puasa Sunnah</h6>
+          <div class="d-flex flex-wrap gap-2" id="modal-puasa-list">
+            <!-- Populated via Javascript -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary-custom rounded-pill w-100" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Embedded Log Map data from EJS -->
+<script>
+  const logsMap = <%- JSON.stringify(logsMap) %>;
+  
+  // Track currently viewed month & year
+  let currentYear = new Date().getFullYear();
+  let currentMonth = new Date().getMonth(); // 0-11
+
+  // Indonesian Months list
+  const indonesianMonths = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+
+  function renderCalendar(year, month) {
+    const calendarDays = document.getElementById("calendar-days");
+    const monthYearLabel = document.getElementById("month-year-label");
+    
+    // Set Month Year Title
+    monthYearLabel.innerText = `${indonesianMonths[month]} ${year}`;
+    
+    // Clear previous cells
+    calendarDays.innerHTML = "";
+    
+    // Determine first day of month (0 = Sun, 1 = Mon...)
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    
+    // Determine last day of month (e.g. 30, 31)
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    
+    // Render blank spaces for days of previous month
+    for (let i = 0; i < firstDayIndex; i++) {
+      const emptyDiv = document.createElement("div");
+      emptyDiv.classList.add("calendar-day", "day-empty");
+      calendarDays.appendChild(emptyDiv);
+    }
+    
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Render active day cells
+    for (let day = 1; day <= lastDay; day++) {
+      const dayDiv = document.createElement("div");
+      dayDiv.classList.add("calendar-day");
+      dayDiv.innerText = day;
+      
+      // Pad single digit values
+      const padDay = String(day).padStart(2, '0');
+      const padMonth = String(month + 1).padStart(2, '0');
+      const dateStr = `${year}-${padMonth}-${padDay}`;
+      
+      // Mark today's cell outline
+      if (dateStr === todayStr) {
+        dayDiv.classList.add("day-today");
+      }
+
+      // Check if this date has a log
+      const log = logsMap[dateStr];
+      if (log) {
+        if (log.isPunctual) {
+          dayDiv.classList.add("day-punctual");
+          dayDiv.setAttribute("title", "Tepat Waktu (Klik untuk detail)");
+        } else {
+          dayDiv.classList.add("day-late");
+          dayDiv.setAttribute("title", "Terlambat / Rapel (Klik untuk detail)");
+        }
+        
+        // Add log click handler to pop open the modal
+        dayDiv.onclick = () => showLogDetail(dateStr, log);
+        
+        // Add indicator dot inside cell
+        const dot = document.createElement("span");
+        dot.classList.add("log-indicator-dot");
+        dayDiv.appendChild(dot);
+      } else {
+        dayDiv.classList.add("day-no-log");
+        dayDiv.setAttribute("title", "Belum ada log checklist");
+        
+        // If clicking a date without logs, inform PAI teacher
+        dayDiv.onclick = () => {
+          const opt = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+          const formattedDate = new Date(year, month, day).toLocaleDateString('id-ID', opt);
+          alert(`Siswa belum mengisi checklist amalan pada hari ${formattedDate}.`);
+        };
+      }
+      
+      calendarDays.appendChild(dayDiv);
+    }
+  }
+
+  function prevMonth() {
+    currentMonth--;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+    renderCalendar(currentYear, currentMonth);
+  }
+
+  function nextMonth() {
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+    renderCalendar(currentYear, currentMonth);
+  }
+
+  // Display detail modal with loaded log contents
+  function showLogDetail(dateStr, log) {
+    const modalDateTitle = document.getElementById("modal-date-title");
+    const modalSubmitTime = document.getElementById("modal-submit-time");
+    const modalFardhuList = document.getElementById("modal-fardhu-list");
+    const modalSunnahList = document.getElementById("modal-sunnah-list");
+    const modalPuasaList = document.getElementById("modal-puasa-list");
+
+    // Format local date string
+    const d = new Date(log.tanggal);
+    const dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    modalDateTitle.innerText = d.toLocaleDateString('id-ID', dateOptions);
+
+    // Format creation submit timestamp
+    const c = new Date(log.createdAt);
+    modalSubmitTime.innerText = `Dicatat pada: ${c.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})} (${log.isPunctual ? 'Tepat Waktu' : 'Terlambat/Rapel'})`;
+
+    // Clear previous details
+    modalFardhuList.innerHTML = "";
+    modalSunnahList.innerHTML = "";
+    modalPuasaList.innerHTML = "";
+
+    // 1. Render Fardhu list
+    const fardus = [
+      { key: 'subuh', label: 'Subuh' },
+      { key: 'dzuhur', label: 'Dzuhur' },
+      { key: 'ashar', label: 'Ashar' },
+      { key: 'maghrib', label: 'Maghrib' },
+      { key: 'isya', label: 'Isya' }
+    ];
+    fardus.forEach(item => {
+      const active = log.sholat_fardu && log.sholat_fardu[item.key];
+      modalFardhuList.appendChild(createBadge(item.label, active, 'success'));
+    });
+
+    // 2. Render Sunnah list
+    const sunnahs = [
+      { key: 'tahajud', label: 'Tahajud' },
+      { key: 'duha', label: 'Duha' },
+      { key: 'rawatib', label: 'Rawatib' }
+    ];
+    sunnahs.forEach(item => {
+      const active = log.sholat_sunnah && log.sholat_sunnah[item.key];
+      modalSunnahList.appendChild(createBadge(item.label, active, 'info'));
+    });
+
+    // 3. Render Puasa list
+    const puasa = [
+      { key: 'senin', label: 'Senin' },
+      { key: 'kamis', label: 'Kamis' },
+      { key: 'ayyamul_bidh', label: 'Ayyamul Bidh' }
+    ];
+    puasa.forEach(item => {
+      const active = log.puasa && log.puasa[item.key];
+      modalPuasaList.appendChild(createBadge(item.label, active, 'warning'));
+    });
+
+    // Show modal using Bootstrap API
+    const myModal = new bootstrap.Modal(document.getElementById('logDetailModal'));
+    myModal.show();
+  }
+
+  // Helper to generate premium checked/unchecked badges
+  function createBadge(label, active, colorClass) {
+    const span = document.createElement("span");
+    span.classList.add("badge", "py-2", "px-3", "rounded-pill", "d-inline-flex", "align-items-center", "gap-1");
+    if (active) {
+      span.classList.add(`bg-${colorClass}-subtle`, `text-${colorClass}`, `border-${colorClass}`);
+      span.style.border = "1.5px solid";
+      span.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${label}`;
+    } else {
+      span.classList.add("bg-light", "text-muted", "border");
+      span.style.opacity = "0.55";
+      span.innerHTML = `<i class="fa-regular fa-circle"></i> ${label}`;
+    }
+    return span;
+  }
+
+  // Initial Calendar Render on page load
+  document.addEventListener("DOMContentLoaded", () => {
+    renderCalendar(currentYear, currentMonth);
+  });
+</script>
 
 <%- include('../partials/footer') %>

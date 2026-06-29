@@ -18,8 +18,18 @@ exports.showForm = async (req, res) => {
       return res.status(403).render('error', { title: 'Akses Ditolak', message: 'Hanya siswa yang dapat mengisi checklist amalan.', error: { status: 403 } });
     }
 
-    const selectedDateStr = req.query.tanggal || new Date().toISOString().split('T')[0];
+    const todayStr = new Date().toISOString().split('T')[0];
+    const selectedDateStr = req.query.tanggal || todayStr;
     const selectedDate = getStartOfDay(selectedDateStr);
+
+    const today = getStartOfDay(new Date());
+    if (selectedDate > today) {
+      return res.status(400).render('error', { 
+        title: 'Tanggal Tidak Valid', 
+        message: 'Anda tidak dapat melihat atau mengisi checklist amalan untuk tanggal yang akan datang.', 
+        error: { status: 400 } 
+      });
+    }
 
     // Fetch existing log if any
     const existingLog = await AmalanYaumi.findOne({
@@ -57,6 +67,10 @@ exports.saveForm = async (req, res) => {
     }
 
     const logDate = getStartOfDay(tanggal);
+    const today = getStartOfDay(new Date());
+    if (logDate > today) {
+      throw new Error('Anda tidak dapat mengisi checklist amalan untuk tanggal yang akan datang.');
+    }
 
     // Parse checkboxes (they only arrive in req.body if checked)
     const sholat_fardu = {
@@ -249,9 +263,35 @@ exports.showDetail = async (req, res) => {
 
     const history = await AmalanYaumi.find({ siswa_id }).sort({ tanggal: -1 });
 
+    // Group logs by YYYY-MM-DD for easy calendar rendering
+    const logsMap = {};
+    history.forEach(log => {
+      // Use local timezone representation for key
+      const year = log.tanggal.getFullYear();
+      const month = String(log.tanggal.getMonth() + 1).padStart(2, '0');
+      const day = String(log.tanggal.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+
+      // Punctuality check: compare log date vs creation date (both local day representations)
+      const tDate = log.tanggal.toDateString();
+      const cDate = log.createdAt.toDateString();
+      const isPunctual = tDate === cDate;
+
+      logsMap[dateStr] = {
+        _id: log._id,
+        tanggal: log.tanggal,
+        sholat_fardu: log.sholat_fardu || {},
+        sholat_sunnah: log.sholat_sunnah || {},
+        puasa: log.puasa || {},
+        isPunctual,
+        createdAt: log.createdAt
+      };
+    });
+
     res.render('amalan/detail', {
       title: `Detail Amalan: ${student.nama} - BaknusTa\'lim`,
       student,
+      logsMap,
       history
     });
   } catch (error) {
