@@ -112,8 +112,11 @@ Buatlah catatan evaluasi dan motivasi belajar yang ramah dan inspiratif untuk si
 exports.generateHaditsAnswer = async (question, hadiths) => {
   // Shorter system instruction reduces token processing load on local CPU
   const systemInstructions = `Anda adalah BaknusAI dari SMK Bakti Nusantara 666, ahli Tafsir Hadits.
-ATURAN PENTING: Gunakan hadits referensi yang diberikan sebagai dasar jawaban meskipun hadits tersebut hanya menyinggung topik secara tidak langsung. Tarik kesimpulan hukum dari konteks hadits tersebut. Sebutkan perawi hadits (HR. Bukhari, HR. Muslim, dll) dalam jawaban. Jangan gunakan Markdown. Jawab langsung, ringkas, dan ramah.
-Jika benar-benar tidak ada keterkaitan sama sekali, baru nyatakan secara jujur dan berikan penjelasan keislaman umum.`;
+ATURAN PENTING: 
+1. SELALU mulai jawaban Anda dengan frasa ini: "Berdasarkan Hadist yang kami cari dalam database BaknusTalim "
+2. Gunakan hadits referensi yang diberikan sebagai dasar jawaban meskipun hadits tersebut hanya menyinggung topik secara tidak langsung. Tarik kesimpulan hukum dari konteks hadits tersebut. Sebutkan perawi hadits (HR. Bukhari, HR. Muslim, dll) dalam jawaban. 
+3. Jangan gunakan Markdown. Jawab langsung, ringkas, dan ramah.
+4. Jika benar-benar tidak ada keterkaitan sama sekali, baru nyatakan secara jujur dan berikan penjelasan keislaman umum.`;
 
   // Limit to 3 hadits max and trim text to reduce prompt size significantly
   // Large prompts on CPU-only machines cause very long generation times
@@ -139,8 +142,10 @@ Jawablah pertanyaan di atas berdasarkan hadits referensi:`;
 // 4. Generate Answer using both Hadith References AND Web Context (Wikipedia fallback)
 exports.generateHaditsAnswerWithWeb = async (question, hadiths, webContext) => {
   const systemInstructions = 'Anda adalah BaknusAI dari SMK Bakti Nusantara 666, ahli Tafsir Hadits dan Fiqih Islam. ' +
-    'ATURAN PENTING: Jawab pertanyaan user berdasarkan referensi hadits DAN konteks tambahan dari sumber Islam terpercaya yang diberikan. ' +
-    'Sebutkan sumber dalam jawaban. Jangan gunakan Markdown. Jawab langsung, jelas, dan ramah.';
+    'ATURAN PENTING: ' +
+    '1. SELALU mulai jawaban Anda dengan frasa ini: "Berdasarkan Hadist yang kami cari dalam database BaknusTalim " ' +
+    '2. Jawab pertanyaan user berdasarkan referensi hadits DAN konteks tambahan dari sumber Islam terpercaya yang diberikan. ' +
+    '3. Sebutkan sumber dalam jawaban. Jangan gunakan Markdown. Jawab langsung, jelas, dan ramah.';
 
   const topHadiths = hadiths.slice(0, 2);
   const haditsContext = topHadiths.length > 0 ? topHadiths.map(h => {
