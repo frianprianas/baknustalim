@@ -7,5 +7,7 @@ const haditsController = require('../controllers/haditsController');
 const { requireAuth } = require('../middlewares/auth');
 
 router.get('/', requireAuth, haditsController.getIndex);
+router.get('/tanya', requireAuth, haditsController.getTanya);
+router.post('/tanya', requireAuth, haditsController.postTanya);
 
 module.exports = router;

@@ -75,3 +75,27 @@ Buatlah catatan evaluasi dan motivasi belajar yang ramah dan inspiratif untuk si
 
   return await callOllama(prompt, systemInstructions);
 };
+
+// 3. Generate Answer for Q&A based on Hadith References (Tanya Hadits AI)
+exports.generateHaditsAnswer = async (question, hadiths) => {
+  const systemInstructions = `Anda adalah seorang Ustadz / Ahli Tafsir Hadits yang bijaksana, berilmu luas, dan santun.
+Tugas Anda adalah menjawab pertanyaan user secara syar'i, bijaksana, dan ramah berdasarkan referensi hadits-hadits yang disediakan.
+Jika hadits yang disediakan tidak mendukung atau tidak relevan dengan pertanyaan, jawablah dengan jujur dan santun bahwa referensi hadits yang ada kurang mencukupi, namun tetap berikan pandangan umum keislaman yang sahih.
+Sebutkan nama perawi hadits (HR. Bukhari, HR. Muslim, dll) yang Anda gunakan untuk mendukung jawaban Anda di dalam teks jawaban secara santun (misal: "Berdasarkan hadits riwayat Muslim nomor...").
+Jangan gunakan format Markdown yang terlalu kompleks. Cukup gunakan spasi baris (linebreaks) dan tanda kutip untuk dalil. Tuliskan jawaban Anda secara langsung dengan ramah.`;
+
+  const contextText = hadiths.map(h => {
+    const cleanTerjemah = h.terjemah ? h.terjemah.replace(/<[^>]+>/g, '') : '';
+    const cleanKitab = h.kitab ? h.kitab.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '';
+    return `[Hadits HR. ${cleanKitab} No. ${h.nomor}]\nArab: ${h.arab}\nTerjemah: ${cleanTerjemah}`;
+  }).join('\n\n');
+
+  const prompt = `Pertanyaan User: "${question}"
+
+Referensi Hadits yang Ditemukan Sistem:
+${contextText || 'Tidak ada hadits referensi spesifik yang ditemukan di database.'}
+
+Jawablah pertanyaan tersebut secara komprehensif berdasarkan referensi hadits di atas:`;
+
+  return await callOllama(prompt, systemInstructions);
+};

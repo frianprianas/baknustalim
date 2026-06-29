@@ -38,34 +38,29 @@
               </a>
             </li>
             
-            <!-- Dropdown Al-Qur'an -->
+            <!-- Dropdown Al-Qur'an & Hadits -->
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="quranDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <a class="nav-link dropdown-toggle" href="#" id="quranHaditsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <div class="nav-icon-wrapper">
-                  <i class="fa-solid fa-book-quran"></i>
+                  <i class="fa-solid fa-book-open-reader"></i>
                 </div>
                 <div class="nav-text-container">
-                  <span class="nav-label-main">Al-Qur'an</span>
-                  <span class="nav-caption-sub">Mushaf & Audio</span>
+                  <span class="nav-label-main">Al-Qur'an & Hadits</span>
+                  <span class="nav-caption-sub">Mushaf, Cari & Tanya AI</span>
                 </div>
               </a>
-              <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="quranDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
-                <li><a class="dropdown-item rounded py-2" href="/quran"><i class="fa-solid fa-book-open me-2 text-success"></i> Baca Al-Qur'an</a></li>
-                <li><a class="dropdown-item rounded py-2" href="/quran/murottal"><i class="fa-solid fa-volume-high me-2 text-info"></i> Murottal Audio</a></li>
-                <li><a class="dropdown-item rounded py-2" href="/quran/bookmarks"><i class="fa-solid fa-bookmark me-2 text-warning"></i> Bookmarks Saya</a></li>
+              <ul class="dropdown-menu border-0 shadow-sm p-3" aria-labelledby="quranHaditsDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important; min-width: 240px;">
+                <li class="dropdown-header text-success fw-bold px-2 mb-1" style="font-size: 0.85rem;"><i class="fa-solid fa-book-quran me-1"></i> AL-QUR'AN</li>
+                <li><a class="dropdown-item rounded py-2 ps-3" href="/quran"><i class="fa-solid fa-book-open me-2 text-success" style="width: 16px;"></i> Baca Al-Qur'an</a></li>
+                <li><a class="dropdown-item rounded py-2 ps-3" href="/quran/murottal"><i class="fa-solid fa-volume-high me-2 text-info" style="width: 16px;"></i> Murottal Audio</a></li>
+                <li><a class="dropdown-item rounded py-2 ps-3" href="/quran/bookmarks"><i class="fa-solid fa-bookmark me-2 text-warning" style="width: 16px;"></i> Bookmarks Saya</a></li>
+                
+                <li><hr class="dropdown-divider my-2" style="border-color: var(--glass-border);"></li>
+                
+                <li class="dropdown-header text-success fw-bold px-2 mb-1" style="font-size: 0.85rem;"><i class="fa-solid fa-book-journal-whills me-1"></i> AL-HADITS</li>
+                <li><a class="dropdown-item rounded py-2 ps-3" href="/hadits"><i class="fa-solid fa-magnifying-glass me-2 text-primary" style="width: 16px;"></i> Cari Hadits</a></li>
+                <li><a class="dropdown-item rounded py-2 ps-3" href="/hadits/tanya"><i class="fa-solid fa-robot me-2 text-success" style="width: 16px;"></i> Tanya Hadits AI</a></li>
               </ul>
-            </li>
-            
-            <li class="nav-item">
-              <a class="nav-link" href="/hadits">
-                <div class="nav-icon-wrapper">
-                  <i class="fa-solid fa-book-journal-whills"></i>
-                </div>
-                <div class="nav-text-container">
-                  <span class="nav-label-main">Cari Hadits</span>
-                  <span class="nav-caption-sub">Pencarian Topik</span>
-                </div>
-              </a>
             </li>
             
             <li class="nav-item">
