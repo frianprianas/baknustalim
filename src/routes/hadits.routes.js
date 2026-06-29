@@ -9,5 +9,7 @@ const { requireAuth } = require('../middlewares/auth');
 router.get('/', requireAuth, haditsController.getIndex);
 router.get('/tanya', requireAuth, haditsController.getTanya);
 router.post('/tanya', requireAuth, haditsController.postTanya);
+router.post('/tanya/api', requireAuth, haditsController.postTanyaApi);
+router.get('/tanya/api/status/:jobId', requireAuth, haditsController.getTanyaStatus);
 
 module.exports = router;

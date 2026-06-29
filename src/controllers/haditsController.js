@@ -80,56 +80,89 @@ exports.getTanya = async (req, res) => {
   });
 };
 
+// In-memory store for background AI jobs
+const activeJobs = {};
+
 exports.postTanya = async (req, res) => {
+  // Deprecated for direct EJS form submission, we now use API + polling
+  res.redirect('/hadits/tanya');
+};
+
+exports.postTanyaApi = async (req, res) => {
   const { pertanyaan } = req.body;
   if (!pertanyaan || pertanyaan.trim() === '') {
-    return res.render('hadits/tanya', {
-      title: 'Tanya Hadits AI',
-      pertanyaan: '',
-      jawaban: null,
-      referensi: [],
-      error: 'Pertanyaan tidak boleh kosong.',
-      path: '/hadits/tanya'
-    });
+    return res.status(400).json({ success: false, error: 'Pertanyaan tidak boleh kosong.' });
   }
 
-  let jawaban = null;
-  let referensi = [];
-  let error = null;
+  const jobId = Date.now().toString() + '_' + Math.random().toString(36).substring(2, 9);
+  activeJobs[jobId] = { done: false, error: null, jawaban: null, referensi: [] };
 
-  try {
-    // 1. Ekstrak keyword dari pertanyaan
-    const keyword = extractKeywords(pertanyaan);
-    
-    // 2. Cari hadits relevan
-    if (keyword.trim()) {
-      const data = await haditsService.searchHadits(keyword.trim(), 1, 5);
-      referensi = data.results;
+  // Run AI processing asynchronously in the background
+  (async () => {
+    try {
+      // 1. Ekstrak keyword dari pertanyaan
+      const keyword = extractKeywords(pertanyaan);
+      let referensi = [];
       
-      // Fallback jika tidak ada hadits sama sekali
-      if (referensi.length === 0) {
-        const firstWord = keyword.split(' ')[0];
-        if (firstWord) {
-          const fallbackData = await haditsService.searchHadits(firstWord, 1, 5);
-          referensi = fallbackData.results;
+      // 2. Cari hadits relevan
+      if (keyword.trim()) {
+        const data = await haditsService.searchHadits(keyword.trim(), 1, 5);
+        referensi = data.results;
+        
+        // Fallback jika tidak ada hadits sama sekali
+        if (referensi.length === 0) {
+          const firstWord = keyword.split(' ')[0];
+          if (firstWord) {
+            const fallbackData = await haditsService.searchHadits(firstWord, 1, 5);
+            referensi = fallbackData.results;
+          }
         }
       }
-    }
 
-    // 3. Generate jawaban dengan AI menggunakan referensi hadits
-    jawaban = await aiService.generateHaditsAnswer(pertanyaan, referensi);
-  } catch (err) {
-    error = 'Gagal memproses pertanyaan Anda menggunakan AI. Pastikan server AI aktif.';
-    console.error(err);
+      // 3. Generate jawaban dengan AI menggunakan referensi hadits
+      const jawaban = await aiService.generateHaditsAnswer(pertanyaan, referensi);
+      
+      // 4. Save results to the job object
+      activeJobs[jobId].jawaban = jawaban;
+      activeJobs[jobId].referensi = referensi;
+      activeJobs[jobId].done = true;
+    } catch (err) {
+      console.error('[HaditsController] Error in background AI job:', err);
+      activeJobs[jobId].error = 'Gagal memproses pertanyaan Anda menggunakan AI. Pastikan server AI aktif.';
+      activeJobs[jobId].done = true;
+    }
+  })();
+
+  // Return job ID immediately to prevent HTTP 504 timeouts!
+  res.json({ success: true, jobId });
+};
+
+exports.getTanyaStatus = async (req, res) => {
+  const { jobId } = req.params;
+  const job = activeJobs[jobId];
+
+  if (!job) {
+    return res.status(404).json({ success: false, error: 'Proses tidak ditemukan atau sudah kedaluwarsa.' });
   }
 
-  res.render('hadits/tanya', {
-    title: 'Tanya Hadits AI',
-    pertanyaan,
-    jawaban,
-    referensi,
-    error,
-    path: '/hadits/tanya'
-  });
+  if (job.error) {
+    const errorMsg = job.error;
+    delete activeJobs[jobId]; // Clean up memory
+    return res.json({ success: true, done: true, error: errorMsg });
+  }
+
+  if (job.done) {
+    const responseData = {
+      success: true,
+      done: true,
+      jawaban: job.jawaban,
+      referensi: job.referensi
+    };
+    delete activeJobs[jobId]; // Clean up memory
+    return res.json(responseData);
+  }
+
+  // Not done yet
+  return res.json({ success: true, done: false });
 };
 
