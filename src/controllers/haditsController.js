@@ -109,8 +109,9 @@ exports.getTanya = async (req, res) => {
   });
 };
 
-// In-memory store for background AI jobs
+// In-memory store for background AI jobs and user limits
 const activeJobs = {};
+const userLimits = {};
 
 exports.postTanya = async (req, res) => {
   // Deprecated for direct EJS form submission, we now use API + polling
@@ -122,6 +123,25 @@ exports.postTanyaApi = async (req, res) => {
   if (!pertanyaan || pertanyaan.trim() === '') {
     return res.status(400).json({ success: false, error: 'Pertanyaan tidak boleh kosong.' });
   }
+
+  // Rate Limiting: Max 2 questions per user per day
+  const userIdentifier = (req.session && req.session.user && req.session.user.email) || req.ip || 'anonymous';
+  const todayDate = new Date().toISOString().split('T')[0];
+  const limitKey = `${userIdentifier}_${todayDate}`;
+
+  if (!userLimits[limitKey]) {
+    userLimits[limitKey] = 0;
+  }
+
+  if (userLimits[limitKey] >= 2) {
+    return res.status(429).json({ 
+      success: false, 
+      error: 'Batas harian tercapai. Setiap akun hanya dapat mengajukan 2 pertanyaan Tanya Hadits AI per hari. Silakan coba lagi besok.' 
+    });
+  }
+
+  // Increment usage count
+  userLimits[limitKey]++;
 
   const jobId = Date.now().toString() + '_' + Math.random().toString(36).substring(2, 9);
   activeJobs[jobId] = { done: false, error: null, jawaban: null, referensi: [] };

@@ -222,16 +222,24 @@
               </div>
               <div>
                 <h5 class="fw-bold text-secondary mb-0">Jawaban BaknusAI</h5>
-                <small class="text-muted">Menggunakan model gemma2:9b & Hadits RAG</small>
+                <small class="text-muted">Generate by BaknusAI</small>
               </div>
             </div>
             <div class="card-body px-4 py-4">
               <div class="ai-response-text" style="font-size: 1.1rem; color: #374151; line-height: 1.8rem; text-align: justify; white-space: pre-line;">
                 ${jawaban}
               </div>
+              
+              <div class="mt-4 text-center">
+                <p class="text-muted small mb-0 fst-italic"><i class="fa-solid fa-circle-info text-info me-1"></i> Ini adalah hasil penelusuran dari database hadist oleh BaknusAI Jawaban bisa saja keliru.</p>
+              </div>
+              
               <hr class="my-4" style="opacity: 0.1;">
               <div class="text-center">
-                <button onclick="location.reload()" class="btn btn-outline-success btn-sm rounded-pill px-4"><i class="fa-solid fa-rotate-left me-1"></i> Tanya Pertanyaan Lain</button>
+                <button onclick="location.reload()" class="btn btn-outline-success btn-sm rounded-pill px-4 mb-3"><i class="fa-solid fa-rotate-left me-1"></i> Tanya Pertanyaan Lain</button>
+                <div class="text-muted small mt-2">
+                  Anda cukup puas dengan jawaban ini? jika belum silahkan bertanya langsung ke ustad ustadah di fasilitas <a href="/tanya" class="text-success fw-bold text-decoration-none">Tanya Yuk</a>.
+                </div>
               </div>
             </div>
           </div>
