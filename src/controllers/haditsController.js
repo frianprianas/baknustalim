@@ -1,5 +1,6 @@
 const haditsService = require('../services/haditsService');
 const aiService = require('../services/aiService');
+const webSearchService = require('../services/webSearchService');
 
 /**
  * Helper function to highlight keywords inside HTML text without affecting HTML tags.
@@ -43,13 +44,24 @@ function extractKeywords(question) {
     'tentang', 'mengenai', 'terkait', 'hal', 'cara', 'hukum', 'hukumnya'
   ]);
 
+  // Strip Indonesian verb prefixes: berkurban->kurban, berwudhu->wudhu
+  const stripPrefix = (word) => {
+    const prefixes = ['menge','memper','diper','ber','ter','mem','men','meng','me','ke','se'];
+    for (const pfx of prefixes) {
+      if (word.startsWith(pfx) && word.length > pfx.length + 2) return word.slice(pfx.length);
+    }
+    return word;
+  };
+
   const words = question.toLowerCase()
-    .replace(/[?,\.!\-"']/g, ' ')
+    .replace(/[?,.\/!\-"']/g, ' ')
     .split(/\s+/)
+    .filter(w => w.length > 2 && !stopWords.has(w))
+    .map(stripPrefix)
     .filter(w => w.length > 2 && !stopWords.has(w));
 
-  // Return up to 2 most specific keywords to keep search focused
-  return words.slice(0, 2).join(' ');
+  const unique = [...new Set(words)];
+  return unique.slice(0, 2).join(' ');
 }
 
 exports.getIndex = async (req, res) => {
@@ -123,14 +135,13 @@ exports.postTanyaApi = async (req, res) => {
       
       console.log(`[HaditsController] Question: "${pertanyaan}" → Keywords: "${keyword}"`);
 
-      // 2. Cari hadits dengan strategi progresif:
-      //    a) Coba semua keyword → b) Coba keyword pertama saja → c) Coba keyword kedua saja
+      // 2. Cari hadits dengan strategi progresif
       if (keyword.trim()) {
         const data = await haditsService.searchHadits(keyword.trim(), 1, 3);
         referensi = data.results;
         console.log(`[HaditsController] Search "${keyword}" → ${referensi.length} results`);
 
-        // Fallback ke keyword pertama jika hasil kurang dari 2
+        // Fallback ke keyword pertama/kedua jika hasil kurang dari 2
         if (referensi.length < 2) {
           const words = keyword.split(' ');
           for (const word of words) {
@@ -148,10 +159,31 @@ exports.postTanyaApi = async (req, res) => {
 
       // 3. Generate jawaban dengan AI menggunakan referensi hadits
       const jawaban = await aiService.generateHaditsAnswer(pertanyaan, referensi);
+
+      // 4. Cek apakah AI menyatakan hadits tidak relevan → fallback ke Wikipedia
+      const isUnhelpful = /tidak (ada|menjelaskan|membahas|relevan|ditemukan|terkait|berkaitan)/i.test(jawaban) ||
+                          /hadits (tidak|kurang|belum)/i.test(jawaban) ||
+                          jawaban.trim().length < 80;
+
+      let webSources = [];
+      if (isUnhelpful) {
+        console.log('[HaditsController] AI answer seems unhelpful, triggering web search fallback...');
+        const webResult = await webSearchService.searchIslamicContext(pertanyaan, keyword || pertanyaan);
+        webSources = webResult.sources || [];
+        // Regenerate answer using web context if available
+        if (webResult.context) {
+          const enhancedJawaban = await aiService.generateHaditsAnswerWithWeb(pertanyaan, referensi, webResult.context);
+          activeJobs[jobId].jawaban = enhancedJawaban;
+        } else {
+          activeJobs[jobId].jawaban = jawaban;
+        }
+      } else {
+        activeJobs[jobId].jawaban = jawaban;
+      }
       
-      // 4. Save results to the job object
-      activeJobs[jobId].jawaban = jawaban;
+      // 5. Save results to the job object
       activeJobs[jobId].referensi = referensi;
+      activeJobs[jobId].webSources = webSources;
       activeJobs[jobId].done = true;
     } catch (err) {
       console.error('[HaditsController] Error in background AI job:', err);
@@ -183,7 +215,8 @@ exports.getTanyaStatus = async (req, res) => {
       success: true,
       done: true,
       jawaban: job.jawaban,
-      referensi: job.referensi
+      referensi: job.referensi,
+      webSources: job.webSources || []
     };
     delete activeJobs[jobId]; // Clean up memory
     return res.json(responseData);

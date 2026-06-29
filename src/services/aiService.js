@@ -136,3 +136,25 @@ Jawablah pertanyaan di atas berdasarkan hadits referensi:`;
   return await callOllama(prompt, systemInstructions);
 };
 
+// 4. Generate Answer using both Hadith References AND Web Context (Wikipedia fallback)
+exports.generateHaditsAnswerWithWeb = async (question, hadiths, webContext) => {
+  const systemInstructions = 'Anda adalah BaknusAI dari SMK Bakti Nusantara 666, ahli Tafsir Hadits dan Fiqih Islam. ' +
+    'ATURAN PENTING: Jawab pertanyaan user berdasarkan referensi hadits DAN konteks tambahan dari sumber Islam terpercaya yang diberikan. ' +
+    'Sebutkan sumber dalam jawaban. Jangan gunakan Markdown. Jawab langsung, jelas, dan ramah.';
+
+  const topHadiths = hadiths.slice(0, 2);
+  const haditsContext = topHadiths.length > 0 ? topHadiths.map(h => {
+    const cleanTerjemah = h.terjemah ? h.terjemah.replace(/<[^>]+>/g, '').substring(0, 300) : '';
+    const cleanKitab = h.kitab ? h.kitab.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '';
+    return '[HR. ' + cleanKitab + ' No. ' + h.nomor + ']\nTerjemah: ' + cleanTerjemah;
+  }).join('\n\n') : 'Tidak ada hadits spesifik.';
+
+  const ctx = webContext ? webContext.substring(0, 600) : 'Tidak ada.';
+  const prompt = 'Pertanyaan: "' + question + '"\n\n' +
+    'Referensi Hadits:\n' + haditsContext + '\n\n' +
+    'Konteks Tambahan (dari Wikipedia Indonesia):\n' + ctx + '\n\n' +
+    'Jawablah pertanyaan di atas. Jika menggunakan konteks Wikipedia, sebutkan bahwa informasi bersumber dari Wikipedia:';
+
+  console.log('[AIService] generateHaditsAnswerWithWeb - prompt length: ' + prompt.length + ' chars');
+  return await callOllama(prompt, systemInstructions);
+};
