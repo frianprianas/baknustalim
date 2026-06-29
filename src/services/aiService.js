@@ -11,7 +11,7 @@ async function callOllama(promptText, systemInstructions = '') {
     : promptText;
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 second timeout
 
   try {
     const response = await fetch(url, {
