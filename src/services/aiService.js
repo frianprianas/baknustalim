@@ -112,8 +112,8 @@ Buatlah catatan evaluasi dan motivasi belajar yang ramah dan inspiratif untuk si
 exports.generateHaditsAnswer = async (question, hadiths) => {
   // Shorter system instruction reduces token processing load on local CPU
   const systemInstructions = `Anda adalah BaknusAI dari SMK Bakti Nusantara 666, ahli Tafsir Hadits.
-Jawab pertanyaan user secara syar'i, bijaksana, dan ramah berdasarkan referensi hadits yang disediakan.
-Sebutkan perawi hadits (HR. Bukhari, HR. Muslim, dll) dalam jawaban. Jangan gunakan Markdown. Jawab langsung dan ringkas.`;
+ATURAN PENTING: Gunakan hadits referensi yang diberikan sebagai dasar jawaban meskipun hadits tersebut hanya menyinggung topik secara tidak langsung. Tarik kesimpulan hukum dari konteks hadits tersebut. Sebutkan perawi hadits (HR. Bukhari, HR. Muslim, dll) dalam jawaban. Jangan gunakan Markdown. Jawab langsung, ringkas, dan ramah.
+Jika benar-benar tidak ada keterkaitan sama sekali, baru nyatakan secara jujur dan berikan penjelasan keislaman umum.`;
 
   // Limit to 3 hadits max and trim text to reduce prompt size significantly
   // Large prompts on CPU-only machines cause very long generation times

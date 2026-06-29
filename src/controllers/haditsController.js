@@ -19,20 +19,37 @@ function highlightKeyword(html, keyword) {
 }
 
 /**
- * Helper function to extract 3 main keywords from a question string for hadith search.
+ * Helper function to extract the most relevant topic keywords from a question.
+ * Uses an expanded stopword list that removes question words, time words, and filler words
+ * so that the actual Islamic topic (sahur, wudhu, zakat, etc.) is always prioritized.
  */
 function extractKeywords(question) {
-  const finalStopWords = [
-    'bolehkah', 'apakah', 'bagaimana', 'hukumnya', 'hukum', 'tentang', 
-    'dengan', 'dan', 'di', 'ke', 'yang', 'saya', 'kami', 'kita', 'ada', 
-    'adakah', 'ini', 'itu', 'adalah', 'untuk', 'saja', 'atau', 'dalam', 
-    'dari', 'pada', 'bisa', 'kah', 'apakah', 'apa', 'bagaimanakah'
-  ];
-  let words = question.toLowerCase()
-    .replace(/[?,.!\-"']/g, ' ')
+  const stopWords = new Set([
+    // Question words
+    'apakah', 'bolehkah', 'bagaimana', 'bagaimanakah', 'kapankah', 'kapan',
+    'siapakah', 'siapa', 'mengapa', 'kenapa', 'dimanakah', 'dimana',
+    'adakah', 'bisakah', 'dapatkah', 'haruskah', 'perlukah',
+    // Filler / structural words
+    'yang', 'dan', 'atau', 'juga', 'serta', 'untuk', 'agar', 'supaya',
+    'dengan', 'dalam', 'pada', 'dari', 'oleh', 'karena', 'sebab',
+    'ini', 'itu', 'tersebut', 'adalah', 'ialah', 'merupakan',
+    'saya', 'kami', 'kita', 'anda', 'kamu', 'dia', 'mereka',
+    'ada', 'tidak', 'bisa', 'dapat', 'harus', 'perlu', 'mau', 'akan',
+    'sudah', 'sudahkah', 'belum', 'pernah', 'sering', 'selalu',
+    'sangat', 'sangatlah', 'lebih', 'paling', 'terlalu',
+    // Time/context words that are too generic
+    'waktu', 'saat', 'ketika', 'kali', 'setelah', 'sebelum', 'selama',
+    'terbaik', 'baik', 'benar', 'tepat', 'sesuai', 'boleh', 'haram', 'halal',
+    'tentang', 'mengenai', 'terkait', 'hal', 'cara', 'hukum', 'hukumnya'
+  ]);
+
+  const words = question.toLowerCase()
+    .replace(/[?,\.!\-"']/g, ' ')
     .split(/\s+/)
-    .filter(w => w.length > 2 && !finalStopWords.includes(w));
-  return words.slice(0, 3).join(' ');
+    .filter(w => w.length > 2 && !stopWords.has(w));
+
+  // Return up to 2 most specific keywords to keep search focused
+  return words.slice(0, 2).join(' ');
 }
 
 exports.getIndex = async (req, res) => {
@@ -100,21 +117,31 @@ exports.postTanyaApi = async (req, res) => {
   // Run AI processing asynchronously in the background
   (async () => {
     try {
-      // 1. Ekstrak keyword dari pertanyaan
+      // 1. Ekstrak keyword utama dari pertanyaan
       const keyword = extractKeywords(pertanyaan);
       let referensi = [];
       
-      // 2. Cari hadits relevan
+      console.log(`[HaditsController] Question: "${pertanyaan}" → Keywords: "${keyword}"`);
+
+      // 2. Cari hadits dengan strategi progresif:
+      //    a) Coba semua keyword → b) Coba keyword pertama saja → c) Coba keyword kedua saja
       if (keyword.trim()) {
-        const data = await haditsService.searchHadits(keyword.trim(), 1, 5);
+        const data = await haditsService.searchHadits(keyword.trim(), 1, 3);
         referensi = data.results;
-        
-        // Fallback jika tidak ada hadits sama sekali
-        if (referensi.length === 0) {
-          const firstWord = keyword.split(' ')[0];
-          if (firstWord) {
-            const fallbackData = await haditsService.searchHadits(firstWord, 1, 5);
-            referensi = fallbackData.results;
+        console.log(`[HaditsController] Search "${keyword}" → ${referensi.length} results`);
+
+        // Fallback ke keyword pertama jika hasil kurang dari 2
+        if (referensi.length < 2) {
+          const words = keyword.split(' ');
+          for (const word of words) {
+            if (word && word.length > 2) {
+              const fb = await haditsService.searchHadits(word, 1, 3);
+              console.log(`[HaditsController] Fallback "${word}" → ${fb.results.length} results`);
+              if (fb.results.length > referensi.length) {
+                referensi = fb.results;
+              }
+              if (referensi.length >= 2) break;
+            }
           }
         }
       }
