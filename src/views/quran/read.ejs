@@ -112,6 +112,13 @@
                 <%= text %>
               </div>
               
+              <!-- Latin Transliteration Text -->
+              <% if (typeof a.teks_latin !== 'undefined' && a.teks_latin) { %>
+                <div class="latin-text">
+                  <%= a.teks_latin %>
+                </div>
+              <% } %>
+              
               <!-- Translation Text -->
               <div class="translation-text">
                 <%= a.teks_terjemahan_id %>

@@ -61,50 +61,86 @@ async function getSurahAyat(surahNumber) {
   // 1. Check local cache
   let cachedAyat = await QuranAyat.find({ surah_number: parsedNumber }).sort({ ayat_number: 1 });
   if (cachedAyat && cachedAyat.length > 0) {
-    // If any cached verse doesn't have tafsir, backfill from EQuran.id
+    // Check if any cached verse doesn't have tafsir
     const needsTafsirBackfill = cachedAyat.some(a => !a.tafsir);
-    if (needsTafsirBackfill) {
+    // Check if any cached verse doesn't have latin transliteration
+    const needsLatinBackfill = cachedAyat.some(a => !a.teks_latin);
+
+    if (needsTafsirBackfill || needsLatinBackfill) {
       try {
-        console.log(`Backfilling Tafsir for Surah ${parsedNumber} from EQuran.id...`);
-        const tafsirRes = await fetch(`https://equran.id/api/v2/tafsir/${parsedNumber}`);
-        if (tafsirRes.ok) {
-          const tafsirJson = await tafsirRes.json();
-          if (tafsirJson.data && tafsirJson.data.tafsir) {
-            const tafsirList = tafsirJson.data.tafsir;
-            for (const t of tafsirList) {
-              await QuranAyat.updateOne(
-                { surah_number: parsedNumber, ayat_number: t.ayat },
-                { $set: { tafsir: t.teks } }
-              );
+        console.log(`Backfilling missing data (Tafsir: ${needsTafsirBackfill}, Latin: ${needsLatinBackfill}) for Surah ${parsedNumber}...`);
+        
+        let tafsirMap = {};
+        if (needsTafsirBackfill) {
+          const tafsirRes = await fetch(`https://equran.id/api/v2/tafsir/${parsedNumber}`);
+          if (tafsirRes.ok) {
+            const tafsirJson = await tafsirRes.json();
+            if (tafsirJson.data && tafsirJson.data.tafsir) {
+              const tafsirList = tafsirJson.data.tafsir;
+              for (const t of tafsirList) {
+                tafsirMap[t.ayat] = t.teks;
+              }
             }
-            // Reload from DB
-            cachedAyat = await QuranAyat.find({ surah_number: parsedNumber }).sort({ ayat_number: 1 });
           }
         }
+
+        let latinMap = {};
+        if (needsLatinBackfill) {
+          const surahRes = await fetch(`https://equran.id/api/v2/surat/${parsedNumber}`);
+          if (surahRes.ok) {
+            const surahJson = await surahRes.json();
+            if (surahJson.data && surahJson.data.ayat) {
+              const ayatList = surahJson.data.ayat;
+              for (const a of ayatList) {
+                latinMap[a.nomorAyat] = a.teksLatin;
+              }
+            }
+          }
+        }
+
+        // Apply backfills to DB
+        const totalLength = cachedAyat.length;
+        for (let i = 0; i < totalLength; i++) {
+          const a = cachedAyat[i];
+          const updateData = {};
+          if (needsTafsirBackfill && tafsirMap[a.ayat_number]) {
+            updateData.tafsir = tafsirMap[a.ayat_number];
+          }
+          if (needsLatinBackfill && latinMap[a.ayat_number]) {
+            updateData.teks_latin = latinMap[a.ayat_number];
+          }
+
+          if (Object.keys(updateData).length > 0) {
+            await QuranAyat.updateOne(
+              { surah_number: parsedNumber, ayat_number: a.ayat_number },
+              { $set: updateData }
+            );
+          }
+        }
+
+        // Reload from DB
+        cachedAyat = await QuranAyat.find({ surah_number: parsedNumber }).sort({ ayat_number: 1 });
       } catch (err) {
-        console.warn(`Failed to backfill Tafsir for Surah ${parsedNumber}:`, err.message);
+        console.warn(`Failed to backfill missing data for Surah ${parsedNumber}:`, err.message);
       }
     }
     return cachedAyat;
   }
 
-  // 2. Fetch from external API
-  console.log(`Cache miss for Surah ${parsedNumber}. Fetching from API...`);
+  // 2. Fetch from external API (Cache Miss)
+  console.log(`Cache miss for Surah ${parsedNumber}. Fetching from EQuran.id API...`);
   try {
-    const response = await fetch(`https://api.alquran.cloud/v1/surah/${parsedNumber}/editions/quran-uthmani,id.indonesian`);
+    const response = await fetch(`https://equran.id/api/v2/surat/${parsedNumber}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch verses for Surah ${parsedNumber}. Status: ${response.status}`);
     }
 
     const json = await response.json();
-    const editions = json.data;
+    const surahData = json.data;
 
-    if (!editions || editions.length < 2) {
-      throw new Error('Unexpected API response layout. Missing editions.');
+    if (!surahData || !surahData.ayat) {
+      throw new Error('Unexpected API response layout. Missing verses.');
     }
-
-    const arabicEdition = editions[0];
-    const indonesianEdition = editions[1];
 
     // Fetch Tafsir from EQuran.id
     let tafsirMap = {};
@@ -124,18 +160,18 @@ async function getSurahAyat(surahNumber) {
     }
 
     const ayahsToInsert = [];
+    const totalAyahs = surahData.ayat.length;
 
-    const totalAyahs = arabicEdition.ayahs.length;
     for (let i = 0; i < totalAyahs; i++) {
-      const arAyah = arabicEdition.ayahs[i];
-      const idAyah = indonesianEdition.ayahs[i];
-      const ayatNum = arAyah.numberInSurah;
+      const a = surahData.ayat[i];
+      const ayatNum = a.nomorAyat;
 
       const ayatData = {
         surah_number: parsedNumber,
         ayat_number: ayatNum,
-        teks_arab: arAyah.text,
-        teks_terjemahan_id: idAyah.text,
+        teks_arab: a.teksArab,
+        teks_latin: a.teksLatin || '',
+        teks_terjemahan_id: a.teksIndonesia,
         tafsir: tafsirMap[ayatNum] || ''
       };
 
@@ -144,9 +180,8 @@ async function getSurahAyat(surahNumber) {
 
     // Insert into DB and return
     const inserted = await QuranAyat.insertMany(ayahsToInsert);
-    console.log(`Successfully cached ${inserted.length} verses with Tafsir for Surah ${parsedNumber}.`);
+    console.log(`Successfully cached ${inserted.length} verses with Latin transliteration & Tafsir for Surah ${parsedNumber}.`);
     
-    // Sort just in case insertMany response order is different
     return inserted.sort((a, b) => a.ayat_number - b.ayat_number);
   } catch (error) {
     console.error(`Error fetching/caching verses for Surah ${parsedNumber}: ${error.message}`);
