@@ -22,7 +22,7 @@ async function searchHadits(keyword, limit = 20) {
     }
 
     const json = await res.json();
-    return json.data && json.data.hadits ? json.data.hadits : [];
+    return Array.isArray(json.data) ? json.data : [];
   } catch (error) {
     console.error('Error in searchHadits:', error.message);
     throw error;
