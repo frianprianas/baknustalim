@@ -1,7 +1,7 @@
 const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://192.168.100.129:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma2:9b';
 
-// Helper function to call Ollama API with a timeout
+// Helper function to call Ollama API without any timeouts
 async function callOllama(promptText, systemInstructions = '') {
   const url = `${OLLAMA_HOST}/api/generate`;
   
@@ -9,9 +9,6 @@ async function callOllama(promptText, systemInstructions = '') {
   const fullPrompt = systemInstructions 
     ? `<start_of_turn>system\n${systemInstructions}<end_of_turn>\n<start_of_turn>user\n${promptText}<end_of_turn>\n<start_of_turn>model\n`
     : promptText;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
 
   try {
     const response = await fetch(url, {
@@ -24,11 +21,8 @@ async function callOllama(promptText, systemInstructions = '') {
         options: {
           temperature: 0.7
         }
-      }),
-      signal: controller.signal
+      })
     });
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`Ollama API responded with status: ${response.status}`);
@@ -37,11 +31,7 @@ async function callOllama(promptText, systemInstructions = '') {
     const data = await response.json();
     return data.response;
   } catch (error) {
-    clearTimeout(timeoutId);
     console.error('[AIService] Error communicating with Ollama:', error.message);
-    if (error.name === 'AbortError') {
-      throw new Error('Koneksi ke Server AI Lokal (Ollama) timeout. Pastikan server aktif.');
-    }
     throw error;
   }
 }
