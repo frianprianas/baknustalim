@@ -125,7 +125,11 @@ exports.postTanyaApi = async (req, res) => {
   }
 
   // Rate Limiting: Max 2 questions per user per day
-  const userIdentifier = (req.session && req.session.user && req.session.user.email) || req.ip || 'anonymous';
+  // Fix identifier: check mailcow_email, _id, or real client IP (x-forwarded-for) to prevent Docker NAT issues
+  const userIdentifier = (req.session && req.session.user && (req.session.user.mailcow_email || req.session.user._id || req.session.user.email)) 
+    || req.headers['x-forwarded-for'] 
+    || req.ip 
+    || 'anonymous';
   const todayDate = new Date().toISOString().split('T')[0];
   const limitKey = `${userIdentifier}_${todayDate}`;
 
