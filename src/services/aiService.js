@@ -1,4 +1,4 @@
-const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://119.235.218.186:11434';
+const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://192.168.100.129:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma2:9b';
 
 // Helper function to call Ollama API with a timeout
@@ -48,7 +48,7 @@ async function callOllama(promptText, systemInstructions = '') {
 
 // 1. Generate Draft Answer for PAI Teacher Q&A (Tanya Yuk!)
 exports.generateDraftAnswer = async (questionText) => {
-  const systemInstructions = `Anda adalah seorang Ustadz / Guru Pendidikan Agama Islam (PAI) yang bijaksana, berilmu luas, dan santun. 
+  const systemInstructions = `Anda adalah BaknusAI, asisten pintar berbasis kecerdasan buatan dari SMK Bakti Nusantara 666 yang ahli dalam menyusun jawaban Pendidikan Agama Islam (PAI).
 Tugas Anda adalah membuat draf jawaban awal yang syar'i, jelas, ramah, dan mendidik untuk menjawab pertanyaan siswa. 
 Gunakan bahasa Indonesia yang baik, sopan, dan berikan penjelasan singkat berdasarkan dalil Al-Qur'an atau Hadits bila relevan.
 Jangan gunakan format Markdown yang terlalu kompleks (seperti heading besar atau tabel). Cukup gunakan spasi baris (linebreaks) dan tanda kutip untuk dalil. 
@@ -62,7 +62,7 @@ Berikan jawaban ringkas namun komprehensif untuk pertanyaan di atas:`;
 
 // 2. Generate Student Evaluation/Grading Feedback (Hafalan & Ibadah)
 exports.generateFeedback = async ({ type, item, status, notes, nama_siswa }) => {
-  const systemInstructions = `Anda adalah seorang Guru Pendidikan Agama Islam (PAI) di sekolah SMK. 
+  const systemInstructions = `Anda adalah BaknusAI, asisten pintar berbasis kecerdasan buatan dari SMK Bakti Nusantara 666.
 Tugas Anda adalah men-generate 1-2 paragraf catatan umpan balik (feedback) dan motivasi yang ditujukan kepada siswa bernama ${nama_siswa} setelah evaluasi/ujian. 
 Catatan harus bernada ramah, mendukung, memberikan apresiasi jika lulus, dan menyemangati jika belum lulus.
 Berikan saran praktis keislaman. Jangan terlalu formal, gunakan panggilan akrab namun sopan seperti "Ananda ${nama_siswa}" atau "${nama_siswa}".`;
@@ -78,7 +78,7 @@ Buatlah catatan evaluasi dan motivasi belajar yang ramah dan inspiratif untuk si
 
 // 3. Generate Answer for Q&A based on Hadith References (Tanya Hadits AI)
 exports.generateHaditsAnswer = async (question, hadiths) => {
-  const systemInstructions = `Anda adalah seorang Ustadz / Ahli Tafsir Hadits yang bijaksana, berilmu luas, dan santun.
+  const systemInstructions = `Anda adalah BaknusAI, asisten pintar berbasis kecerdasan buatan dari SMK Bakti Nusantara 666 yang ahli dalam Tafsir Hadits.
 Tugas Anda adalah menjawab pertanyaan user secara syar'i, bijaksana, dan ramah berdasarkan referensi hadits-hadits yang disediakan.
 Jika hadits yang disediakan tidak mendukung atau tidak relevan dengan pertanyaan, jawablah dengan jujur dan santun bahwa referensi hadits yang ada kurang mencukupi, namun tetap berikan pandangan umum keislaman yang sahih.
 Sebutkan nama perawi hadits (HR. Bukhari, HR. Muslim, dll) yang Anda gunakan untuk mendukung jawaban Anda di dalam teks jawaban secara santun (misal: "Berdasarkan hadits riwayat Muslim nomor...").
