@@ -1,0 +1,114 @@
+<%- include('../partials/header') %>
+
+<div class="container my-4 pb-5">
+  <div class="row mb-4 align-items-center">
+    <div class="col-12 text-center">
+      <h2 class="fw-bold mb-2 arabic-title-highlight" style="font-family: var(--font-arabic); font-size: 2.2rem; color: var(--accent-color);">البحث في الحديث</h2>
+      <h4 class="fw-bold text-secondary">Pencarian Hadits</h4>
+      <p class="text-muted small">Cari hadits berdasarkan topik atau kata kunci (Misal: shalat, wudhu, puasa)</p>
+    </div>
+  </div>
+
+  <div class="row justify-content-center mb-5">
+    <div class="col-md-8 col-lg-6">
+      <form action="/hadits" method="GET" class="search-form">
+        <div class="input-group input-group-lg shadow-sm" style="border-radius: 50px; overflow: hidden; border: 2px solid var(--accent-color);">
+          <span class="input-group-text bg-white border-0 text-success ps-4"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" name="q" class="form-control border-0 px-3" placeholder="Masukkan kata kunci..." value="<%= q %>" required autofocus style="box-shadow: none;">
+          <button class="btn text-white px-4 fw-bold" type="submit" style="background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-color-hover) 100%);">Cari</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <% if (error) { %>
+    <div class="alert alert-danger shadow-sm border-0" role="alert" style="border-left: 4px solid #dc3545 !important;">
+      <i class="fa-solid fa-circle-exclamation me-2"></i> <%= error %>
+    </div>
+  <% } %>
+
+  <% if (q) { %>
+    <div class="row mb-3">
+      <div class="col-12">
+        <h5 class="fw-bold text-secondary border-bottom pb-2">Hasil pencarian untuk: <span class="text-success">"<%= q %>"</span> <small class="text-muted fw-normal ms-2">(<%= results.length %> hadits ditemukan)</small></h5>
+      </div>
+    </div>
+
+    <% if (results && results.length > 0) { %>
+      <div class="row row-cols-1 g-4">
+        <% results.forEach((h, index) => { %>
+          <div class="col">
+            <div class="card h-100 shadow-sm border-0" style="background: var(--glass-bg); backdrop-filter: blur(12px); border-radius: 12px; overflow: hidden;">
+              <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4 d-flex justify-content-between align-items-center">
+                <span class="badge rounded-pill px-3 py-2" style="background-color: var(--bg-tertiary); color: var(--accent-color); border: 1px solid var(--glass-border); font-size: 0.85rem; font-weight: 600;">
+                  <i class="fa-solid fa-book-journal-whills me-1"></i> <%= h.kitab %>
+                </span>
+                <span class="text-muted small fw-bold">ID: <%= h.id %></span>
+              </div>
+              <div class="card-body px-4 py-4">
+                <% if (h.arab) { %>
+                  <div class="arabic-text text-end mb-4" style="font-size: 1.8rem; line-height: 3.5rem; color: var(--text-primary); direction: rtl;">
+                    <%= h.arab %>
+                  </div>
+                <% } %>
+                
+                <% if (h.has_terjemah && h.terjemah) { %>
+                  <div class="translation-text" style="font-size: 1rem; color: var(--text-secondary); line-height: 1.7rem; text-align: justify;">
+                    <div class="fw-bold text-success mb-2 small"><i class="fa-solid fa-language me-1"></i> Terjemahan:</div>
+                    <div class="terjemah-content">
+                      <%- h.terjemah %>
+                    </div>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else if (!error) { %>
+      <div class="alert bg-white shadow-sm border-0 text-center py-5 rounded-4" style="border: 1px solid var(--glass-border) !important;">
+        <i class="fa-solid fa-book-open text-muted mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+        <h5 class="text-secondary fw-bold">Tidak ada hadits ditemukan</h5>
+        <p class="text-muted mb-0">Coba gunakan kata kunci lain yang lebih umum, atau periksa ejaan Anda.</p>
+      </div>
+    <% } %>
+  <% } else { %>
+    <!-- Empty state before search -->
+    <div class="row justify-content-center mt-5">
+      <div class="col-md-8 text-center">
+        <div class="p-5 rounded-4 bg-white shadow-sm border" style="border-color: var(--glass-border) !important;">
+          <i class="fa-solid fa-book-journal-whills text-success mb-3" style="font-size: 3.5rem; opacity: 0.8;"></i>
+          <h4 class="fw-bold text-secondary mb-3">Jelajahi Hadits Nabi ﷺ</h4>
+          <p class="text-muted mb-4">Temukan pedoman dan sunnah Rasulullah dalam berbagai aspek kehidupan. Mesin pencari ini menelusuri puluhan ribu hadits dari Kutubut Tis'ah (Bukhari, Muslim, Abu Dawud, Tirmidzi, dll).</p>
+          <div class="d-flex justify-content-center gap-2 flex-wrap">
+            <a href="/hadits?q=shalat" class="badge rounded-pill bg-light text-secondary text-decoration-none border px-3 py-2 hover-success">Shalat</a>
+            <a href="/hadits?q=puasa" class="badge rounded-pill bg-light text-secondary text-decoration-none border px-3 py-2 hover-success">Puasa</a>
+            <a href="/hadits?q=sedekah" class="badge rounded-pill bg-light text-secondary text-decoration-none border px-3 py-2 hover-success">Sedekah</a>
+            <a href="/hadits?q=ilmu" class="badge rounded-pill bg-light text-secondary text-decoration-none border px-3 py-2 hover-success">Ilmu</a>
+            <a href="/hadits?q=akhlak" class="badge rounded-pill bg-light text-secondary text-decoration-none border px-3 py-2 hover-success">Akhlak</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<style>
+  .terjemah-content h1, .terjemah-content h2, .terjemah-content h3 {
+    font-size: 1.15rem;
+    color: var(--accent-color);
+    font-weight: 700;
+    margin-bottom: 0.5rem !important;
+    text-align: left !important;
+  }
+  .terjemah-content p {
+    margin-bottom: 1rem !important;
+  }
+  .hover-success:hover {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+    border-color: var(--accent-color) !important;
+  }
+</style>
+
+<%- include('../partials/footer') %>
