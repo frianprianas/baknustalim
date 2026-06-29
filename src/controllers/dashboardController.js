@@ -6,6 +6,7 @@ const PraktekIbadah = require('../models/PraktekIbadah');
 const JenisIbadah = require('../models/JenisIbadah');
 const Question = require('../models/Question');
 const LiveSession = require('../models/LiveSession');
+const AmalanYaumi = require('../models/AmalanYaumi');
 
 exports.showDashboard = async (req, res) => {
   const user = req.session.user;
@@ -133,6 +134,33 @@ exports.showDashboard = async (req, res) => {
         const ibadahTotal = await PraktekIbadah.countDocuments({ siswa_id: s._id });
         const ibadahKompeten = await PraktekIbadah.countDocuments({ siswa_id: s._id, status: 'Kompeten' });
 
+        // Amalan stats
+        const amalanLogs = await AmalanYaumi.find({ siswa_id: s._id });
+        let farduDone = 0;
+        let farduExpected = amalanLogs.length * 5;
+        let sunnahCount = 0;
+        let puasaCount = 0;
+        
+        amalanLogs.forEach(log => {
+          if (log.sholat_fardu) {
+            if (log.sholat_fardu.subuh) farduDone++;
+            if (log.sholat_fardu.dzuhur) farduDone++;
+            if (log.sholat_fardu.ashar) farduDone++;
+            if (log.sholat_fardu.maghrib) farduDone++;
+            if (log.sholat_fardu.isya) farduDone++;
+          }
+          if (log.sholat_sunnah) {
+            if (log.sholat_sunnah.tahajud) sunnahCount++;
+            if (log.sholat_sunnah.duha) sunnahCount++;
+            if (log.sholat_sunnah.rawatib) sunnahCount++;
+          }
+          if (log.puasa) {
+            if (log.puasa.senin) puasaCount++;
+            if (log.puasa.kamis) puasaCount++;
+            if (log.puasa.ayyamul_bidh) puasaCount++;
+          }
+        });
+
         return {
           id: s._id,
           nis: s.nis || '-',
@@ -140,7 +168,13 @@ exports.showDashboard = async (req, res) => {
           kelas: s.kelas_id ? s.kelas_id.nama_kelas : 'Belum Ada Kelas',
           tahun_ajaran: s.kelas_id ? s.kelas_id.tahun_ajaran : '-',
           hafalan: { total: hafalanTotal, kompeten: hafalanKompeten },
-          ibadah: { total: ibadahTotal, kompeten: ibadahKompeten }
+          ibadah: { total: ibadahTotal, kompeten: ibadahKompeten },
+          amalan: {
+            daysFilled: amalanLogs.length,
+            fardu: { done: farduDone, expected: farduExpected },
+            sunnah: sunnahCount,
+            puasa: puasaCount
+          }
         };
       }));
 

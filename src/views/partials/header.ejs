@@ -126,6 +126,28 @@
               </li>
             <% } %>
  
+            <!-- Dropdown Amalan Yaumi -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="amalanDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="nav-icon-wrapper">
+                  <i class="fa-solid fa-square-check text-success"></i>
+                </div>
+                <div class="nav-text-container">
+                  <span class="nav-label-main">Amalan Yaumi</span>
+                  <span class="nav-caption-sub">Checklist & Laporan</span>
+                </div>
+              </a>
+              <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="amalanDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
+                <% if (currentUser.role === 'siswa') { %>
+                  <li><a class="dropdown-item rounded py-2" href="/amalan"><i class="fa-solid fa-calendar-check me-2 text-success"></i> Isi Checklist Harian</a></li>
+                  <li><a class="dropdown-item rounded py-2" href="/amalan/riwayat"><i class="fa-solid fa-clock-rotate-left me-2 text-info"></i> Riwayat Amalan Saya</a></li>
+                <% } %>
+                <% if (currentUser.role === 'admin' || (currentUser.role === 'guru' && currentUser.is_guru_pai) || currentUser.role === 'tu') { %>
+                  <li><a class="dropdown-item rounded py-2" href="/amalan/laporan"><i class="fa-solid fa-chart-line me-2 text-primary"></i> Laporan Amalan Siswa</a></li>
+                <% } %>
+              </ul>
+            </li>
+
             <!-- History log lookup (open to all) -->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="historyDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

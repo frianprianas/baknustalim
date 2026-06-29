@@ -112,6 +112,7 @@
             <th>Tahun Ajaran</th>
             <th class="text-center">Hafalan (Kompeten / Total)</th>
             <th class="text-center">Ibadah (Kompeten / Total)</th>
+            <th class="text-center">Amalan Yaumi (Fardhu / Sunnah / Puasa)</th>
             <th class="text-end d-print-none">Riwayat Detail</th>
           </tr>
         </thead>
@@ -143,14 +144,32 @@
                 </div>
               </td>
 
+              <!-- Amalan Yaumi Recap -->
+              <td class="text-center">
+                <% if (row.amalan && row.amalan.daysFilled > 0) { %>
+                  <% const farduPct = row.amalan.fardu.expected > 0 ? Math.round((row.amalan.fardu.done / row.amalan.fardu.expected) * 100) : 0 %>
+                  <span class="text-success fw-bold" title="Fardhu: <%= row.amalan.fardu.done %>/<%= row.amalan.fardu.expected %>"><%= farduPct %>% Fardhu</span> &bull;
+                  <span class="text-info fw-bold" title="Salat Sunnah"><%= row.amalan.sunnah %> Sunnah</span> &bull;
+                  <span class="text-warning fw-bold" title="Puasa Sunnah"><%= row.amalan.puasa %> Puasa</span>
+                  <div class="progress mt-1 mx-auto d-print-none" style="height: 4px; max-width: 120px; background-color: var(--bg-tertiary);">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: <%= farduPct %>%"></div>
+                  </div>
+                <% } else { %>
+                  <span class="text-muted small">Belum Mengisi</span>
+                <% } %>
+              </td>
+
               <!-- Action Link -->
               <td class="text-end d-print-none">
                 <div class="btn-group">
                   <a href="/hafalan/riwayat?search=<%= row.nama %>" class="btn btn-outline-secondary btn-sm me-1 rounded" title="Riwayat Hafalan">
                     <i class="fa-solid fa-microphone"></i>
                   </a>
-                  <a href="/ibadah/riwayat?search=<%= row.nama %>" class="btn btn-outline-secondary btn-sm rounded" title="Riwayat Ibadah">
+                  <a href="/ibadah/riwayat?search=<%= row.nama %>" class="btn btn-outline-secondary btn-sm me-1 rounded" title="Riwayat Ibadah">
                     <i class="fa-solid fa-hands-praying"></i>
+                  </a>
+                  <a href="/amalan/detail/<%= row.id %>" class="btn btn-outline-secondary btn-sm rounded" title="Detail Amalan Yaumi">
+                    <i class="fa-solid fa-calendar-check"></i>
                   </a>
                 </div>
               </td>

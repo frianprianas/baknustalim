@@ -1,0 +1,124 @@
+<%- include('../partials/header') %>
+
+<div class="row justify-content-center animate__animated animate__fadeIn">
+  <div class="col-lg-10 col-md-12">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h2 mb-1"><i class="fa-solid fa-clock-rotate-left me-2 text-info"></i> Riwayat Amalan Yaumi</h1>
+        <p class="text-secondary mb-0">Catatan perkembangan ibadah harian Anda yang telah tersimpan.</p>
+      </div>
+      <a href="/amalan" class="btn btn-primary-custom rounded-pill px-4">
+        <i class="fa-solid fa-plus me-1"></i> Isi Amalan Baru
+      </a>
+    </div>
+
+    <!-- History Table/Cards -->
+    <div class="card-glass p-4">
+      <% if (history && history.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-custom align-middle">
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th class="text-center">Salat Fardhu (Wajib)</th>
+                <th class="text-center">Salat Sunnah</th>
+                <th class="text-center">Puasa Sunnah</th>
+                <th class="text-end">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% history.forEach(log => { %>
+                <tr>
+                  <td>
+                    <strong><%= new Date(log.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %></strong>
+                  </td>
+                  
+                  <!-- Salat Fardhu list -->
+                  <td class="text-center">
+                    <div class="d-flex justify-content-center gap-1 flex-wrap">
+                      <% const fardus = [
+                        { key: 'subuh', label: 'S' },
+                        { key: 'dzuhur', label: 'D' },
+                        { key: 'ashar', label: 'A' },
+                        { key: 'maghrib', label: 'M' },
+                        { key: 'isya', label: 'I' }
+                      ] %>
+                      <% fardus.forEach(f => { %>
+                        <% const done = log.sholat_fardu && log.sholat_fardu[f.key] %>
+                        <span class="badge rounded-circle d-inline-flex align-items-center justify-content-center" 
+                              style="width: 25px; height: 25px; font-size: 0.72rem; 
+                                     background-color: <%= done ? 'rgba(22, 163, 74, 0.15)' : 'rgba(239, 68, 68, 0.08)' %>; 
+                                     color: <%= done ? '#16a34a' : '#ef4444' %>;
+                                     border: 1px solid <%= done ? 'rgba(22, 163, 74, 0.3)' : 'rgba(239, 68, 68, 0.2)' %>;" 
+                              title="<%= f.key.toUpperCase() %>: <%= done ? 'Telah Dikerjakan' : 'Belum/Tidak' %>">
+                          <%= f.label %>
+                        </span>
+                      <% }) %>
+                    </div>
+                  </td>
+
+                  <!-- Salat Sunnah list -->
+                  <td class="text-center">
+                    <% let sunnahList = [] %>
+                    <% if (log.sholat_sunnah && log.sholat_sunnah.tahajud) sunnahList.push('Tahajud') %>
+                    <% if (log.sholat_sunnah && log.sholat_sunnah.duha) sunnahList.push('Duha') %>
+                    <% if (log.sholat_sunnah && log.sholat_sunnah.rawatib) sunnahList.push('Rawatib') %>
+                    
+                    <% if (sunnahList.length > 0) { %>
+                      <div class="d-flex justify-content-center gap-1 flex-wrap">
+                        <% sunnahList.forEach(s => { %>
+                          <span class="badge bg-info-subtle text-info border border-info-subtle py-1 px-2 rounded-pill" style="font-size: 0.7rem;">
+                            <%= s %>
+                          </span>
+                        <% }) %>
+                      </div>
+                    <% } else { %>
+                      <span class="text-muted small">-</span>
+                    <% } %>
+                  </td>
+
+                  <!-- Puasa list -->
+                  <td class="text-center">
+                    <% let puasaList = [] %>
+                    <% if (log.puasa && log.puasa.senin) puasaList.push('Senin') %>
+                    <% if (log.puasa && log.puasa.kamis) puasaList.push('Kamis') %>
+                    <% if (log.puasa && log.puasa.ayyamul_bidh) puasaList.push('Ayyamul Bidh') %>
+                    
+                    <% if (puasaList.length > 0) { %>
+                      <div class="d-flex justify-content-center gap-1 flex-wrap">
+                        <% puasaList.forEach(p => { %>
+                          <span class="badge bg-warning-subtle text-warning border border-warning-subtle py-1 px-2 rounded-pill" style="font-size: 0.7rem;">
+                            <%= p %>
+                          </span>
+                        <% }) %>
+                      </div>
+                    <% } else { %>
+                      <span class="text-muted small">-</span>
+                    <% } %>
+                  </td>
+
+                  <!-- Action -->
+                  <td class="text-end">
+                    <a href="/amalan?tanggal=<%= log.tanggal.toISOString().split('T')[0] %>" class="btn btn-outline-success btn-sm rounded" title="Edit Log">
+                      <i class="fa-solid fa-edit"></i> Edit
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-secondary animate__animated animate__fadeIn">
+          <i class="fa-solid fa-square-check fa-3x mb-3 text-muted"></i>
+          <p class="mb-0">Belum ada riwayat amalan tercatat. Mari mulai mengisi checklist harian Anda!</p>
+          <a href="/amalan" class="btn btn-primary-custom mt-3 rounded-pill px-4">Mulai Isi Checklist</a>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
