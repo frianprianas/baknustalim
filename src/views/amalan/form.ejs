@@ -36,6 +36,22 @@
       <form action="/amalan" method="POST">
         <input type="hidden" name="tanggal" value="<%= selectedDateStr %>">
         
+        <!-- Halangan Toggle (Haid) -->
+        <div class="card-glass p-3 mb-4 border border-info" style="background: rgba(6, 182, 212, 0.05); border-radius: 12px;">
+          <div class="form-check form-switch d-flex align-items-center justify-content-between p-0">
+            <label class="form-check-label fw-bold text-info mb-0 d-flex align-items-center gap-2" for="is_halangan" style="cursor: pointer;">
+              <i class="fa-solid fa-venus fs-5"></i>
+              <div>
+                <span>Sedang Halangan / Haid</span>
+                <small class="text-secondary d-block font-weight-normal" style="font-size: 0.75rem;">(Khusus Siswi - Wajib salat & puasa dinonaktifkan dan tidak mengurangi nilai kepatuhan)</small>
+              </div>
+            </label>
+            <div class="form-check form-switch">
+              <input class="form-check-input fs-4" type="checkbox" role="switch" name="is_halangan" id="is_halangan" <%= log.is_halangan ? 'checked' : '' %>>
+            </div>
+          </div>
+        </div>
+        
         <!-- Sholat Fardhu Checklist -->
         <div class="mb-5">
           <h5 class="fw-bold mb-3 border-bottom pb-2 text-success">
@@ -129,5 +145,26 @@
 
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const isHalanganCheckbox = document.getElementById('is_halangan');
+    const checklistInputs = document.querySelectorAll('input.btn-check');
+
+    function toggleInputs() {
+      const isChecked = isHalanganCheckbox.checked;
+      checklistInputs.forEach(input => {
+        input.disabled = isChecked;
+        if (isChecked) {
+          input.checked = false;
+        }
+      });
+    }
+
+    isHalanganCheckbox.addEventListener('change', toggleInputs);
+    // Initial evaluation
+    toggleInputs();
+  });
+</script>
 
 <%- include('../partials/footer') %>

@@ -83,6 +83,15 @@
   .day-late:hover {
     background-color: rgba(22, 163, 74, 0.18);
   }
+  /* Halangan/Haid state */
+  .day-halangan {
+    background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(236, 72, 153, 0.25);
+  }
+  .day-halangan:hover {
+    box-shadow: 0 6px 15px rgba(236, 72, 153, 0.4);
+  }
   .day-today {
     outline: 2px solid var(--accent-color);
     outline-offset: 2px;
@@ -191,6 +200,10 @@
         <div class="d-flex align-items-center gap-2">
           <span class="legend-box day-late"></span>
           <span>Terlambat / Rapel (Diisi hari berikutnya)</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="legend-box day-halangan"></span>
+          <span>Sedang Halangan / Haid</span>
         </div>
         <div class="d-flex align-items-center gap-2">
           <span class="legend-box day-no-log"></span>
@@ -308,7 +321,10 @@
       // Check if this date has a log
       const log = logsMap[dateStr];
       if (log) {
-        if (log.isPunctual) {
+        if (log.is_halangan) {
+          dayDiv.classList.add("day-halangan");
+          dayDiv.setAttribute("title", "Sedang Halangan / Haid (Klik untuk detail)");
+        } else if (log.isPunctual) {
           dayDiv.classList.add("day-punctual");
           dayDiv.setAttribute("title", "Tepat Waktu (Klik untuk detail)");
         } else {
@@ -379,40 +395,46 @@
     modalSunnahList.innerHTML = "";
     modalPuasaList.innerHTML = "";
 
-    // 1. Render Fardhu list
-    const fardus = [
-      { key: 'subuh', label: 'Subuh' },
-      { key: 'dzuhur', label: 'Dzuhur' },
-      { key: 'ashar', label: 'Ashar' },
-      { key: 'maghrib', label: 'Maghrib' },
-      { key: 'isya', label: 'Isya' }
-    ];
-    fardus.forEach(item => {
-      const active = log.sholat_fardu && log.sholat_fardu[item.key];
-      modalFardhuList.appendChild(createBadge(item.label, active, 'success'));
-    });
+    if (log.is_halangan) {
+      modalFardhuList.innerHTML = `<span class="badge bg-secondary-subtle text-secondary border py-2 px-3 rounded-pill w-100"><i class="fa-solid fa-venus me-1"></i> Dibebaskan (Sedang Halangan / Haid)</span>`;
+      modalSunnahList.innerHTML = `<span class="badge bg-secondary-subtle text-secondary border py-2 px-3 rounded-pill w-100"><i class="fa-solid fa-venus me-1"></i> Dibebaskan (Sedang Halangan / Haid)</span>`;
+      modalPuasaList.innerHTML = `<span class="badge bg-secondary-subtle text-secondary border py-2 px-3 rounded-pill w-100"><i class="fa-solid fa-venus me-1"></i> Dibebaskan (Sedang Halangan / Haid)</span>`;
+    } else {
+      // 1. Render Fardhu list
+      const fardus = [
+        { key: 'subuh', label: 'Subuh' },
+        { key: 'dzuhur', label: 'Dzuhur' },
+        { key: 'ashar', label: 'Ashar' },
+        { key: 'maghrib', label: 'Maghrib' },
+        { key: 'isya', label: 'Isya' }
+      ];
+      fardus.forEach(item => {
+        const active = log.sholat_fardu && log.sholat_fardu[item.key];
+        modalFardhuList.appendChild(createBadge(item.label, active, 'success'));
+      });
 
-    // 2. Render Sunnah list
-    const sunnahs = [
-      { key: 'tahajud', label: 'Tahajud' },
-      { key: 'duha', label: 'Duha' },
-      { key: 'rawatib', label: 'Rawatib' }
-    ];
-    sunnahs.forEach(item => {
-      const active = log.sholat_sunnah && log.sholat_sunnah[item.key];
-      modalSunnahList.appendChild(createBadge(item.label, active, 'info'));
-    });
+      // 2. Render Sunnah list
+      const sunnahs = [
+        { key: 'tahajud', label: 'Tahajud' },
+        { key: 'duha', label: 'Duha' },
+        { key: 'rawatib', label: 'Rawatib' }
+      ];
+      sunnahs.forEach(item => {
+        const active = log.sholat_sunnah && log.sholat_sunnah[item.key];
+        modalSunnahList.appendChild(createBadge(item.label, active, 'info'));
+      });
 
-    // 3. Render Puasa list
-    const puasa = [
-      { key: 'senin', label: 'Senin' },
-      { key: 'kamis', label: 'Kamis' },
-      { key: 'ayyamul_bidh', label: 'Ayyamul Bidh' }
-    ];
-    puasa.forEach(item => {
-      const active = log.puasa && log.puasa[item.key];
-      modalPuasaList.appendChild(createBadge(item.label, active, 'warning'));
-    });
+      // 3. Render Puasa list
+      const puasa = [
+        { key: 'senin', label: 'Senin' },
+        { key: 'kamis', label: 'Kamis' },
+        { key: 'ayyamul_bidh', label: 'Ayyamul Bidh' }
+      ];
+      puasa.forEach(item => {
+        const active = log.puasa && log.puasa[item.key];
+        modalPuasaList.appendChild(createBadge(item.label, active, 'warning'));
+      });
+    }
 
     // Show modal using Bootstrap API
     const myModal = new bootstrap.Modal(document.getElementById('logDetailModal'));

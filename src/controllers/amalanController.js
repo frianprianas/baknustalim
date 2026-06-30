@@ -41,6 +41,7 @@ exports.showForm = async (req, res) => {
       title: 'Isi Amalan Yaumi - BaknusTa\'lim',
       selectedDateStr,
       log: existingLog || {
+        is_halangan: false,
         sholat_fardu: { subuh: false, dzuhur: false, ashar: false, maghrib: false, isya: false },
         sholat_sunnah: { tahajud: false, duha: false, rawatib: false },
         puasa: { senin: false, kamis: false, ayyamul_bidh: false }
@@ -61,7 +62,7 @@ exports.saveForm = async (req, res) => {
       throw new Error('Akses Ditolak.');
     }
 
-    const { tanggal, fardu, sunnah, puasa } = req.body;
+    const { tanggal, fardu, sunnah, puasa, is_halangan } = req.body;
     if (!tanggal) {
       throw new Error('Tanggal wajib ditentukan.');
     }
@@ -72,8 +73,10 @@ exports.saveForm = async (req, res) => {
       throw new Error('Anda tidak dapat mengisi checklist amalan untuk tanggal yang akan datang.');
     }
 
-    // Parse checkboxes (they only arrive in req.body if checked)
-    const sholat_fardu = {
+    const hasHalangan = !!is_halangan;
+
+    // Parse checkboxes (only active if not in halangan)
+    const sholat_fardu = hasHalangan ? { subuh: false, dzuhur: false, ashar: false, maghrib: false, isya: false } : {
       subuh: !!(fardu && fardu.subuh),
       dzuhur: !!(fardu && fardu.dzuhur),
       ashar: !!(fardu && fardu.ashar),
@@ -81,13 +84,13 @@ exports.saveForm = async (req, res) => {
       isya: !!(fardu && fardu.isya)
     };
 
-    const sholat_sunnah = {
+    const sholat_sunnah = hasHalangan ? { tahajud: false, duha: false, rawatib: false } : {
       tahajud: !!(sunnah && sunnah.tahajud),
       duha: !!(sunnah && sunnah.duha),
       rawatib: !!(sunnah && sunnah.rawatib)
     };
 
-    const parsedPuasa = {
+    const parsedPuasa = hasHalangan ? { senin: false, kamis: false, ayyamul_bidh: false } : {
       senin: !!(puasa && puasa.senin),
       kamis: !!(puasa && puasa.kamis),
       ayyamul_bidh: !!(puasa && puasa.ayyamul_bidh)
@@ -97,6 +100,7 @@ exports.saveForm = async (req, res) => {
     await AmalanYaumi.findOneAndUpdate(
       { siswa_id: user.id, tanggal: logDate },
       {
+        is_halangan: hasHalangan,
         sholat_fardu,
         sholat_sunnah,
         puasa: parsedPuasa
@@ -112,6 +116,7 @@ exports.saveForm = async (req, res) => {
       title: 'Isi Amalan Yaumi - BaknusTa\'lim',
       selectedDateStr: req.body.tanggal || new Date().toISOString().split('T')[0],
       log: {
+        is_halangan: !!req.body.is_halangan,
         sholat_fardu: {
           subuh: !!(req.body.fardu && req.body.fardu.subuh),
           dzuhur: !!(req.body.fardu && req.body.fardu.dzuhur),
@@ -198,7 +203,7 @@ exports.listLaporan = async (req, res) => {
       const logs = await AmalanYaumi.find({ siswa_id: s._id });
       
       let farduDone = 0;
-      let farduExpected = logs.length * 5;
+      let farduExpected = logs.filter(log => !log.is_halangan).length * 5;
       let sunnahCount = 0;
       let puasaCount = 0;
 
@@ -280,6 +285,7 @@ exports.showDetail = async (req, res) => {
       logsMap[dateStr] = {
         _id: log._id,
         tanggal: log.tanggal,
+        is_halangan: log.is_halangan || false,
         sholat_fardu: log.sholat_fardu || {},
         sholat_sunnah: log.sholat_sunnah || {},
         puasa: log.puasa || {},

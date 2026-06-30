@@ -36,65 +36,79 @@
                   
                   <!-- Salat Fardhu list -->
                   <td class="text-center">
-                    <div class="d-flex justify-content-center gap-1 flex-wrap">
-                      <% const fardus = [
-                        { key: 'subuh', label: 'S' },
-                        { key: 'dzuhur', label: 'D' },
-                        { key: 'ashar', label: 'A' },
-                        { key: 'maghrib', label: 'M' },
-                        { key: 'isya', label: 'I' }
-                      ] %>
-                      <% fardus.forEach(f => { %>
-                        <% const done = log.sholat_fardu && log.sholat_fardu[f.key] %>
-                        <span class="badge rounded-circle d-inline-flex align-items-center justify-content-center" 
-                              style="width: 25px; height: 25px; font-size: 0.72rem; 
-                                     background-color: <%= done ? 'rgba(22, 163, 74, 0.15)' : 'rgba(239, 68, 68, 0.08)' %>; 
-                                     color: <%= done ? '#16a34a' : '#ef4444' %>;
-                                     border: 1px solid <%= done ? 'rgba(22, 163, 74, 0.3)' : 'rgba(239, 68, 68, 0.2)' %>;" 
-                              title="<%= f.key.toUpperCase() %>: <%= done ? 'Telah Dikerjakan' : 'Belum/Tidak' %>">
-                          <%= f.label %>
-                        </span>
-                      <% }) %>
-                    </div>
-                  </td>
-
-                  <!-- Salat Sunnah list -->
-                  <td class="text-center">
-                    <% let sunnahList = [] %>
-                    <% if (log.sholat_sunnah && log.sholat_sunnah.tahajud) sunnahList.push('Tahajud') %>
-                    <% if (log.sholat_sunnah && log.sholat_sunnah.duha) sunnahList.push('Duha') %>
-                    <% if (log.sholat_sunnah && log.sholat_sunnah.rawatib) sunnahList.push('Rawatib') %>
-                    
-                    <% if (sunnahList.length > 0) { %>
+                    <% if (log.is_halangan) { %>
+                      <span class="badge bg-secondary-subtle text-secondary border py-1 px-3 rounded-pill" style="font-size: 0.75rem;">
+                        <i class="fa-solid fa-venus me-1"></i> Halangan/Haid
+                      </span>
+                    <% } else { %>
                       <div class="d-flex justify-content-center gap-1 flex-wrap">
-                        <% sunnahList.forEach(s => { %>
-                          <span class="badge bg-info-subtle text-info border border-info-subtle py-1 px-2 rounded-pill" style="font-size: 0.7rem;">
-                            <%= s %>
+                        <% const fardus = [
+                          { key: 'subuh', label: 'S' },
+                          { key: 'dzuhur', label: 'D' },
+                          { key: 'ashar', label: 'A' },
+                          { key: 'maghrib', label: 'M' },
+                          { key: 'isya', label: 'I' }
+                        ] %>
+                        <% fardus.forEach(f => { %>
+                          <% const done = log.sholat_fardu && log.sholat_fardu[f.key] %>
+                          <span class="badge rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                style="width: 25px; height: 25px; font-size: 0.72rem; 
+                                       background-color: <%= done ? 'rgba(22, 163, 74, 0.15)' : 'rgba(239, 68, 68, 0.08)' %>; 
+                                       color: <%= done ? '#16a34a' : '#ef4444' %>;
+                                       border: 1px solid <%= done ? 'rgba(22, 163, 74, 0.3)' : 'rgba(239, 68, 68, 0.2)' %>;" 
+                                title="<%= f.key.toUpperCase() %>: <%= done ? 'Telah Dikerjakan' : 'Belum/Tidak' %>">
+                            <%= f.label %>
                           </span>
                         <% }) %>
                       </div>
-                    <% } else { %>
-                      <span class="text-muted small">-</span>
                     <% } %>
                   </td>
-
-                  <!-- Puasa list -->
-                  <td class="text-center">
-                    <% let puasaList = [] %>
-                    <% if (log.puasa && log.puasa.senin) puasaList.push('Senin') %>
-                    <% if (log.puasa && log.puasa.kamis) puasaList.push('Kamis') %>
-                    <% if (log.puasa && log.puasa.ayyamul_bidh) puasaList.push('Ayyamul Bidh') %>
-                    
-                    <% if (puasaList.length > 0) { %>
-                      <div class="d-flex justify-content-center gap-1 flex-wrap">
-                        <% puasaList.forEach(p => { %>
-                          <span class="badge bg-warning-subtle text-warning border border-warning-subtle py-1 px-2 rounded-pill" style="font-size: 0.7rem;">
-                            <%= p %>
-                          </span>
-                        <% }) %>
-                      </div>
-                    <% } else { %>
+ 
+                   <!-- Salat Sunnah list -->
+                   <td class="text-center">
+                    <% if (log.is_halangan) { %>
                       <span class="text-muted small">-</span>
+                    <% } else { %>
+                      <% let sunnahList = [] %>
+                      <% if (log.sholat_sunnah && log.sholat_sunnah.tahajud) sunnahList.push('Tahajud') %>
+                      <% if (log.sholat_sunnah && log.sholat_sunnah.duha) sunnahList.push('Duha') %>
+                      <% if (log.sholat_sunnah && log.sholat_sunnah.rawatib) sunnahList.push('Rawatib') %>
+                      
+                      <% if (sunnahList.length > 0) { %>
+                        <div class="d-flex justify-content-center gap-1 flex-wrap">
+                          <% sunnahList.forEach(s => { %>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle py-1 px-2 rounded-pill" style="font-size: 0.7rem;">
+                              <%= s %>
+                            </span>
+                          <% }) %>
+                        </div>
+                      <% } else { %>
+                        <span class="text-muted small">-</span>
+                      <% } %>
+                    <% } %>
+                  </td>
+ 
+                   <!-- Puasa list -->
+                   <td class="text-center">
+                    <% if (log.is_halangan) { %>
+                      <span class="text-muted small">-</span>
+                    <% } else { %>
+                      <% let puasaList = [] %>
+                      <% if (log.puasa && log.puasa.senin) puasaList.push('Senin') %>
+                      <% if (log.puasa && log.puasa.kamis) puasaList.push('Kamis') %>
+                      <% if (log.puasa && log.puasa.ayyamul_bidh) puasaList.push('Ayyamul Bidh') %>
+                      
+                      <% if (puasaList.length > 0) { %>
+                        <div class="d-flex justify-content-center gap-1 flex-wrap">
+                          <% puasaList.forEach(p => { %>
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle py-1 px-2 rounded-pill" style="font-size: 0.7rem;">
+                              <%= p %>
+                            </span>
+                          <% }) %>
+                        </div>
+                      <% } else { %>
+                        <span class="text-muted small">-</span>
+                      <% } %>
                     <% } %>
                   </td>
 

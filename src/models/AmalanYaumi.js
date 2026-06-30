@@ -10,6 +10,10 @@ const AmalanYaumiSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
+  is_halangan: {
+    type: Boolean,
+    default: false
+  },
   sholat_fardu: {
     subuh: { type: Boolean, default: false },
     dzuhur: { type: Boolean, default: false },

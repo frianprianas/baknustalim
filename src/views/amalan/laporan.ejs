@@ -141,7 +141,7 @@
               
               <!-- Salat Fardhu Compliance -->
               <td class="text-center">
-                <% const percentage = row.fardu.expected > 0 ? Math.round((row.fardu.done / row.fardu.expected) * 100) : 0 %>
+                <% const percentage = row.daysFilled === 0 ? 0 : (row.fardu.expected > 0 ? Math.round((row.fardu.done / row.fardu.expected) * 100) : 100) %>
                 <span class="fw-bold <%= percentage >= 80 ? 'text-success' : percentage >= 50 ? 'text-warning' : 'text-danger' %>">
                   <%= row.fardu.done %>
                 </span>
