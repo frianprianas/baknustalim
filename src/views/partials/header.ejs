@@ -10,6 +10,17 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
   <!-- Custom Style -->
   <link rel="stylesheet" href="/css/style.css">
+  <!-- Theme Init Script -->
+  <script>
+    const storedTheme = localStorage.getItem('theme');
+    const getPreferredTheme = () => {
+      if (storedTheme) {
+        return storedTheme;
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+    document.documentElement.setAttribute('data-bs-theme', getPreferredTheme());
+  </script>
 </head>
 <body>
 
@@ -180,6 +191,11 @@
           </ul>
 
           <div class="d-flex align-items-center gap-2">
+            <!-- Theme Toggle -->
+            <button class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" id="themeToggleBtn" style="width: 32px; height: 32px; border-color: var(--glass-border);" title="Ganti Tema Terang/Gelap">
+              <i class="fa-solid fa-circle-half-stroke text-secondary"></i>
+            </button>
+            
             <div class="d-flex align-items-center justify-content-center rounded-circle border border-success text-white fw-bold d-none d-lg-inline-flex" style="width: 32px; height: 32px; background-color: #15803d; overflow: hidden; font-size: 0.9rem; flex-shrink: 0;">
               <img src="https://baknusmail.smkbn666.sch.id/api/auth/avatar/<%= currentUser.mailcow_email %>"
                    alt="Avatar"
