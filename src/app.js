@@ -85,7 +85,7 @@ app.use('/live', require('./routes/live.routes'));
 app.use('/ai', require('./routes/ai.routes'));
 app.use('/hadits', require('./routes/hadits.routes'));
 app.use('/amalan', require('./routes/amalan.routes'));
-app.use('/tajwid', require('./routes/tajweed.routes'));
+app.use('/belajar', require('./routes/belajar.routes'));
 
 // 404 Handler
 app.use((req, res, next) => {

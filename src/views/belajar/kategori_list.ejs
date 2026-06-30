@@ -1,0 +1,107 @@
+<%- include('../partials/header') %>
+
+<div class="row justify-content-center animate__animated animate__fadeIn">
+  <div class="col-lg-9 col-md-11">
+
+    <!-- Header Navigation Back & Action Button -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
+      <div class="d-flex align-items-center">
+        <a href="/belajar" class="btn btn-outline-light rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+          <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+          <span class="text-secondary small text-uppercase fw-bold">Kategori Belajar Islam</span>
+          <h1 class="h3 mb-0 text-success"><%= kategoriName %></h1>
+        </div>
+      </div>
+      
+      <% if (currentUser.role === 'admin' || (currentUser.role === 'guru' && currentUser.is_guru_pai)) { %>
+        <a href="/belajar/input?kategori=<%= kategoriId %>" class="btn btn-success rounded-pill px-4 shadow-sm">
+          <i class="fa-solid fa-pen-nib me-2"></i> Tulis Materi Baru
+        </a>
+      <% } %>
+    </div>
+
+    <!-- Materials List -->
+    <% if (materiList.length > 0) { %>
+      <div class="row g-4">
+        <% materiList.forEach(m => { %>
+          <div class="col-12">
+            <div class="card-glass p-4" style="transition: all 0.2s ease;">
+              <div class="d-flex flex-column gap-2">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <h4 class="fw-bold text-primary mb-1">
+                    <a href="/belajar/materi/<%= m._id %>" class="text-decoration-none text-primary hover-opacity">
+                      <%= m.judul %>
+                    </a>
+                  </h4>
+                  
+                  <% if (currentUser.role === 'admin' || (currentUser.role === 'guru' && m.guru_id && m.guru_id._id.toString() === currentUser.id)) { %>
+                    <div class="dropdown">
+                      <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-ellipsis-vertical fs-5"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end border-0 shadow p-2" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
+                        <li>
+                          <a class="dropdown-item rounded py-2 text-primary" href="/belajar/input?edit_id=<%= m._id %>">
+                            <i class="fa-solid fa-pen me-2"></i> Edit Materi
+                          </a>
+                        </li>
+                        <li>
+                          <form action="/belajar/delete/<%= m._id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus materi ini?');">
+                            <button type="submit" class="dropdown-item rounded py-2 text-danger">
+                              <i class="fa-solid fa-trash me-2"></i> Hapus Materi
+                            </button>
+                          </form>
+                        </li>
+                      </ul>
+                    </div>
+                  <% } %>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center gap-3 text-secondary small mb-2">
+                  <span class="d-flex align-items-center gap-1">
+                    <i class="fa-solid fa-user-tie text-success"></i> Oleh: <strong><%= m.guru_id ? m.guru_id.nama : 'Guru PAI' %></strong>
+                  </span>
+                  <span class="d-flex align-items-center gap-1">
+                    <i class="fa-solid fa-calendar-day"></i> <%= new Date(m.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                  </span>
+                </div>
+
+                <!-- Text Snippet (First 180 chars) -->
+                <% 
+                  let plainText = m.konten.replace(/<[^>]*>/g, '').substring(0, 180);
+                  if (m.konten.length > 180) plainText += '...';
+                %>
+                <p class="text-secondary mb-3 leading-relaxed" style="font-size: 0.95rem;"><%= plainText %></p>
+
+                <div class="text-end">
+                  <a href="/belajar/materi/<%= m._id %>" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                    Baca Selengkapnya <i class="fa-solid fa-arrow-right-long ms-1"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <!-- Empty State -->
+      <div class="card-glass text-center py-5">
+        <div class="mb-4">
+          <i class="fa-solid fa-folder-open text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
+        </div>
+        <h4 class="fw-bold">Belum Ada Materi</h4>
+        <p class="text-secondary max-w-md mx-auto mb-4">Materi pembelajaran untuk kategori ini belum diunggah oleh Guru PAI. Silakan kembali lagi nanti.</p>
+        <% if (currentUser.role === 'admin' || (currentUser.role === 'guru' && currentUser.is_guru_pai)) { %>
+          <a href="/belajar/input?kategori=<%= kategoriId %>" class="btn btn-success rounded-pill px-4">
+            <i class="fa-solid fa-plus me-1"></i> Tulis Materi Pertama
+          </a>
+        <% } %>
+      </div>
+    <% } %>
+
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
