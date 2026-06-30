@@ -163,7 +163,7 @@
             const mLat = el.lat || (el.center && el.center.lat);
             const mLon = el.lon || (el.center && el.center.lon);
             return {
-              name: (el.tags && el.tags.name) ? el.tags.name : 'Masjid (Tanpa Nama)',
+              name: (el.tags && (el.tags.name || el.tags.official_name || el.tags.alt_name || el.tags['name:id'] || el.tags.description)) ? (el.tags.name || el.tags.official_name || el.tags.alt_name || el.tags['name:id'] || el.tags.description) : 'Masjid Terdekat',
               lat: mLat,
               lon: mLon,
               dist: calculateDistance(lat, lng, mLat, mLon)
