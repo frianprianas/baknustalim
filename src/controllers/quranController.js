@@ -102,6 +102,10 @@ exports.addBookmark = async (req, res) => {
       { upsert: true, new: true }
     );
 
+    // Update user points
+    const { updateUserPoints } = require('../services/pointsService');
+    await updateUserPoints(currentUser.id);
+
     res.json({ success: true, message: 'Bookmark berhasil disimpan.' });
   } catch (error) {
     console.error(error);
@@ -124,6 +128,10 @@ exports.removeBookmark = async (req, res) => {
       surah_number: parseInt(surah_number),
       ayat_number: parseInt(ayat_number)
     });
+
+    // Update user points
+    const { updateUserPoints } = require('../services/pointsService');
+    await updateUserPoints(currentUser.id);
 
     res.json({ success: true, message: 'Bookmark berhasil dihapus.' });
   } catch (error) {

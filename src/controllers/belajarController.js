@@ -118,10 +118,30 @@ exports.showMateri = async (req, res) => {
       return res.status(404).render('error', { title: 'Tidak Ditemukan', message: 'Materi belajar tidak ditemukan.', error: { status: 404 } });
     }
 
+    const currentUser = req.session.user;
+    let earnedPoints = false;
+    if (currentUser && currentUser.role === 'siswa') {
+      const MateriReadLog = require('../models/MateriReadLog');
+      const existingLog = await MateriReadLog.findOne({
+        siswa_id: currentUser.id,
+        materi_id: materi._id
+      });
+      if (!existingLog) {
+        await MateriReadLog.create({
+          siswa_id: currentUser.id,
+          materi_id: materi._id
+        });
+        const { updateUserPoints } = require('../services/pointsService');
+        await updateUserPoints(currentUser.id);
+        earnedPoints = true;
+      }
+    }
+
     res.render('belajar/materi_detail', {
       title: `${materi.judul} - Belajar ${KATEGORI_MAP[materi.kategori]}`,
       materi,
-      kategoriName: KATEGORI_MAP[materi.kategori]
+      kategoriName: KATEGORI_MAP[materi.kategori],
+      earnedPoints
     });
   } catch (error) {
     console.error(error);

@@ -17,7 +17,10 @@ exports.showDashboard = async (req, res) => {
     }
 
     if (user.role === 'siswa') {
-      // 1. Fetch Student profile & class
+      // 1. Refresh & Fetch Student profile & class
+      const { updateUserPoints } = require('../services/pointsService');
+      await updateUserPoints(user.id);
+
       const student = await User.findById(user.id).populate('kelas_id');
       
       // 2. Fetch Memorization Stats

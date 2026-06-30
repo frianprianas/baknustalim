@@ -93,6 +93,10 @@ exports.create = async (req, res) => {
 
     await record.save();
 
+    // Update user points for the graded student
+    const { updateUserPoints } = require('../services/pointsService');
+    await updateUserPoints(student._id);
+
     req.session.successMessage = `Berhasil menyimpan nilai hafalan untuk ${student.nama}.`;
     res.redirect('/hafalan/riwayat');
   } catch (error) {

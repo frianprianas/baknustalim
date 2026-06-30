@@ -74,8 +74,29 @@
 
 <!-- Stats Counter Grid -->
 <div class="row mb-4">
+  <!-- Poin Stats -->
+  <div class="col-lg-4 col-md-6 mb-3">
+    <div class="card-glass stat-card info" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(6, 182, 212, 0.15) 100%); border: 1px solid rgba(6, 182, 212, 0.25);">
+      <h5 class="text-secondary mb-3 d-flex align-items-center justify-content-between">
+        <span><i class="fa-solid fa-coins me-2 text-info animate__animated animate__pulse animate__infinite"></i> Poin Belajar & Ibadah</span>
+        <button class="btn btn-link text-info p-0 text-decoration-none btn-sm" data-bs-toggle="modal" data-bs-target="#poinInfoModal">
+          <i class="fa-solid fa-circle-question fs-5"></i>
+        </button>
+      </h5>
+      <div class="d-flex align-items-center justify-content-between py-2">
+        <div>
+          <h2 class="mb-0 text-white fw-bold"><%= student.poin || 0 %> <span class="fs-5 fw-normal text-info">Poin</span></h2>
+          <small class="text-secondary">Peringkat & Kepatuhan Aktif</small>
+        </div>
+        <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center" style="width: 55px; height: 55px; box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); flex-shrink: 0;">
+          <i class="fa-solid fa-award fa-2x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Hafalan Stats -->
-  <div class="col-md-6 mb-3 mb-md-0">
+  <div class="col-lg-4 col-md-6 mb-3">
     <div class="card-glass stat-card success">
       <h5 class="text-secondary mb-3"><i class="fa-solid fa-book-open me-2 text-success"></i> Hafalan Al-Qur'an</h5>
       <div class="row text-center">
@@ -96,7 +117,7 @@
   </div>
 
   <!-- Worship Stats -->
-  <div class="col-md-6">
+  <div class="col-lg-4 col-md-12 mb-3">
     <div class="card-glass stat-card warning">
       <h5 class="text-secondary mb-3"><i class="fa-solid fa-person-praying me-2 text-warning"></i> Praktek Ibadah</h5>
       <div class="row text-center">
@@ -220,6 +241,81 @@
           <p class="mb-0">Belum ada riwayat praktek ibadah.</p>
         </div>
       <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap Modal for Points Info -->
+<div class="modal fade" id="poinInfoModal" tabindex="-1" aria-labelledby="poinInfoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content card-glass border-0" style="background: rgba(30, 41, 59, 0.98); backdrop-filter: blur(20px); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1) !important;">
+      <div class="modal-header border-bottom border-secondary pb-3">
+        <h5 class="modal-title fw-bold text-info" id="poinInfoModalLabel">
+          <i class="fa-solid fa-award me-2"></i> Sistem Perolehan Poin
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body py-4">
+        <p class="text-secondary small mb-4">Dapatkan poin dengan aktif beribadah dan belajar di portal BaknusTa'lim. Berikut adalah daftar perolehan poin Anda:</p>
+        
+        <div class="table-responsive">
+          <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+            <thead>
+              <tr class="text-secondary small">
+                <th>Aktivitas Belajar & Ibadah</th>
+                <th class="text-end" style="width: 100px;">Poin</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="fw-bold"><i class="fa-solid fa-mosque me-2 text-success"></i> Salat Fardhu</div>
+                  <small class="text-secondary">Setiap waktu salat wajib yang diisi tepat waktu</small>
+                </td>
+                <td class="text-end fw-bold text-success">+5 Poin</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="fw-bold"><i class="fa-solid fa-moon me-2 text-info"></i> Salat Sunnah</div>
+                  <small class="text-secondary">Tahajud, Duha, atau Rawatib yang dirikan</small>
+                </td>
+                <td class="text-end fw-bold text-info">+3 Poin</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="fw-bold"><i class="fa-solid fa-droplet-slash me-2 text-warning"></i> Puasa Sunnah</div>
+                  <small class="text-secondary">Puasa Senin, Kamis, atau Ayyamul Bidh</small>
+                </td>
+                <td class="text-end fw-bold text-warning">+10 Poin</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="fw-bold"><i class="fa-solid fa-bookmark me-2 text-danger"></i> Bookmark Al-Qur'an</div>
+                  <small class="text-secondary">Tadarus mandiri dengan menandai ayat bookmark</small>
+                </td>
+                <td class="text-end fw-bold text-danger">+10 Poin</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="fw-bold"><i class="fa-solid fa-book-open me-2 text-primary"></i> Membaca Materi Islam</div>
+                  <small class="text-secondary">Artikel Akhlak, Fiqih, atau Aqidah yang dibaca</small>
+                </td>
+                <td class="text-end fw-bold text-primary">+5 Poin</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="fw-bold"><i class="fa-solid fa-graduation-cap me-2 text-success"></i> Hafalan Surah (Kompeten)</div>
+                  <small class="text-secondary">Hafalan surah yang dinilai kompeten oleh Guru PAI</small>
+                </td>
+                <td class="text-end fw-bold text-success">+20 Poin</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-info rounded-pill text-white w-100" data-bs-dismiss="modal">Mengerti & Siap Belajar</button>
+      </div>
     </div>
   </div>
 </div>

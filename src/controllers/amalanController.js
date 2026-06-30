@@ -108,6 +108,10 @@ exports.saveForm = async (req, res) => {
       { upsert: true, new: true }
     );
 
+    // Update user points
+    const { updateUserPoints } = require('../services/pointsService');
+    await updateUserPoints(user.id);
+
     req.session.successMessage = `Berhasil menyimpan checklist amalan untuk tanggal ${new Date(logDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
     res.redirect('/amalan');
   } catch (error) {

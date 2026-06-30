@@ -36,6 +36,10 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  poin: {
+    type: Number,
+    default: 0
+  },
   last_synced_at: {
     type: Date,
     default: Date.now
