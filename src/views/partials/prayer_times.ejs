@@ -26,6 +26,18 @@
   <div id="prayerData" class="row g-2 d-none">
     <!-- Items will be injected here via JS -->
   </div>
+
+  <div id="mosquesData" class="mt-4 border-top border-secondary-subtle pt-3 d-none">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <small class="fw-bold text-secondary"><i class="fa-solid fa-mosque me-1"></i> Masjid Terdekat</small>
+    </div>
+    <div class="row g-2" id="mosquesList">
+      <!-- Mosques will be injected here via JS -->
+    </div>
+    <div id="mosquesLoading" class="text-center py-2 d-none">
+      <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -102,6 +114,9 @@
           document.getElementById('prayerError').classList.add('d-none');
           document.getElementById('prayerData').classList.remove('d-none');
           
+          // Fetch nearest mosques
+          fetchNearestMosques(lat, lng);
+          
           // Cache coordinates for 24 hours
           localStorage.setItem('baknus_prayer_loc', JSON.stringify({ lat, lng, timestamp: Date.now() }));
         } else {
@@ -118,6 +133,63 @@
     document.getElementById('prayerData').classList.add('d-none');
     document.getElementById('prayerError').classList.remove('d-none');
     document.getElementById('prayerErrorMessage').innerText = msg;
+  }
+
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return (R * c * 1000).toFixed(0); // in meters
+  }
+
+  function fetchNearestMosques(lat, lng) {
+    document.getElementById('mosquesData').classList.remove('d-none');
+    document.getElementById('mosquesLoading').classList.remove('d-none');
+    
+    // Overpass API Query: mosques within 2500m
+    const query = `[out:json];node(around:2500,${lat},${lng})["amenity"="place_of_worship"]["religion"="muslim"];out 5;`;
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+    
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('mosquesLoading').classList.add('d-none');
+        if (data && data.elements && data.elements.length > 0) {
+          const mosques = data.elements.map(el => {
+            return {
+              name: el.tags.name || 'Masjid (Tanpa Nama)',
+              lat: el.lat,
+              lon: el.lon,
+              dist: calculateDistance(lat, lng, el.lat, el.lon)
+            };
+          }).sort((a, b) => a.dist - b.dist).slice(0, 3);
+          
+          let html = '';
+          mosques.forEach(m => {
+            const mapUrl = `https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}`;
+            html += `
+              <div class="col-12 col-md-4">
+                <a href="${mapUrl}" target="_blank" class="text-decoration-none">
+                  <div class="p-2 rounded-3 border border-secondary-subtle bg-transparent text-secondary h-100" style="transition: all 0.2s ease;" onmouseover="this.classList.add('bg-success-subtle', 'border-success', 'text-success'); this.classList.remove('text-secondary', 'border-secondary-subtle');" onmouseout="this.classList.remove('bg-success-subtle', 'border-success', 'text-success'); this.classList.add('text-secondary', 'border-secondary-subtle');">
+                    <small class="d-block fw-bold text-primary text-truncate mb-1" style="font-size: 0.8rem;">${m.name}</small>
+                    <span class="d-block" style="font-size: 0.7rem;"><i class="fa-solid fa-location-arrow me-1"></i> ${m.dist} meter</span>
+                  </div>
+                </a>
+              </div>
+            `;
+          });
+          document.getElementById('mosquesList').innerHTML = html;
+        } else {
+          document.getElementById('mosquesList').innerHTML = `<div class="col-12"><small class="text-muted">Tidak ditemukan data masjid terdekat dalam radius 2.5km.</small></div>`;
+        }
+      })
+      .catch(err => {
+        document.getElementById('mosquesLoading').classList.add('d-none');
+      });
   }
 
   function requestLocation() {
