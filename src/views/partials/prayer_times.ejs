@@ -151,7 +151,7 @@
     document.getElementById('mosquesLoading').classList.remove('d-none');
     
     // Overpass API Query: mosques within 2500m
-    const query = `[out:json];node(around:2500,${lat},${lng})["amenity"="place_of_worship"]["religion"="muslim"];out 5;`;
+    const query = `[out:json];nwr(around:2500,${lat},${lng})["amenity"="place_of_worship"]["religion"="muslim"];out center 5;`;
     const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
     
     fetch(url)
@@ -160,11 +160,13 @@
         document.getElementById('mosquesLoading').classList.add('d-none');
         if (data && data.elements && data.elements.length > 0) {
           const mosques = data.elements.map(el => {
+            const mLat = el.lat || (el.center && el.center.lat);
+            const mLon = el.lon || (el.center && el.center.lon);
             return {
-              name: el.tags.name || 'Masjid (Tanpa Nama)',
-              lat: el.lat,
-              lon: el.lon,
-              dist: calculateDistance(lat, lng, el.lat, el.lon)
+              name: (el.tags && el.tags.name) ? el.tags.name : 'Masjid (Tanpa Nama)',
+              lat: mLat,
+              lon: mLon,
+              dist: calculateDistance(lat, lng, mLat, mLon)
             };
           }).sort((a, b) => a.dist - b.dist).slice(0, 3);
           
