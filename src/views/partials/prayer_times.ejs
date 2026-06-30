@@ -9,6 +9,16 @@
     </span>
   </div>
 
+  <!-- Kalender Resmi Indonesia (Masehi & Hijriah) -->
+  <div class="d-flex align-items-center gap-3 flex-wrap mb-3 pb-3 border-bottom" style="border-color: rgba(255, 255, 255, 0.05) !important;">
+    <div class="small text-secondary">
+      <i class="fa-solid fa-calendar-day me-1 text-info"></i> Masehi: <strong class="text-white" id="masehiDate">-</strong>
+    </div>
+    <div class="small text-secondary">
+      <i class="fa-solid fa-moon me-1 text-warning"></i> Hijriah: <strong class="text-white" id="hijriDate">-</strong>
+    </div>
+  </div>
+
   <div id="prayerLoading" class="text-center py-4">
     <div class="spinner-border text-success mb-2" role="status" style="width: 2rem; height: 2rem;">
       <span class="visually-hidden">Loading...</span>
@@ -41,6 +51,20 @@
 </div>
 
 <script>
+  const masehiMonths = {
+    'January': 'Januari', 'February': 'Februari', 'March': 'Maret', 'April': 'April',
+    'May': 'Mei', 'June': 'Juni', 'July': 'Juli', 'August': 'Agustus',
+    'September': 'September', 'October': 'Oktober', 'November': 'November', 'December': 'Desember'
+  };
+
+  const hijriMonths = {
+    'Muharram': 'Muharam', 'Safar': 'Safar', 'Rabi\' al-awwal': 'Rabiulawal', 'Rabi\' I': 'Rabiulawal',
+    'Rabi\' al-thani': 'Rabiulakhir', 'Rabi\' II': 'Rabiulakhir', 'Jumada al-awwal': 'Jumadilawal', 'Jumada I': 'Jumadilawal',
+    'Jumada al-thani': 'Jumadilakhir', 'Jumada II': 'Jumadilakhir', 'Rajab': 'Rajab', 'Sha\'ban': 'Syakban',
+    'Ramadan': 'Ramadan', 'Shawwal': 'Syawal', 'Dhu al-Qi\'dah': 'Zulkaidah', 'Dhu al-qi\'dah': 'Zulkaidah',
+    'Dhu al-Hijjah': 'Zulhijah', 'Dhu al-hijjah': 'Zulhijah'
+  };
+
   function renderPrayerItem(name, time, isNext) {
     const activeClass = isNext ? 'bg-success text-white' : 'bg-transparent text-secondary';
     const borderClass = isNext ? 'border-success' : 'border-secondary-subtle';
@@ -65,6 +89,21 @@
       .then(data => {
         if (data && data.code === 200) {
           const timings = data.data.timings;
+          const dateInfo = data.data.date;
+          
+          // Set Masehi Date
+          if (dateInfo && dateInfo.gregorian) {
+            const g = dateInfo.gregorian;
+            const monthIndo = masehiMonths[g.month.en] || g.month.en;
+            document.getElementById('masehiDate').innerText = `${g.day} ${monthIndo} ${g.year}`;
+          }
+          
+          // Set Hijri Date
+          if (dateInfo && dateInfo.hijri) {
+            const h = dateInfo.hijri;
+            const monthIndo = hijriMonths[h.month.en] || h.month.en;
+            document.getElementById('hijriDate').innerText = `${h.day} ${monthIndo} ${h.year} H`;
+          }
           
           // Get location name (reverse geocoding)
           fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`)
