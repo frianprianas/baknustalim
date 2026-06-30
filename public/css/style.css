@@ -150,7 +150,7 @@ body::before {
 
 /* Header & Navbar */
 .navbar-glass {
-  background: rgba(244, 251, 247, 0.85);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--glass-border);
   position: sticky;

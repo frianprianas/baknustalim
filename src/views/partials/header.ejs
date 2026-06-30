@@ -26,7 +26,7 @@
 
   <!-- Navigation Bar -->
   <% if (typeof currentUser !== 'undefined' && currentUser) { %>
-    <nav class="navbar navbar-expand-lg navbar-light navbar-glass">
+    <nav class="navbar navbar-expand-lg navbar-glass">
       <div class="container">
         <a class="navbar-brand d-flex align-items-center text-decoration-none" href="/dashboard">
           <img src="/img/baknus_talim_calligraphy.png" alt="Baknus Ta'lim" style="max-height: 40px; width: auto; margin-right: 8px; filter: drop-shadow(0 2px 6px rgba(21, 128, 61, 0.15));" />
@@ -192,8 +192,8 @@
 
           <div class="d-flex align-items-center gap-2">
             <!-- Theme Toggle -->
-            <button class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" id="themeToggleBtn" style="width: 32px; height: 32px; border-color: var(--glass-border);" title="Ganti Tema Terang/Gelap">
-              <i class="fa-solid fa-circle-half-stroke text-secondary"></i>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center px-3 me-1" id="themeToggleBtn" style="border-color: var(--glass-border); color: var(--text-primary);" title="Ganti Tema Terang/Gelap">
+              <i class="fa-solid fa-moon me-2" id="themeIcon"></i> <span id="themeText" class="fw-medium" style="font-size: 0.8rem;">Gelap</span>
             </button>
             
             <div class="d-flex align-items-center justify-content-center rounded-circle border border-success text-white fw-bold d-none d-lg-inline-flex" style="width: 32px; height: 32px; background-color: #15803d; overflow: hidden; font-size: 0.9rem; flex-shrink: 0;">

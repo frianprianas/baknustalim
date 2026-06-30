@@ -14,12 +14,30 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const themeToggleBtn = document.getElementById('themeToggleBtn');
+      const themeIcon = document.getElementById('themeIcon');
+      const themeText = document.getElementById('themeText');
+      
+      const updateThemeUI = (theme) => {
+        if (!themeIcon || !themeText) return;
+        if (theme === 'dark') {
+          themeIcon.className = 'fa-solid fa-sun me-2 text-warning';
+          themeText.innerText = 'Terang';
+        } else {
+          themeIcon.className = 'fa-solid fa-moon me-2';
+          themeText.innerText = 'Gelap';
+        }
+      };
+      
+      // Initialize UI based on current theme
+      updateThemeUI(document.documentElement.getAttribute('data-bs-theme'));
+      
       if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', () => {
           const currentTheme = document.documentElement.getAttribute('data-bs-theme');
           const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
           document.documentElement.setAttribute('data-bs-theme', newTheme);
           localStorage.setItem('theme', newTheme);
+          updateThemeUI(newTheme);
         });
       }
     });
