@@ -42,5 +42,62 @@
       }
     });
   </script>
+
+  <!-- Ngaji Bareng Notification Container -->
+  <div id="ngaji-notification-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100; max-width: 350px;"></div>
+
+  <% if (typeof currentUser !== 'undefined' && currentUser && typeof activeNgajiSession !== 'undefined' && activeNgajiSession) { %>
+    <!-- Socket.IO Ngaji Bareng Global Toast Handler -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        if (typeof io !== 'undefined') {
+          const socket = io();
+          
+          // Join the Ngaji Bareng socket room
+          socket.emit('join_ngaji_bareng');
+          
+          const container = document.getElementById('ngaji-notification-container');
+          
+          socket.on('ngaji_read_broadcast', (data) => {
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = 'card-glass p-3 mb-2 animate__animated animate__fadeInRight';
+            toast.style.background = 'var(--glass-bg)';
+            toast.style.borderColor = 'var(--accent-color)';
+            toast.style.borderLeft = '4px solid var(--accent-color)';
+            toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+            toast.style.backdropFilter = 'blur(12px)';
+            
+            let roleBadgeColor = 'bg-secondary';
+            if (data.role === 'Guru') roleBadgeColor = 'bg-success';
+            else if (data.role === 'TU') roleBadgeColor = 'bg-info';
+            else if (data.role === 'Admin') roleBadgeColor = 'bg-danger';
+            else roleBadgeColor = 'bg-primary';
+
+            toast.innerHTML = `
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge ${roleBadgeColor} rounded-pill text-xs px-2" style="font-size: 0.65rem;">${data.role}</span>
+                <strong class="text-primary small">${data.user_name}</strong>
+              </div>
+              <div class="text-secondary small" style="font-size: 0.8rem; line-height: 1.4;">
+                Sedang membaca <strong class="text-accent">Surah ${data.surah_name}</strong> Ayat <strong>${data.ayat_number}</strong>
+              </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+              toast.classList.replace('animate__fadeInRight', 'animate__fadeOutRight');
+              toast.addEventListener('animationend', () => {
+                toast.remove();
+              });
+            }, 4000);
+          });
+        }
+      });
+    </script>
+  <% } %>
 </body>
 </html>

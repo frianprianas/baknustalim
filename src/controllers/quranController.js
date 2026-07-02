@@ -188,3 +188,101 @@ exports.murottalPlayer = async (req, res) => {
     res.status(500).render('error', { title: 'Server Error', message: error.message, error });
   }
 };
+
+// Halaman Utama Ngaji Bareng
+exports.ngajiBarengIndex = async (req, res) => {
+  const currentUser = req.session.user;
+  const NgajiSession = require('../models/NgajiSession');
+  try {
+    // 1. Clean up any expired active sessions
+    await NgajiSession.updateMany(
+      { status: 'aktif', waktu_selesai: { $lte: new Date() } },
+      { $set: { status: 'selesai' } }
+    );
+
+    // 2. Find if there is an active session
+    const activeSession = await NgajiSession.findOne({ status: 'aktif' }).populate('created_by');
+
+    // 3. Find recently ended sessions (max 10)
+    const endedSessions = await NgajiSession.find({ status: 'selesai' })
+      .populate('created_by')
+      .sort({ waktu_selesai: -1 })
+      .limit(10);
+
+    res.render('quran/ngaji_bareng', {
+      title: 'Ngaji Bareng - BaknusTa\'lim',
+      activeSession,
+      endedSessions,
+      currentUser
+    });
+  } catch (error) {
+    console.error('[QuranController] Error in ngajiBarengIndex:', error);
+    res.status(500).render('error', { title: 'Server Error', message: error.message, error });
+  }
+};
+
+// Mulai Sesi Ngaji Bareng
+exports.startNgajiSession = async (req, res) => {
+  const currentUser = req.session.user;
+  const NgajiSession = require('../models/NgajiSession');
+  try {
+    const existing = await NgajiSession.findOne({ status: 'aktif' });
+    if (existing) {
+      req.session.errorMessage = 'Sesi Ngaji Bareng sedang berlangsung.';
+      return res.redirect('/quran/ngajibareng');
+    }
+
+    const startTime = new Date();
+    const endTime = new Date(startTime.getTime() + 90 * 60 * 1000); // 90 minutes max
+
+    const session = new NgajiSession({
+      created_by: currentUser.id,
+      creator_name: currentUser.nama || (currentUser.profile && currentUser.profile.displayName) || 'Pengguna',
+      waktu_mulai: startTime,
+      waktu_selesai: endTime,
+      status: 'aktif'
+    });
+
+    await session.save();
+    req.session.successMessage = 'Sesi Ngaji Bareng berhasil dimulai selama 90 menit!';
+    res.redirect('/quran/ngajibareng');
+  } catch (error) {
+    console.error('[QuranController] Error in startNgajiSession:', error);
+    res.status(500).render('error', { title: 'Server Error', message: error.message, error });
+  }
+};
+
+// Hentikan Sesi Ngaji Bareng
+exports.stopNgajiSession = async (req, res) => {
+  const { id } = req.params;
+  const currentUser = req.session.user;
+  const NgajiSession = require('../models/NgajiSession');
+
+  try {
+    const session = await NgajiSession.findById(id);
+    if (!session) {
+      req.session.errorMessage = 'Sesi tidak ditemukan.';
+      return res.redirect('/quran/ngajibareng');
+    }
+
+    // Allow session creator, Guru, or Admin to end the session
+    if (
+      session.created_by.toString() !== currentUser.id && 
+      currentUser.role !== 'guru' && 
+      currentUser.role !== 'admin'
+    ) {
+      req.session.errorMessage = 'Anda tidak memiliki wewenang untuk mengakhiri sesi ini.';
+      return res.redirect('/quran/ngajibareng');
+    }
+
+    session.status = 'selesai';
+    session.waktu_selesai = new Date();
+    await session.save();
+
+    req.session.successMessage = 'Sesi Ngaji Bareng telah diakhiri.';
+    res.redirect('/quran/ngajibareng');
+  } catch (error) {
+    console.error('[QuranController] Error in stopNgajiSession:', error);
+    res.status(500).render('error', { title: 'Server Error', message: error.message, error });
+  }
+};

@@ -12,5 +12,8 @@ router.get('/surah/:number', quranController.readSurah);
 router.post('/bookmark/add', quranController.addBookmark);
 router.post('/bookmark/remove', quranController.removeBookmark);
 router.get('/bookmarks', quranController.listBookmarks);
+router.get('/ngajibareng', quranController.ngajiBarengIndex);
+router.post('/ngajibareng/start', quranController.startNgajiSession);
+router.post('/ngajibareng/stop/:id', quranController.stopNgajiSession);
 
 module.exports = router;

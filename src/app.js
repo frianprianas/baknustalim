@@ -47,6 +47,21 @@ app.use(async (req, res, next) => {
     }
   }
 
+  // Fetch active Ngaji Bareng Session & auto-expire old ones
+  const NgajiSession = require('./models/NgajiSession');
+  try {
+    const now = new Date();
+    await NgajiSession.updateMany(
+      { status: 'aktif', waktu_selesai: { $lte: now } },
+      { $set: { status: 'selesai' } }
+    );
+    const activeNgaji = await NgajiSession.findOne({ status: 'aktif' });
+    res.locals.activeNgajiSession = activeNgaji || null;
+  } catch (ngajiErr) {
+    console.error('Error handling active Ngaji sessions in middleware:', ngajiErr);
+    res.locals.activeNgajiSession = null;
+  }
+
   res.locals.currentUser = req.session.user || null;
   res.locals.successMessage = req.session.successMessage || null;
   res.locals.errorMessage = req.session.errorMessage || null;
@@ -127,6 +142,19 @@ io.on('connection', (socket) => {
       // Broadcast the updated room size to all users in the room
       const roomSize = io.sockets.adapter.rooms.get(roomName)?.size || 1;
       io.to(roomName).emit('update_room_viewers', roomSize);
+    }
+  });
+
+  // Join Ngaji Bareng room
+  socket.on('join_ngaji_bareng', () => {
+    socket.join('ngaji_bareng');
+    console.log(`[Socket] Client ${socket.id} joined room: ngaji_bareng`);
+  });
+
+  // User reads/clicks an ayat in Ngaji Bareng
+  socket.on('ngaji_read_event', (data) => {
+    if (data && data.user_name && data.surah_name && data.ayat_number) {
+      socket.to('ngaji_bareng').emit('ngaji_read_broadcast', data);
     }
   });
 

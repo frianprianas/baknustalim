@@ -314,6 +314,7 @@
       const isStudent = <%= currentUser.role === 'siswa' ? 'true' : 'false' %>;
       const isGuru = <%= currentUser.role === 'guru' ? 'true' : 'false' %>;
       const currentUserId = "<%= currentUser.id %>";
+      const isNgajiBarengActive = <%= (typeof activeNgajiSession !== 'undefined' && activeNgajiSession) ? 'true' : 'false' %>;
       
       // If the teacher visits this page to watch a student, they can pass ?siswa_id=123 in the URL
       const urlParams = new URLSearchParams(window.location.search);
@@ -362,22 +363,33 @@
         }
       }
 
-      // STUDENT LOGIC: Add click/tap listeners to emit events
-      if (isStudent) {
-        const ayatContainers = document.querySelectorAll('.ayat-container');
-        ayatContainers.forEach(container => {
-          container.style.cursor = 'pointer'; // indicate it's clickable
+      // Join the Ngaji Bareng socket room if session is active
+      if (isNgajiBarengActive) {
+        socket.emit('join_ngaji_bareng');
+      }
+
+      // Click/tap listener on verses for highlighting and broadcasting
+      const ayatContainers = document.querySelectorAll('.ayat-container');
+      ayatContainers.forEach(container => {
+        // Show pointer cursor if either Live Monitoring or Ngaji Bareng is active
+        if (isStudent || isNgajiBarengActive) {
+          container.style.cursor = 'pointer';
+        }
+        
+        container.addEventListener('click', (e) => {
+          // Prevent emitting if clicking the bookmark button, play button, or collapse elements
+          if (
+            e.target.closest('.bookmark-btn') || 
+            e.target.closest('.play-ayat-btn') || 
+            e.target.closest('[data-bs-toggle="collapse"]') || 
+            e.target.closest('.collapse')
+          ) return;
           
-          container.addEventListener('click', (e) => {
-            // Prevent emitting if clicking the bookmark button, play button, or collapse elements
-            if (
-              e.target.closest('.bookmark-btn') || 
-              e.target.closest('.play-ayat-btn') || 
-              e.target.closest('[data-bs-toggle="collapse"]') || 
-              e.target.closest('.collapse')
-            ) return;
-            
-            // Visual feedback for the student
+          const ayatNum = container.id.split('-')[1];
+          const surahNum = <%= surah.number %>;
+
+          // 1. Highlight visual feedback for current user
+          if (isStudent || isNgajiBarengActive) {
             document.querySelectorAll('.ayat-container').forEach(el => {
               el.style.backgroundColor = '';
               el.style.boxShadow = 'none';
@@ -385,21 +397,28 @@
             container.style.transition = 'all 0.3s ease';
             container.style.backgroundColor = 'rgba(21, 128, 61, 0.08)'; // Subtle green highlight
             container.style.boxShadow = 'inset 4px 0 0 var(--accent-color)';
-            
-            const ayatNum = container.id.split('-')[1];
-            const surahNum = <%= surah.number %>;
-            
-            // Emit to teacher
-            if (roomSiswaId) {
-              socket.emit('highlight_ayat', {
-                siswa_id: roomSiswaId,
-                surah_number: surahNum,
-                ayat_number: parseInt(ayatNum)
-              });
-            }
-          });
+          }
+
+          // 2. Emit to teacher (Live Monitoring)
+          if (isStudent && roomSiswaId) {
+            socket.emit('highlight_ayat', {
+              siswa_id: roomSiswaId,
+              surah_number: surahNum,
+              ayat_number: parseInt(ayatNum)
+            });
+          }
+
+          // 3. Emit to Ngaji Bareng active room
+          if (isNgajiBarengActive) {
+            socket.emit('ngaji_read_event', {
+              user_name: "<%= currentUser.nama || (currentUser.profile && currentUser.profile.displayName) || 'Pengguna' %>",
+              role: "<%= currentUser.role === 'guru' ? 'Guru' : (currentUser.role === 'admin' ? 'Admin' : (currentUser.role === 'tu' ? 'TU' : 'Siswa')) %>",
+              surah_name: "<%= surah.name_latin %>",
+              ayat_number: parseInt(ayatNum)
+            });
+          }
         });
-      }
+      });
     }
   });
 </script>
