@@ -62,13 +62,34 @@
           socket.on('ngaji_read_broadcast', (data) => {
             if (!container) return;
 
+            // 1. Cap active popups: limit to maximum of 4 active on screen
+            const activeToasts = container.children;
+            if (activeToasts.length >= 4) {
+              const oldest = activeToasts[0];
+              if (oldest && !oldest.classList.contains('animate__fadeOutRight')) {
+                oldest.classList.replace('animate__fadeInRight', 'animate__fadeOutRight');
+                oldest.addEventListener('animationend', () => oldest.remove());
+              }
+            }
+
+            // 2. Determine dynamic display duration based on crowd density
+            const currentCount = container.children.length;
+            let displayDuration = 5000; // Default 5 seconds
+            if (currentCount >= 3) {
+              displayDuration = 1500; // Dynamic 1.5 seconds if busy
+            } else if (currentCount >= 2) {
+              displayDuration = 3000; // Dynamic 3 seconds if moderately busy
+            }
+
+            // 3. Create a compact, slim toast container
             const toast = document.createElement('div');
-            toast.className = 'card-glass p-3 mb-2 animate__animated animate__fadeInRight';
+            toast.className = 'card-glass p-2 mb-2 animate__animated animate__fadeInRight';
             toast.style.background = 'var(--glass-bg)';
             toast.style.borderColor = 'var(--accent-color)';
-            toast.style.borderLeft = '4px solid var(--accent-color)';
-            toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+            toast.style.borderLeft = '3px solid var(--accent-color)';
+            toast.style.boxShadow = '0 6px 20px rgba(0,0,0,0.12)';
             toast.style.backdropFilter = 'blur(12px)';
+            toast.style.transition = 'all 0.3s ease';
             
             let roleBadgeColor = 'bg-secondary';
             if (data.role === 'Guru') roleBadgeColor = 'bg-success';
@@ -76,24 +97,30 @@
             else if (data.role === 'Admin') roleBadgeColor = 'bg-danger';
             else roleBadgeColor = 'bg-primary';
 
+            // High-density compact HTML layout
             toast.innerHTML = `
-              <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge ${roleBadgeColor} rounded-pill text-xs px-2" style="font-size: 0.65rem;">${data.role}</span>
-                <strong class="text-primary small">${data.user_name}</strong>
-              </div>
-              <div class="text-secondary small" style="font-size: 0.8rem; line-height: 1.4;">
-                Sedang membaca <strong class="text-accent">Surah ${data.surah_name}</strong> Ayat <strong>${data.ayat_number}</strong>
+              <div class="d-flex align-items-center justify-content-between gap-3 text-nowrap">
+                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                  <span class="badge ${roleBadgeColor} rounded-pill text-xs px-1.5 py-0.5" style="font-size: 0.6rem; scale: 0.9;">${data.role}</span>
+                  <strong class="text-primary small text-truncate" style="max-width: 90px; font-size: 0.8rem;">${data.user_name}</strong>
+                  <span class="text-secondary small" style="font-size: 0.78rem;">membaca</span>
+                  <strong class="text-accent small" style="font-size: 0.78rem;">QS ${data.surah_name}:${data.ayat_number}</strong>
+                </div>
+                <i class="fa-solid fa-book-open text-success" style="font-size: 0.8rem; margin-right: 4px;"></i>
               </div>
             `;
 
             container.appendChild(toast);
 
+            // 4. Set dynamic auto-dismiss
             setTimeout(() => {
-              toast.classList.replace('animate__fadeInRight', 'animate__fadeOutRight');
-              toast.addEventListener('animationend', () => {
-                toast.remove();
-              });
-            }, 4000);
+              if (toast.parentNode === container) {
+                toast.classList.replace('animate__fadeInRight', 'animate__fadeOutRight');
+                toast.addEventListener('animationend', () => {
+                  toast.remove();
+                });
+              }
+            }, displayDuration);
           });
         }
       });
