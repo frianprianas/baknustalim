@@ -60,7 +60,7 @@
                   <i class="fa-solid fa-book-open me-2"></i> Mulai Baca Al-Qur'an
                 </a>
                 
-                <% if (currentUser.id === activeSession.created_by._id.toString() || currentUser.role === 'guru' || currentUser.role === 'admin') { %>
+                <% if (currentUser.id === activeSession.created_by._id.toString() || currentUser.role === 'admin') { %>
                   <form action="/quran/ngajibareng/stop/<%= activeSession._id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin mengakhiri sesi Ngaji Bareng ini?');">
                     <button type="submit" class="btn btn-outline-danger rounded-pill px-3">
                       <i class="fa-solid fa-stop me-1"></i> Akhiri Sesi
@@ -92,11 +92,19 @@
           <p class="text-secondary mx-auto mb-4" style="max-width: 500px;">
             Saat ini tidak ada sesi Ngaji Bareng yang aktif. Anda dapat memulai sesi baru untuk mengundang siswa, guru, dan staf TU lainnya membaca Al-Qur'an bersama.
           </p>
-          <form action="/quran/ngajibareng/start" method="POST" class="d-inline-block">
-            <button type="submit" class="btn btn-primary-custom px-4 py-2.5 rounded-pill shadow-sm">
-              <i class="fa-solid fa-circle-play me-2"></i> Mulai Sesi Ngaji Bareng (90 Menit)
-            </button>
-          </form>
+          <% const isAdmin = currentUser.role === 'admin'; %>
+          <% const isGuruPAI = currentUser.role === 'guru' && currentUser.is_guru_pai; %>
+          <% if (isAdmin || isGuruPAI) { %>
+            <form action="/quran/ngajibareng/start" method="POST" class="d-inline-block">
+              <button type="submit" class="btn btn-primary-custom px-4 py-2.5 rounded-pill shadow-sm">
+                <i class="fa-solid fa-circle-play me-2"></i> Mulai Sesi Ngaji Bareng (90 Menit)
+              </button>
+            </form>
+          <% } else { %>
+            <div class="alert alert-info border-0 rounded-3 small d-inline-block px-4 py-2 mb-0">
+              <i class="fa-solid fa-info-circle me-2"></i> Hubungi Guru PAI atau Admin untuk memulai sesi Ngaji Bareng.
+            </div>
+          <% } %>
         </div>
       <% } %>
     </div>

@@ -225,6 +225,15 @@ exports.ngajiBarengIndex = async (req, res) => {
 exports.startNgajiSession = async (req, res) => {
   const currentUser = req.session.user;
   const NgajiSession = require('../models/NgajiSession');
+  
+  const isAdmin = currentUser.role === 'admin';
+  const isGuruPAI = currentUser.role === 'guru' && currentUser.is_guru_pai;
+
+  if (!isAdmin && !isGuruPAI) {
+    req.session.errorMessage = 'Hanya Admin atau Guru PAI yang dapat memulai sesi Ngaji Bareng.';
+    return res.redirect('/quran/ngajibareng');
+  }
+
   try {
     const existing = await NgajiSession.findOne({ status: 'aktif' });
     if (existing) {
@@ -265,13 +274,12 @@ exports.stopNgajiSession = async (req, res) => {
       return res.redirect('/quran/ngajibareng');
     }
 
-    // Allow session creator, Guru, or Admin to end the session
-    if (
-      session.created_by.toString() !== currentUser.id && 
-      currentUser.role !== 'guru' && 
-      currentUser.role !== 'admin'
-    ) {
-      req.session.errorMessage = 'Anda tidak memiliki wewenang untuk mengakhiri sesi ini.';
+    // Allow only the session creator or Admin to end the session
+    const isCreator = session.created_by.toString() === currentUser.id;
+    const isAdmin = currentUser.role === 'admin';
+
+    if (!isCreator && !isAdmin) {
+      req.session.errorMessage = 'Hanya Guru PAI yang memulai sesi ini atau Admin yang dapat mengakhirinya.';
       return res.redirect('/quran/ngajibareng');
     }
 
