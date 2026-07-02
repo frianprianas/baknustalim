@@ -62,23 +62,22 @@
           socket.on('ngaji_read_broadcast', (data) => {
             if (!container) return;
 
-            // 1. Cap active popups: limit to maximum of 4 active on screen
-            const activeToasts = container.children;
-            if (activeToasts.length >= 4) {
+            // 1. Cap active popups: limit to maximum of 3 active on screen
+            const activeToasts = Array.from(container.querySelectorAll('.card-glass:not(.fading-out)'));
+            if (activeToasts.length >= 3) {
               const oldest = activeToasts[0];
-              if (oldest && !oldest.classList.contains('animate__fadeOutRight')) {
+              if (oldest) {
+                oldest.classList.add('fading-out');
                 oldest.classList.replace('animate__fadeInRight', 'animate__fadeOutRight');
-                oldest.addEventListener('animationend', () => oldest.remove());
+                setTimeout(() => oldest.remove(), 300);
               }
             }
 
             // 2. Determine dynamic display duration based on crowd density
-            const currentCount = container.children.length;
-            let displayDuration = 5000; // Default 5 seconds
-            if (currentCount >= 3) {
-              displayDuration = 1500; // Dynamic 1.5 seconds if busy
-            } else if (currentCount >= 2) {
-              displayDuration = 3000; // Dynamic 3 seconds if moderately busy
+            const currentCount = container.querySelectorAll('.card-glass:not(.fading-out)').length;
+            let displayDuration = 3000; // Capped at 3 seconds maximum
+            if (currentCount >= 2) {
+              displayDuration = 1200; // Snappy 1.2 seconds if busy
             }
 
             // 3. Create a compact, slim toast container
@@ -90,6 +89,7 @@
             toast.style.boxShadow = '0 6px 20px rgba(0,0,0,0.12)';
             toast.style.backdropFilter = 'blur(12px)';
             toast.style.transition = 'all 0.3s ease';
+            toast.style.animationDuration = '0.3s'; // Snappy animations
             
             let roleBadgeColor = 'bg-secondary';
             if (data.role === 'Guru') roleBadgeColor = 'bg-success';
@@ -114,11 +114,10 @@
 
             // 4. Set dynamic auto-dismiss
             setTimeout(() => {
-              if (toast.parentNode === container) {
+              if (toast.parentNode === container && !toast.classList.contains('fading-out')) {
+                toast.classList.add('fading-out');
                 toast.classList.replace('animate__fadeInRight', 'animate__fadeOutRight');
-                toast.addEventListener('animationend', () => {
-                  toast.remove();
-                });
+                setTimeout(() => toast.remove(), 300);
               }
             }, displayDuration);
           });
