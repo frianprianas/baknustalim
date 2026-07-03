@@ -145,6 +145,9 @@
                       </span>
                     </td>
                     <td class="text-end pe-4">
+                      <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3 me-2" onclick="showSummaryModal('<%= session._id %>')">
+                        <i class="fa-solid fa-chart-bar me-1"></i> Ringkasan
+                      </button>
                       <span class="badge bg-secondary rounded-pill px-3">Selesai</span>
                     </td>
                   </tr>
@@ -249,6 +252,210 @@
       });
     }
   });
+</script>
+
+<!-- Modal Detail Ringkasan Ngaji Bareng -->
+<div class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);">
+      <div class="modal-header border-0 pb-0">
+        <h4 class="modal-title font-weight-bold text-primary" id="summaryModalLabel">
+          <i class="fa-solid fa-book-quran me-2 text-accent"></i> Ringkasan Sesi Ngaji Bareng
+        </h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-3">
+        <!-- Loader -->
+        <div id="modalLoader" class="text-center py-5">
+          <div class="spinner-border text-success mb-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="text-muted small">Mengambil data ringkasan sesi...</p>
+        </div>
+
+        <!-- Content -->
+        <div id="modalContent" style="display: none;">
+          <!-- Summary Stats -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-6 col-lg-3">
+              <div class="p-3 rounded bg-light border border-light text-center h-100">
+                <span class="small text-muted d-block">Dimulai Oleh</span>
+                <strong class="text-dark small" id="sumCreator">-</strong>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="p-3 rounded bg-light border border-light text-center h-100">
+                <span class="small text-muted d-block">Waktu Mulai</span>
+                <strong class="text-dark small" id="sumStart">-</strong>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="p-3 rounded bg-light border border-light text-center h-100">
+                <span class="small text-muted d-block">Jumlah Pembaca</span>
+                <span class="h4 font-weight-bold text-success d-block my-1" id="sumTotalPembaca">0</span>
+                <span class="small text-muted">Orang</span>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="p-3 rounded bg-light border border-light text-center h-100">
+                <span class="small text-muted d-block">Total Ayat Dibaca</span>
+                <span class="h4 font-weight-bold text-primary d-block my-1" id="sumTotalAyat">0</span>
+                <span class="small text-muted">Kali Klik</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs for Pembaca and Timeline -->
+          <ul class="nav nav-tabs nav-fill mb-3" id="summaryTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active fw-bold text-success border-0 border-bottom border-3" id="pembaca-tab" data-bs-toggle="tab" data-bs-target="#pembaca-panel" type="button" role="tab" aria-controls="pembaca-panel" aria-selected="true">
+                <i class="fa-solid fa-users me-1"></i> Daftar Pembaca
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link fw-bold text-success border-0 border-bottom border-3" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline-panel" type="button" role="tab" aria-controls="timeline-panel" aria-selected="false">
+                <i class="fa-solid fa-timeline me-1"></i> Log Aktivitas
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="summaryTabsContent">
+            <!-- Panel Pembaca -->
+            <div class="tab-pane fade show active" id="pembaca-panel" role="tabpanel" aria-labelledby="pembaca-tab">
+              <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                <table class="table align-middle">
+                  <thead>
+                    <tr>
+                      <th style="width: 30%;">Nama & Peran</th>
+                      <th style="width: 20%;">Total Ayat</th>
+                      <th style="width: 50%;">Surah & Ayat yang Dibaca</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pembacaListTableBody">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Panel Timeline -->
+            <div class="tab-pane fade" id="timeline-panel" role="tabpanel" aria-labelledby="timeline-tab">
+              <div class="list-group list-group-flush overflow-auto" style="max-height: 350px;" id="timelineListGroup">
+                <!-- Dynamic -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function showSummaryModal(sessionId) {
+    const modalElement = document.getElementById('summaryModal');
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+
+    const loader = document.getElementById('modalLoader');
+    const content = document.getElementById('modalContent');
+    
+    loader.style.display = 'block';
+    content.style.display = 'none';
+
+    try {
+      const res = await fetch(`/quran/ngajibareng/summary/${sessionId}`);
+      const result = await res.json();
+      
+      if (!result.success) {
+        alert(result.message || 'Gagal mengambil data ringkasan.');
+        modal.hide();
+        return;
+      }
+
+      const data = result.data;
+
+      // Set basic info
+      document.getElementById('sumCreator').innerText = data.creator_name;
+      document.getElementById('sumStart').innerText = data.waktu_mulai;
+      document.getElementById('sumTotalPembaca').innerText = data.total_pembaca;
+      document.getElementById('sumTotalAyat').innerText = data.total_ayat_dibaca;
+
+      // Populate Pembaca Table
+      const pembacaBody = document.getElementById('pembacaListTableBody');
+      pembacaBody.innerHTML = '';
+      
+      if (data.pembaca && data.pembaca.length > 0) {
+        data.pembaca.forEach(p => {
+          let roleBadgeColor = 'bg-secondary';
+          if (p.role === 'Guru') roleBadgeColor = 'bg-success';
+          else if (p.role === 'TU') roleBadgeColor = 'bg-info';
+          else if (p.role === 'Admin') roleBadgeColor = 'bg-danger';
+          else roleBadgeColor = 'bg-primary';
+
+          let surahDetailHtml = p.surahs.map(s => {
+            return `<div class="mb-1"><strong>Surah ${s.surah_name}</strong>: Ayat ${s.ayat_list.join(', ')}</div>`;
+          }).join('');
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>
+              <div class="fw-bold text-dark small">${p.user_name}</div>
+              <span class="badge ${roleBadgeColor} rounded-pill text-xs px-2" style="font-size: 0.65rem;">${p.role}</span>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border fw-bold">${p.total_ayat} ayat</span>
+            </td>
+            <td class="small text-secondary">
+              ${surahDetailHtml || '<span class="text-muted italic">Tidak ada detail</span>'}
+            </td>
+          `;
+          pembacaBody.appendChild(tr);
+        });
+      } else {
+        pembacaBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-muted small">Tidak ada data pembaca untuk sesi ini.</td></tr>`;
+      }
+
+      // Populate Timeline List
+      const timelineGroup = document.getElementById('timelineListGroup');
+      timelineGroup.innerHTML = '';
+
+      if (data.timeline && data.timeline.length > 0) {
+        data.timeline.forEach(t => {
+          let roleBadgeColor = 'bg-secondary';
+          if (t.role === 'Guru') roleBadgeColor = 'bg-success';
+          else if (t.role === 'TU') roleBadgeColor = 'bg-info';
+          else if (t.role === 'Admin') roleBadgeColor = 'bg-danger';
+          else roleBadgeColor = 'bg-primary';
+
+          const div = document.createElement('div');
+          div.className = 'list-group-item d-flex align-items-center justify-content-between py-2 border-0 border-bottom border-light';
+          div.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge ${roleBadgeColor} rounded-pill text-xs px-2" style="font-size: 0.65rem;">${t.role}</span>
+              <strong class="text-primary small">${t.user_name}</strong>
+              <span class="text-secondary small">membaca <strong class="text-accent">Surah ${t.surah_name}</strong> Ayat <strong class="text-accent">${t.ayat_number}</strong></span>
+            </div>
+            <span class="text-muted small" style="font-size: 0.75rem;"><i class="fa-solid fa-clock me-1"></i> ${t.waktu}</span>
+          `;
+          timelineGroup.appendChild(div);
+        });
+      } else {
+        timelineGroup.innerHTML = `<div class="text-center py-4 text-muted small">Tidak ada aktivitas membaca yang terekam.</div>`;
+      }
+
+      loader.style.display = 'none';
+      content.style.display = 'block';
+
+    } catch (error) {
+      console.error(error);
+      alert('Terjadi kesalahan saat memproses data ringkasan.');
+      modal.hide();
+    }
+  }
 </script>
 
 <%- include('../partials/footer') %>

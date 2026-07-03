@@ -15,5 +15,6 @@ router.get('/bookmarks', quranController.listBookmarks);
 router.get('/ngajibareng', quranController.ngajiBarengIndex);
 router.post('/ngajibareng/start', quranController.startNgajiSession);
 router.post('/ngajibareng/stop/:id', quranController.stopNgajiSession);
+router.get('/ngajibareng/summary/:id', quranController.getNgajiSessionSummary);
 
 module.exports = router;

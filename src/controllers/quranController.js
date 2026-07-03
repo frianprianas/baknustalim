@@ -294,3 +294,89 @@ exports.stopNgajiSession = async (req, res) => {
     res.status(500).render('error', { title: 'Server Error', message: error.message, error });
   }
 };
+
+// Detail Ringkasan Sesi Ngaji Bareng
+exports.getNgajiSessionSummary = async (req, res) => {
+  const { id } = req.params;
+  const NgajiSession = require('../models/NgajiSession');
+
+  try {
+    const session = await NgajiSession.findById(id).populate('created_by');
+    if (!session) {
+      return res.status(404).json({ success: false, message: 'Sesi tidak ditemukan.' });
+    }
+
+    // Process & Aggregate reading data (bacaan)
+    const rawBacaan = session.bacaan || [];
+    
+    // Total verses read
+    const totalAyatDibaca = rawBacaan.length;
+
+    // Aggregate by user
+    const usersMap = {};
+    rawBacaan.forEach(b => {
+      const uKey = b.user_id ? b.user_id.toString() : b.user_name;
+      if (!usersMap[uKey]) {
+        usersMap[uKey] = {
+          user_name: b.user_name,
+          role: b.role,
+          total_ayat: 0,
+          surahs: {} // { 'Al-Fatihah': Set([1, 2]) }
+        };
+      }
+      usersMap[uKey].total_ayat += 1;
+      if (!usersMap[uKey].surahs[b.surah_name]) {
+        usersMap[uKey].surahs[b.surah_name] = new Set();
+      }
+      usersMap[uKey].surahs[b.surah_name].add(b.ayat_number);
+    });
+
+    // Format the aggregated user list for rendering JSON
+    const pembaca = Object.values(usersMap).map(u => {
+      const detailedSurahs = Object.entries(u.surahs).map(([surahName, ayatSet]) => {
+        // Sort ayat list in ascending order
+        const sortedAyat = Array.from(ayatSet).sort((a, b) => a - b);
+        return {
+          surah_name: surahName,
+          ayat_list: sortedAyat
+        };
+      });
+
+      return {
+        user_name: u.user_name,
+        role: u.role,
+        total_ayat: u.total_ayat,
+        surahs: detailedSurahs
+      };
+    }).sort((a, b) => b.total_ayat - a.total_ayat); // Sort by most verses read
+
+    // Unique participant count
+    const totalPembaca = pembaca.length;
+
+    // Format timeline (recent events first, max 100)
+    const timeline = rawBacaan.map(b => ({
+      user_name: b.user_name,
+      role: b.role,
+      surah_name: b.surah_name,
+      ayat_number: b.ayat_number,
+      waktu: new Date(b.waktu).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB'
+    })).reverse().slice(0, 100);
+
+    res.json({
+      success: true,
+      data: {
+        creator_name: session.creator_name,
+        waktu_mulai: new Date(session.waktu_mulai).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) + ' WIB',
+        waktu_selesai: new Date(session.waktu_selesai).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) + ' WIB',
+        total_ayat_dibaca: totalAyatDibaca,
+        total_pembaca: totalPembaca,
+        pembaca,
+        timeline
+      }
+    });
+
+  } catch (error) {
+    console.error('[QuranController] Error in getNgajiSessionSummary:', error);
+    res.status(500).json({ success: false, message: 'Gagal mengambil ringkasan sesi.', error: error.message });
+  }
+};

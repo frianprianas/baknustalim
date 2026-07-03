@@ -22,7 +22,33 @@ const NgajiSessionSchema = new mongoose.Schema({
   waktu_selesai: {
     type: Date,
     required: true
-  }
+  },
+  bacaan: [{
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    user_name: {
+      type: String,
+      required: true
+    },
+    role: {
+      type: String,
+      required: true
+    },
+    surah_name: {
+      type: String,
+      required: true
+    },
+    ayat_number: {
+      type: Number,
+      required: true
+    },
+    waktu: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });

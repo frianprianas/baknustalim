@@ -411,6 +411,7 @@
           // 3. Emit to Ngaji Bareng active room
           if (isNgajiBarengActive) {
             socket.emit('ngaji_read_event', {
+              user_id: "<%= currentUser.id %>",
               user_name: "<%= currentUser.nama || (currentUser.profile && currentUser.profile.displayName) || 'Pengguna' %>",
               role: "<%= currentUser.role === 'guru' ? 'Guru' : (currentUser.role === 'admin' ? 'Admin' : (currentUser.role === 'tu' ? 'TU' : 'Siswa')) %>",
               surah_name: "<%= surah.name_latin %>",

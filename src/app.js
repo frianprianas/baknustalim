@@ -152,9 +152,31 @@ io.on('connection', (socket) => {
   });
 
   // User reads/clicks an ayat in Ngaji Bareng
-  socket.on('ngaji_read_event', (data) => {
+  socket.on('ngaji_read_event', async (data) => {
     if (data && data.user_name && data.surah_name && data.ayat_number) {
       socket.to('ngaji_bareng').emit('ngaji_read_broadcast', data);
+
+      // Persist the reading event into the active session
+      try {
+        const NgajiSession = require('./models/NgajiSession');
+        await NgajiSession.updateOne(
+          { status: 'aktif' },
+          {
+            $push: {
+              bacaan: {
+                user_id: data.user_id || null,
+                user_name: data.user_name,
+                role: data.role,
+                surah_name: data.surah_name,
+                ayat_number: data.ayat_number,
+                waktu: new Date()
+              }
+            }
+          }
+        );
+      } catch (err) {
+        console.error('[Socket] Error saving ngaji read event:', err);
+      }
     }
   });
 
