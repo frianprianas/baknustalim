@@ -44,6 +44,16 @@ exports.readSurah = async (req, res) => {
     // 2. Fetch verses (handles caching automatically)
     const ayahs = await quranService.getSurahAyat(surahNumber);
 
+    // Fetch previous and next surah metadata for navigation
+    let prevSurah = null;
+    let nextSurah = null;
+    if (surahNumber > 1) {
+      prevSurah = await Surah.findOne({ number: surahNumber - 1 });
+    }
+    if (surahNumber < 114) {
+      nextSurah = await Surah.findOne({ number: surahNumber + 1 });
+    }
+
     // 3. Fetch user bookmarks for this surah
     const userBookmarks = await Bookmark.find({
       user_id: currentUser.id,
@@ -58,6 +68,8 @@ exports.readSurah = async (req, res) => {
       surah,
       ayahs,
       bookmarkedVerses,
+      prevSurah,
+      nextSurah,
       userBookmarks: userBookmarks.reduce((acc, curr) => {
         acc[curr.ayat_number] = curr;
         return acc;

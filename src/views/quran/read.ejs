@@ -155,6 +155,37 @@
         </div>
       <% }) %>
 
+      <!-- Navigation Buttons for Previous / Next Surah -->
+      <div class="mt-5 pt-4 border-top border-light d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <% if (typeof prevSurah !== 'undefined' && prevSurah) { %>
+          <a href="/quran/surah/<%= prevSurah.number %>" class="btn btn-outline-success rounded-pill px-4 py-2 d-inline-flex align-items-center shadow-sm">
+            <i class="fa-solid fa-chevron-left me-2"></i>
+            <div class="text-start">
+              <span class="d-block text-xs text-muted" style="font-size: 0.65rem;">SURAH SEBELUMNYA</span>
+              <strong class="small"><%= prevSurah.name_latin %></strong>
+            </div>
+          </a>
+        <% } else { %>
+          <div></div> <!-- Spacer -->
+        <% } %>
+
+        <a href="/quran" class="btn btn-secondary-custom rounded-pill px-4 py-2 d-inline-flex align-items-center shadow-sm">
+          <i class="fa-solid fa-list me-2"></i> Daftar Surah
+        </a>
+
+        <% if (typeof nextSurah !== 'undefined' && nextSurah) { %>
+          <a href="/quran/surah/<%= nextSurah.number %>" class="btn btn-success rounded-pill px-4 py-2 text-white d-inline-flex align-items-center shadow-sm" style="background: var(--accent-color); border: none;">
+            <div class="text-end">
+              <span class="d-block text-xs text-light" style="font-size: 0.65rem; opacity: 0.85;">SURAH SELANJUTNYA</span>
+              <strong class="small"><%= nextSurah.name_latin %></strong>
+            </div>
+            <i class="fa-solid fa-chevron-right ms-2"></i>
+          </a>
+        <% } else { %>
+          <div></div> <!-- Spacer -->
+        <% } %>
+      </div>
+
     </div>
   </div>
 </div>
