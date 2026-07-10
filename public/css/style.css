@@ -502,3 +502,41 @@ h1, h2, h3, h4, h5, h6 {
 .bookmark-btn.active {
   color: var(--accent-color);
 }
+
+/* Tajweed Color Coding Styles */
+.tajweed-h,
+.tajweed-l,
+.tajweed-s {
+  color: #AAAAAA; /* Gray for Hamzat ul Wasl / Silent letters / solar lam */
+}
+.tajweed-q {
+  color: #DD0008; /* Red for Qalqalah */
+  font-weight: bold;
+}
+.tajweed-f {
+  color: #9400A8; /* Purple for Ikhfa' */
+}
+.tajweed-g {
+  color: #169777; /* Teal for Idgham with Ghunnah */
+}
+.tajweed-u {
+  color: #169200; /* Green for Idgham without Ghunnah */
+}
+.tajweed-i {
+  color: #26BFFD; /* Cyan for Iqlab */
+  font-weight: bold;
+}
+.tajweed-n {
+  color: #537FFF; /* Light Blue for Madda Normal */
+}
+.tajweed-p,
+.tajweed-c,
+.tajweed-o {
+  color: #2144C1; /* Dark Blue for Madda Permissible / Obligatory / Necessary */
+}
+.tajweed-w {
+  color: #58B800; /* Light Green for Idgham Shafawi */
+}
+.tajweed-d {
+  color: #D500B7; /* Pink/Purple for Ikhfa' Shafawi */
+}

@@ -21,6 +21,10 @@ const QuranAyatSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  teks_tajweed: {
+    type: String,
+    default: ''
+  },
   tafsir: {
     type: String,
     default: ''

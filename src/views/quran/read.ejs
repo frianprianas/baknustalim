@@ -44,16 +44,26 @@
           <i class="fa-solid fa-angles-down me-1"></i> Ayat Terakhir
         </a>
       </div>
-      <div class="d-flex align-items-center gap-2">
-        <label for="jumpAyat" class="small fw-bold text-secondary mb-0 text-nowrap d-none d-sm-block">Lompat ke:</label>
-        <div class="input-group input-group-sm w-auto">
-          <span class="input-group-text bg-success text-white border-success rounded-start-pill"><i class="fa-solid fa-list-ol"></i></span>
-          <select id="jumpAyat" class="form-select border-success rounded-end-pill pe-4" onchange="if(this.value) window.location.hash='ayat-'+this.value;" style="min-width: 120px;">
-            <option value="" disabled selected>Pilih Ayat...</option>
-            <% for(let i = 1; i <= surah.jumlah_ayat; i++) { %>
-              <option value="<%= i %>">Ayat <%= i %></option>
-            <% } %>
-          </select>
+      <div class="d-flex align-items-center gap-3">
+        <!-- Tajweed Toggle Switch -->
+        <div class="form-check form-switch mb-0">
+          <input class="form-check-input text-success" type="checkbox" role="switch" id="toggleTajweed" style="cursor: pointer;">
+          <label class="form-check-label small fw-bold text-secondary" for="toggleTajweed" style="cursor: pointer; user-select: none;">
+            <i class="fa-solid fa-wand-magic-sparkles me-1 text-success"></i> Tajwid Berwarna
+          </label>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <label for="jumpAyat" class="small fw-bold text-secondary mb-0 text-nowrap d-none d-sm-block">Lompat ke:</label>
+          <div class="input-group input-group-sm w-auto">
+            <span class="input-group-text bg-success text-white border-success rounded-start-pill"><i class="fa-solid fa-list-ol"></i></span>
+            <select id="jumpAyat" class="form-select border-success rounded-end-pill pe-4" onchange="if(this.value) window.location.hash='ayat-'+this.value;" style="min-width: 120px;">
+              <option value="" disabled selected>Pilih Ayat...</option>
+              <% for(let i = 1; i <= surah.jumlah_ayat; i++) { %>
+                <option value="<%= i %>">Ayat <%= i %></option>
+              <% } %>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -104,12 +114,19 @@
               <div class="arabic-text">
                 <% 
                   let text = a.teks_arab;
+                  let tajweedText = a.teks_tajweed || '';
                   // Strip Bismillah prefix from first verse of surah, if API includes it
                   if (surah.number !== 1 && surah.number !== 9 && a.ayat_number === 1) {
                     text = text.replace(/^(بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\s*)/, '');
+                    if (tajweedText) {
+                      tajweedText = tajweedText.replace(/^(بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\s*)/, '');
+                    }
                   }
                 %>
-                <%= text %>
+                <span class="plain-arabic-text"><%= text %></span>
+                <% if (tajweedText) { %>
+                  <span class="tajweed-arabic-text d-none" data-raw-tajweed="<%= tajweedText %>"></span>
+                <% } %>
               </div>
               
               <!-- Latin Transliteration Text -->
@@ -189,6 +206,53 @@
     </div>
   </div>
 </div>
+
+<!-- Tajweed Rendering & Toggle Logic -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    function parseTajweedText(raw) {
+      if (!raw) return '';
+      // Replace [rule_letter:optional_id[text] with styled spans
+      return raw.replace(/\[([a-z]+)(?::\d+)?\[([^\]]+)\]/g, (match, rule, content) => {
+        return `<span class="tajweed-${rule}">${content}</span>`;
+      });
+    }
+
+    // Render Tajweed HTML
+    const tajweedSpans = document.querySelectorAll('.tajweed-arabic-text');
+    tajweedSpans.forEach(span => {
+      const raw = span.getAttribute('data-raw-tajweed');
+      span.innerHTML = parseTajweedText(raw);
+    });
+
+    // Toggle switch logic
+    const toggleSwitch = document.getElementById('toggleTajweed');
+    const plainSpans = document.querySelectorAll('.plain-arabic-text');
+
+    function setTajweedMode(isTajweed) {
+      if (isTajweed) {
+        plainSpans.forEach(el => el.classList.add('d-none'));
+        tajweedSpans.forEach(el => el.classList.remove('d-none'));
+      } else {
+        plainSpans.forEach(el => el.classList.remove('d-none'));
+        tajweedSpans.forEach(el => el.classList.add('d-none'));
+      }
+    }
+
+    // Load stored preference or default to false
+    const savedMode = localStorage.getItem('quran_tajweed_mode') === 'true';
+    if (toggleSwitch) {
+      toggleSwitch.checked = savedMode;
+      setTajweedMode(savedMode);
+
+      toggleSwitch.addEventListener('change', (e) => {
+        const active = e.target.checked;
+        localStorage.setItem('quran_tajweed_mode', active);
+        setTajweedMode(active);
+      });
+    }
+  });
+</script>
 
 <!-- AJAX Client Side logic -->
 <script>

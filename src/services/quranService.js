@@ -65,10 +65,12 @@ async function getSurahAyat(surahNumber) {
     const needsTafsirBackfill = cachedAyat.some(a => !a.tafsir);
     // Check if any cached verse doesn't have latin transliteration
     const needsLatinBackfill = cachedAyat.some(a => !a.teks_latin);
+    // Check if any cached verse doesn't have tajweed text
+    const needsTajweedBackfill = cachedAyat.some(a => !a.teks_tajweed);
 
-    if (needsTafsirBackfill || needsLatinBackfill) {
+    if (needsTafsirBackfill || needsLatinBackfill || needsTajweedBackfill) {
       try {
-        console.log(`Backfilling missing data (Tafsir: ${needsTafsirBackfill}, Latin: ${needsLatinBackfill}) for Surah ${parsedNumber}...`);
+        console.log(`Backfilling missing data (Tafsir: ${needsTafsirBackfill}, Latin: ${needsLatinBackfill}, Tajweed: ${needsTajweedBackfill}) for Surah ${parsedNumber}...`);
         
         let tafsirMap = {};
         if (needsTafsirBackfill) {
@@ -98,6 +100,21 @@ async function getSurahAyat(surahNumber) {
           }
         }
 
+        let tajweedMap = {};
+        if (needsTajweedBackfill) {
+          console.log(`Fetching Tajweed data for Surah ${parsedNumber} from api.alquran.cloud...`);
+          const tajweedRes = await fetch(`https://api.alquran.cloud/v1/surah/${parsedNumber}/quran-tajweed`);
+          if (tajweedRes.ok) {
+            const tajweedJson = await tajweedRes.json();
+            if (tajweedJson.data && tajweedJson.data.ayahs) {
+              const ayahsList = tajweedJson.data.ayahs;
+              for (const a of ayahsList) {
+                tajweedMap[a.numberInSurah] = a.text;
+              }
+            }
+          }
+        }
+
         // Apply backfills to DB
         const totalLength = cachedAyat.length;
         for (let i = 0; i < totalLength; i++) {
@@ -108,6 +125,9 @@ async function getSurahAyat(surahNumber) {
           }
           if (needsLatinBackfill && latinMap[a.ayat_number]) {
             updateData.teks_latin = latinMap[a.ayat_number];
+          }
+          if (needsTajweedBackfill && tajweedMap[a.ayat_number]) {
+            updateData.teks_tajweed = tajweedMap[a.ayat_number];
           }
 
           if (Object.keys(updateData).length > 0) {
@@ -159,6 +179,23 @@ async function getSurahAyat(surahNumber) {
       console.warn(`Failed to fetch Tafsir for Surah ${parsedNumber} during cache miss:`, tafsirErr.message);
     }
 
+    // Fetch Tajweed from Al Quran Cloud
+    let tajweedMap = {};
+    try {
+      const tajweedRes = await fetch(`https://api.alquran.cloud/v1/surah/${parsedNumber}/quran-tajweed`);
+      if (tajweedRes.ok) {
+        const tajweedJson = await tajweedRes.json();
+        if (tajweedJson.data && tajweedJson.data.ayahs) {
+          const ayahsList = tajweedJson.data.ayahs;
+          for (const a of ayahsList) {
+            tajweedMap[a.numberInSurah] = a.text;
+          }
+        }
+      }
+    } catch (tajweedErr) {
+      console.warn(`Failed to fetch Tajweed for Surah ${parsedNumber} during cache miss:`, tajweedErr.message);
+    }
+
     const ayahsToInsert = [];
     const totalAyahs = surahData.ayat.length;
 
@@ -170,6 +207,7 @@ async function getSurahAyat(surahNumber) {
         surah_number: parsedNumber,
         ayat_number: ayatNum,
         teks_arab: a.teksArab,
+        teks_tajweed: tajweedMap[ayatNum] || '',
         teks_latin: a.teksLatin || '',
         teks_terjemahan_id: a.teksIndonesia,
         tafsir: tafsirMap[ayatNum] || ''
