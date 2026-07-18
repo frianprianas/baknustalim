@@ -6,6 +6,10 @@ const KelasSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  jurusan: {
+    type: String,
+    trim: true
+  },
   tahun_ajaran: {
     type: String,
     required: true,
