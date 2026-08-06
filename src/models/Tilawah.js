@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const PraktekIbadahSchema = new mongoose.Schema({
+const TilawahSchema = new mongoose.Schema({
   nis: {
     type: String,
     required: true,
@@ -16,9 +16,20 @@ const PraktekIbadahSchema = new mongoose.Schema({
     default: Date.now,
     required: true
   },
-  jenis_ibadah_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'JenisIbadah',
+  surah_number: {
+    type: Number,
+    required: true
+  },
+  surah_nama: {
+    type: String,
+    required: true
+  },
+  ayat_start: {
+    type: Number,
+    required: true
+  },
+  ayat_end: {
+    type: Number,
     required: true
   },
   status: {
@@ -45,4 +56,4 @@ const PraktekIbadahSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.model('PraktekIbadah', PraktekIbadahSchema);
+module.exports = mongoose.model('Tilawah', TilawahSchema);

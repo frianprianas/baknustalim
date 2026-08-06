@@ -105,6 +105,9 @@
               </td>
               <td>
                 <span class="<%= r.status === 'Kompeten' ? 'badge-kompeten' : 'badge-belum' %>"><%= r.status %></span>
+                <% if (r.status === 'Kompeten' && r.nilai) { %>
+                  <span class="badge bg-info text-dark rounded-pill ms-1 fw-bold"><%= r.nilai %></span>
+                <% } %>
               </td>
               <td>
                 <span class="small text-secondary fw-medium"><%= new Date(r.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) %></span>

@@ -118,16 +118,29 @@
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="evalDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <div class="nav-icon-wrapper">
-                    <i class="fa-solid fa-file-signature"></i>
+                    <i class="fa-solid fa-file-signature text-success"></i>
                   </div>
                   <div class="nav-text-container">
-                    <span class="nav-label-main">Penilaian</span>
-                    <span class="nav-caption-sub">Evaluasi Siswa</span>
+                    <span class="nav-label-main">Penilaian PAI</span>
+                    <span class="nav-caption-sub">Evaluasi & Riwayat</span>
                   </div>
                 </a>
-                <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="evalDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
-                  <li><a class="dropdown-item rounded py-2" href="/hafalan/input"><i class="fa-solid fa-microphone me-2 text-info"></i> Input Hafalan</a></li>
-                  <li><a class="dropdown-item rounded py-2" href="/ibadah/input"><i class="fa-solid fa-hands-praying me-2 text-success"></i> Input Praktek Ibadah</a></li>
+                <ul class="dropdown-menu border-0 shadow-sm p-3" aria-labelledby="evalDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important; min-width: 260px;">
+                  <li class="dropdown-header text-success fw-bold px-2 mb-1" style="font-size: 0.85rem;"><i class="fa-solid fa-microphone me-1"></i> HAFALAN</li>
+                  <li><a class="dropdown-item rounded py-2 ps-3" href="/hafalan/input"><i class="fa-solid fa-plus me-2 text-info" style="width: 16px;"></i> Input Hafalan</a></li>
+                  <li><a class="dropdown-item rounded py-2 ps-3" href="/hafalan/riwayat"><i class="fa-solid fa-clock-rotate-left me-2 text-secondary" style="width: 16px;"></i> Riwayat Hafalan</a></li>
+                  
+                  <li><hr class="dropdown-divider my-2" style="border-color: var(--glass-border);"></li>
+                  
+                  <li class="dropdown-header text-success fw-bold px-2 mb-1" style="font-size: 0.85rem;"><i class="fa-solid fa-hands-praying me-1"></i> PRAKTEK IBADAH</li>
+                  <li><a class="dropdown-item rounded py-2 ps-3" href="/ibadah/input"><i class="fa-solid fa-plus me-2 text-success" style="width: 16px;"></i> Input Praktek</a></li>
+                  <li><a class="dropdown-item rounded py-2 ps-3" href="/ibadah/riwayat"><i class="fa-solid fa-clock-rotate-left me-2 text-secondary" style="width: 16px;"></i> Riwayat Praktek</a></li>
+
+                  <li><hr class="dropdown-divider my-2" style="border-color: var(--glass-border);"></li>
+                  
+                  <li class="dropdown-header text-success fw-bold px-2 mb-1" style="font-size: 0.85rem;"><i class="fa-solid fa-book-open me-1"></i> TILAWAH</li>
+                  <li><a class="dropdown-item rounded py-2 ps-3" href="/tilawah/input"><i class="fa-solid fa-plus me-2 text-warning" style="width: 16px;"></i> Input Tilawah</a></li>
+                  <li><a class="dropdown-item rounded py-2 ps-3" href="/tilawah/riwayat"><i class="fa-solid fa-clock-rotate-left me-2 text-secondary" style="width: 16px;"></i> Riwayat Tilawah</a></li>
                 </ul>
               </li>
             <% } %>
@@ -174,22 +187,25 @@
               </ul>
             </li>
 
-            <!-- History log lookup (open to all) -->
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="historyDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="nav-icon-wrapper">
-                  <i class="fa-solid fa-history"></i>
-                </div>
-                <div class="nav-text-container">
-                  <span class="nav-label-main">Riwayat</span>
-                  <span class="nav-caption-sub">Log Aktivitas</span>
-                </div>
-              </a>
-              <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="historyDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
-                <li><a class="dropdown-item rounded py-2" href="/hafalan/riwayat"><i class="fa-solid fa-book-open me-2 text-info"></i> Hafalan Qur'an</a></li>
-                <li><a class="dropdown-item rounded py-2" href="/ibadah/riwayat"><i class="fa-solid fa-person-praying me-2 text-success"></i> Praktek Ibadah</a></li>
-              </ul>
-            </li>
+            <!-- History log lookup (open to Siswa, TU) -->
+            <% if (currentUser.role === 'siswa' || currentUser.role === 'tu') { %>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="historyDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <div class="nav-icon-wrapper">
+                    <i class="fa-solid fa-history"></i>
+                  </div>
+                  <div class="nav-text-container">
+                    <span class="nav-label-main">Riwayat</span>
+                    <span class="nav-caption-sub">Log Aktivitas</span>
+                  </div>
+                </a>
+                <ul class="dropdown-menu border-0 shadow-sm p-2" aria-labelledby="historyDropdown" style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border) !important;">
+                  <li><a class="dropdown-item rounded py-2" href="/hafalan/riwayat"><i class="fa-solid fa-book-open me-2 text-info"></i> Hafalan Qur'an</a></li>
+                  <li><a class="dropdown-item rounded py-2" href="/ibadah/riwayat"><i class="fa-solid fa-person-praying me-2 text-success"></i> Praktek Ibadah</a></li>
+                  <li><a class="dropdown-item rounded py-2" href="/tilawah/riwayat"><i class="fa-solid fa-book me-2 text-warning"></i> Tilawah Qur'an</a></li>
+                </ul>
+              </li>
+            <% } %>
           </ul>
 
           <div class="d-flex align-items-center gap-2">

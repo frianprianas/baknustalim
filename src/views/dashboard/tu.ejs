@@ -117,6 +117,7 @@
             <th>Tahun Ajaran</th>
             <th class="text-center">Hafalan (Kompeten / Total)</th>
             <th class="text-center">Ibadah (Kompeten / Total)</th>
+            <th class="text-center">Tilawah (Kompeten / Total)</th>
             <th class="text-center">Amalan Yaumi (Fardhu / Sunnah / Puasa)</th>
             <th class="text-end d-print-none">Riwayat Detail</th>
           </tr>
@@ -146,6 +147,16 @@
                 <span class="text-primary"><%= row.ibadah.total %></span>
                 <div class="progress mt-1 mx-auto d-print-none" style="height: 4px; max-width: 100px; background-color: var(--bg-tertiary);">
                   <div class="progress-bar bg-info" role="progressbar" style="width: <%= row.ibadah.total > 0 ? (row.ibadah.kompeten / row.ibadah.total * 100) : 0 %>%"></div>
+                </div>
+              </td>
+              
+              <!-- Tilawah Recap -->
+              <td class="text-center">
+                <span class="text-success fw-bold"><%= row.tilawah.kompeten %></span>
+                <span class="text-secondary">/</span>
+                <span class="text-primary"><%= row.tilawah.total %></span>
+                <div class="progress mt-1 mx-auto d-print-none" style="height: 4px; max-width: 100px; background-color: var(--bg-tertiary);">
+                  <div class="progress-bar bg-warning" role="progressbar" style="width: <%= row.tilawah.total > 0 ? (row.tilawah.kompeten / row.tilawah.total * 100) : 0 %>%"></div>
                 </div>
               </td>
 

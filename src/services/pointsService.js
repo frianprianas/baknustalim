@@ -1,5 +1,6 @@
 const AmalanYaumi = require('../models/AmalanYaumi');
 const Hafalan = require('../models/Hafalan');
+const Tilawah = require('../models/Tilawah');
 const Bookmark = require('../models/Bookmark');
 const MateriReadLog = require('../models/MateriReadLog');
 const User = require('../models/User');
@@ -47,6 +48,10 @@ async function updateUserPoints(userId) {
     const hafalanCount = await Hafalan.countDocuments({ siswa_id: userId, status: 'Kompeten' });
     const hafalanPoints = hafalanCount * 20;
 
+    // 2b. Tilawah points: 15 points for each Competent tilawah
+    const tilawahCount = await Tilawah.countDocuments({ siswa_id: userId, status: 'Kompeten' });
+    const tilawahPoints = tilawahCount * 15;
+
     // 3. Quran Bookmarks: 10 points for each bookmark
     const bookmarkCount = await Bookmark.countDocuments({ user_id: userId });
     const bookmarkPoints = bookmarkCount * 10;
@@ -55,7 +60,7 @@ async function updateUserPoints(userId) {
     const readCount = await MateriReadLog.countDocuments({ siswa_id: userId });
     const readPoints = readCount * 5;
 
-    const totalPoints = amalanPoints + hafalanPoints + bookmarkPoints + readPoints;
+    const totalPoints = amalanPoints + hafalanPoints + tilawahPoints + bookmarkPoints + readPoints;
 
     // Save in user profile
     await User.findByIdAndUpdate(userId, { poin: totalPoints });

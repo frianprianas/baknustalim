@@ -2,9 +2,9 @@ const User = require('../models/User');
 const Surah = require('../models/Surah');
 const Kelas = require('../models/Kelas');
 const KelasGuruPAI = require('../models/KelasGuruPAI');
-const Hafalan = require('../models/Hafalan');
+const Tilawah = require('../models/Tilawah');
 
-// Render form to record a student's memorization
+// Render form to record a student's recitation
 exports.showForm = async (req, res) => {
   try {
     const user = req.session.user;
@@ -12,7 +12,6 @@ exports.showForm = async (req, res) => {
 
     // 1. Get eligible students based on role
     if (user.role === 'admin') {
-      // Admins can grade any student who has a class assigned
       students = await User.find({ role: 'siswa', kelas_id: { $ne: null } })
         .populate('kelas_id')
         .sort({ nama: 1 });
@@ -26,11 +25,11 @@ exports.showForm = async (req, res) => {
         .sort({ nama: 1 });
     }
 
-    // 2. Get all 114 Surahs from cache
+    // 2. Get all 114 Surahs
     const surahs = await Surah.find().sort({ number: 1 });
 
-    res.render('hafalan/form', {
-      title: 'Input Hafalan Al-Qur\'an - BaknusTa\'lim',
+    res.render('tilawah/form', {
+      title: 'Input Tilawah Al-Qur\'an - BaknusTa\'lim',
       students,
       surahs,
       error: null
@@ -41,14 +40,18 @@ exports.showForm = async (req, res) => {
   }
 };
 
-// Create a new memorization record
+// Create a new recitation record
 exports.create = async (req, res) => {
-  const { student_id, surah_number, status, nilai, tanggal, catatan } = req.body;
+  const { student_id, surah_number, ayat_start, ayat_end, status, nilai, tanggal, catatan } = req.body;
   const currentUser = req.session.user;
 
   try {
-    if (!student_id || !surah_number || !status) {
-      throw new Error('Siswa, Surah, dan Status Penilaian wajib diisi.');
+    if (!student_id || !surah_number || !ayat_start || !ayat_end || !status) {
+      throw new Error('Siswa, Surah, Ayat Mulai, Ayat Selesai, dan Status Penilaian wajib diisi.');
+    }
+
+    if (parseInt(ayat_start) > parseInt(ayat_end)) {
+      throw new Error('Ayat Mulai tidak boleh lebih besar dari Ayat Selesai.');
     }
 
     // 1. Fetch student
@@ -79,27 +82,28 @@ exports.create = async (req, res) => {
     }
 
     // 4. Save record
-    const record = new Hafalan({
+    const record = new Tilawah({
       nis: student.nis || student.mailcow_email.split('@')[0],
       siswa_id: student._id,
       tanggal: tanggal ? new Date(tanggal) : new Date(),
       surah_number: surah.number,
       surah_nama: surah.name_latin,
+      ayat_start: parseInt(ayat_start),
+      ayat_end: parseInt(ayat_end),
       status: status,
       nilai: status === 'Kompeten' ? nilai : null,
-      nip_penilai: currentUser.nip || currentUser.mailcow_email.split('@')[0],
       guru_id: currentUser.id,
       catatan: catatan || ''
     });
 
     await record.save();
 
-    // Update user points for the graded student
+    // Update user points
     const { updateUserPoints } = require('../services/pointsService');
     await updateUserPoints(student._id);
 
-    req.session.successMessage = `Berhasil menyimpan nilai hafalan untuk ${student.nama}.`;
-    res.redirect('/hafalan/riwayat');
+    req.session.successMessage = `Berhasil menyimpan nilai tilawah untuk ${student.nama}.`;
+    res.redirect('/tilawah/riwayat');
   } catch (error) {
     console.error(error);
     
@@ -114,8 +118,8 @@ exports.create = async (req, res) => {
     }
     const surahs = await Surah.find().sort({ number: 1 });
 
-    res.render('hafalan/form', {
-      title: 'Input Hafalan Al-Qur\'an - BaknusTa\'lim',
+    res.render('tilawah/form', {
+      title: 'Input Tilawah Al-Qur\'an - BaknusTa\'lim',
       students,
       surahs,
       error: error.message
@@ -123,7 +127,7 @@ exports.create = async (req, res) => {
   }
 };
 
-// View memorization history log
+// View recitation history log
 exports.list = async (req, res) => {
   try {
     const user = req.session.user;
@@ -134,26 +138,21 @@ exports.list = async (req, res) => {
 
     // 1. Role-based restrictions
     if (user.role === 'siswa') {
-      // Siswa only sees their own history
       query.siswa_id = user.id;
     } else if (user.role === 'guru') {
-      // Guru PAI sees records of classes they are assigned to
       const mappings = await KelasGuruPAI.find({ guru_id: user.id });
       const classIds = mappings.map(m => m.kelas_id);
       classes = await Kelas.find({ _id: { $in: classIds } }).sort({ nama_kelas: 1 });
 
-      // Find all students in those classes
       const students = await User.find({ role: 'siswa', kelas_id: { $in: classIds } });
       const studentIds = students.map(s => s._id);
       query.siswa_id = { $in: studentIds };
       
-      // If a class filter is selected
       if (class_id) {
         const classStudents = await User.find({ role: 'siswa', kelas_id: class_id });
         query.siswa_id = { $in: classStudents.map(s => s._id) };
       }
     } else if (user.role === 'admin' || user.role === 'tu') {
-      // Admin and TU can see all history
       classes = await Kelas.find().sort({ nama_kelas: 1 });
       
       if (class_id) {
@@ -168,7 +167,6 @@ exports.list = async (req, res) => {
     }
 
     if (search && user.role !== 'siswa') {
-      // Search by student name or NIS
       const matchedStudents = await User.find({
         role: 'siswa',
         $or: [
@@ -178,14 +176,12 @@ exports.list = async (req, res) => {
       });
       const studentIds = matchedStudents.map(s => s._id);
       
-      // Intersect search matches with existing role-based student restrictions
       if (query.siswa_id) {
         if (query.siswa_id.$in) {
           const allowedIds = query.siswa_id.$in.map(id => id.toString());
           const filteredIds = studentIds.filter(id => allowedIds.includes(id.toString()));
           query.siswa_id = { $in: filteredIds };
         } else {
-          // Direct comparison
           const allowedIdStr = query.siswa_id.toString();
           query.siswa_id = studentIds.map(id => id.toString()).includes(allowedIdStr) ? query.siswa_id : null;
         }
@@ -194,27 +190,26 @@ exports.list = async (req, res) => {
       }
     }
 
-    const history = await Hafalan.find(query)
+    const history = await Tilawah.find(query)
       .populate('siswa_id')
       .populate('guru_id')
       .sort({ tanggal: -1, createdAt: -1 });
 
-    // Populate class info manually since hafalan points to user, who points to class
+    // Fetch class info for each history item manually
     const historyWithClass = await Promise.all(history.map(async (record) => {
-      // Just in case, retrieve student's current class
       const student = await User.findById(record.siswa_id).populate('kelas_id');
       const doc = record.toObject();
       doc.siswa = student;
       return doc;
     }));
 
-    res.render('hafalan/riwayat', {
-      title: 'Riwayat Hafalan Al-Qur\'an - BaknusTa\'lim',
+    res.render('tilawah/riwayat', {
+      title: 'Riwayat Tilawah Al-Qur\'an - BaknusTa\'lim',
       history: historyWithClass,
       classes,
-      selectedClass: class_id || '',
-      searchQuery: search || '',
-      selectedStatus: status || ''
+      selectedClassId: class_id || '',
+      selectedStatus: status || '',
+      searchQuery: search || ''
     });
   } catch (error) {
     console.error(error);

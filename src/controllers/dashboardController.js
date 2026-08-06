@@ -3,6 +3,7 @@ const Kelas = require('../models/Kelas');
 const KelasGuruPAI = require('../models/KelasGuruPAI');
 const Hafalan = require('../models/Hafalan');
 const PraktekIbadah = require('../models/PraktekIbadah');
+const Tilawah = require('../models/Tilawah');
 const JenisIbadah = require('../models/JenisIbadah');
 const Question = require('../models/Question');
 const LiveSession = require('../models/LiveSession');
@@ -33,6 +34,11 @@ exports.showDashboard = async (req, res) => {
       const kompetenIbadah = await PraktekIbadah.countDocuments({ siswa_id: user.id, status: 'Kompeten' });
       const belumIbadah = totalIbadah - kompetenIbadah;
 
+      // 3b. Fetch Tilawah Stats
+      const totalTilawah = await Tilawah.countDocuments({ siswa_id: user.id });
+      const kompetenTilawah = await Tilawah.countDocuments({ siswa_id: user.id, status: 'Kompeten' });
+      const belumTilawah = totalTilawah - kompetenTilawah;
+
       // 4. Fetch recent logs
       const recentHafalan = await Hafalan.find({ siswa_id: user.id })
         .populate('guru_id')
@@ -45,6 +51,11 @@ exports.showDashboard = async (req, res) => {
         .sort({ tanggal: -1, createdAt: -1 })
         .limit(5);
 
+      const recentTilawah = await Tilawah.find({ siswa_id: user.id })
+        .populate('guru_id')
+        .sort({ tanggal: -1, createdAt: -1 })
+        .limit(5);
+
       const activeLiveSessions = await LiveSession.find({ status: 'aktif' }).populate('guru_id');
 
       return res.render('dashboard/siswa', {
@@ -52,10 +63,12 @@ exports.showDashboard = async (req, res) => {
         student,
         stats: {
           totalHafalan, kompetenHafalan, belumHafalan,
-          totalIbadah, kompetenIbadah, belumIbadah
+          totalIbadah, kompetenIbadah, belumIbadah,
+          totalTilawah, kompetenTilawah, belumTilawah
         },
         recentHafalan,
         recentIbadah,
+        recentTilawah,
         activeLiveSessions
       });
     }
@@ -72,6 +85,7 @@ exports.showDashboard = async (req, res) => {
       // 3. Count total evaluations graded by this teacher
       const hafalanGraded = await Hafalan.countDocuments({ guru_id: user.id });
       const ibadahGraded = await PraktekIbadah.countDocuments({ guru_id: user.id });
+      const tilawahGraded = await Tilawah.countDocuments({ guru_id: user.id });
 
       // 4. Memorization stats (school-wide)
       const totalHafalan = await Hafalan.countDocuments();
@@ -80,6 +94,10 @@ exports.showDashboard = async (req, res) => {
       // 5. Worship stats (school-wide)
       const totalIbadah = await PraktekIbadah.countDocuments();
       const kompetenIbadah = await PraktekIbadah.countDocuments({ status: 'Kompeten' });
+
+      // 5b. Tilawah stats (school-wide)
+      const totalTilawah = await Tilawah.countDocuments();
+      const kompetenTilawah = await Tilawah.countDocuments({ status: 'Kompeten' });
 
       // 6. Q&A stats
       const totalQuestions = await Question.countDocuments();
@@ -96,10 +114,13 @@ exports.showDashboard = async (req, res) => {
           studentCount,
           hafalanGraded,
           ibadahGraded,
+          tilawahGraded,
           totalHafalan,
           kompetenHafalan,
           totalIbadah,
           kompetenIbadah,
+          totalTilawah,
+          kompetenTilawah,
           totalQuestions,
           answeredQuestions,
           unansweredQuestions,
@@ -137,6 +158,10 @@ exports.showDashboard = async (req, res) => {
         const ibadahTotal = await PraktekIbadah.countDocuments({ siswa_id: s._id });
         const ibadahKompeten = await PraktekIbadah.countDocuments({ siswa_id: s._id, status: 'Kompeten' });
 
+        // Tilawah stats
+        const tilawahTotal = await Tilawah.countDocuments({ siswa_id: s._id });
+        const tilawahKompeten = await Tilawah.countDocuments({ siswa_id: s._id, status: 'Kompeten' });
+
         // Amalan stats
         const amalanLogs = await AmalanYaumi.find({ siswa_id: s._id });
         let farduDone = 0;
@@ -145,6 +170,7 @@ exports.showDashboard = async (req, res) => {
         let puasaCount = 0;
         
         amalanLogs.forEach(log => {
+          if (log.is_halangan) return;
           if (log.sholat_fardu) {
             if (log.sholat_fardu.subuh) farduDone++;
             if (log.sholat_fardu.dzuhur) farduDone++;
@@ -172,6 +198,7 @@ exports.showDashboard = async (req, res) => {
           tahun_ajaran: s.kelas_id ? s.kelas_id.tahun_ajaran : '-',
           hafalan: { total: hafalanTotal, kompeten: hafalanKompeten },
           ibadah: { total: ibadahTotal, kompeten: ibadahKompeten },
+          tilawah: { total: tilawahTotal, kompeten: tilawahKompeten },
           amalan: {
             daysFilled: amalanLogs.length,
             fardu: { done: farduDone, expected: farduExpected },

@@ -22,13 +22,21 @@
     <div class="card-glass p-4 p-md-5">
       <form action="/ibadah/input" method="POST">
         
+        <!-- Class Filter -->
+        <div class="mb-3">
+          <label for="class_filter" class="form-label">Filter Berdasarkan Kelas</label>
+          <select class="form-select border-secondary" id="class_filter">
+            <option value="">-- Semua Kelas --</option>
+          </select>
+        </div>
+
         <!-- Siswa select -->
         <div class="mb-4">
           <label for="student_id" class="form-label">Pilih Siswa</label>
           <select class="form-select border-secondary" id="student_id" name="student_id" required>
             <option value="">-- Pilih Siswa yang Diuji --</option>
             <% students.forEach(s => { %>
-              <option value="<%= s._id %>">
+              <option value="<%= s._id %>" data-class-id="<%= s.kelas_id ? s.kelas_id._id : '' %>" data-class-name="<%= s.kelas_id ? s.kelas_id.nama_kelas : '' %>">
                 <%= s.nama %> (<%= s.nis || 'NIS Kosong' %>) - <%= s.kelas_id ? s.kelas_id.nama_kelas : 'Belum ada kelas' %>
               </option>
             <% }) %>
@@ -70,6 +78,21 @@
             <label class="btn btn-outline-danger px-4 py-2 border-secondary rounded-pill w-50" for="status_belum" style="border-width: 1px;">
               <i class="fa-solid fa-circle-xmark me-2"></i> Belum Kompeten
             </label>
+          </div>
+        </div>
+
+        <!-- Grade selection -->
+        <div class="mb-4 animate__animated animate__fadeIn" id="grade_container" style="display: none;">
+          <label class="form-label d-block">Pilih Nilai Kompetensi</label>
+          <div class="d-flex gap-3">
+            <input type="radio" class="btn-check" name="nilai" id="nilai_a" value="A" autocomplete="off">
+            <label class="btn btn-outline-info px-4 py-2 border-secondary rounded-pill w-100" for="nilai_a" style="border-width: 1px;">A</label>
+
+            <input type="radio" class="btn-check" name="nilai" id="nilai_b" value="B" autocomplete="off">
+            <label class="btn btn-outline-info px-4 py-2 border-secondary rounded-pill w-100" for="nilai_b" style="border-width: 1px;">B</label>
+
+            <input type="radio" class="btn-check" name="nilai" id="nilai_c" value="C" autocomplete="off">
+            <label class="btn btn-outline-info px-4 py-2 border-secondary rounded-pill w-100" for="nilai_c" style="border-width: 1px;">C</label>
           </div>
         </div>
 
@@ -158,6 +181,74 @@
       btn.innerHTML = originalText;
     }
   }
+
+  // Client-side JS to build class filter and toggle grade
+  document.addEventListener('DOMContentLoaded', () => {
+    const studentSelect = document.getElementById('student_id');
+    const classFilter = document.getElementById('class_filter');
+    const originalOptions = Array.from(studentSelect.options);
+    
+    // Extract unique classes
+    const classes = {};
+    originalOptions.forEach(opt => {
+      if (!opt.value) return;
+      const classId = opt.getAttribute('data-class-id');
+      const className = opt.getAttribute('data-class-name');
+      if (classId && className) {
+        classes[classId] = className;
+      }
+    });
+    
+    // Populate class filter dropdown
+    for (const id in classes) {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = classes[id];
+      classFilter.appendChild(opt);
+    }
+    
+    // Event listener to filter
+    classFilter.addEventListener('change', function() {
+      const selectedClassId = this.value;
+      studentSelect.innerHTML = '';
+      
+      // Add default placeholder option
+      studentSelect.appendChild(originalOptions[0]);
+      
+      originalOptions.forEach(opt => {
+        if (!opt.value) return;
+        if (!selectedClassId || opt.getAttribute('data-class-id') === selectedClassId) {
+          studentSelect.appendChild(opt);
+        }
+      });
+      studentSelect.value = "";
+    });
+
+    // Toggle Grade selection based on Status
+    const statusKompeten = document.getElementById('status_kompeten');
+    const statusBelum = document.getElementById('status_belum');
+    const gradeContainer = document.getElementById('grade_container');
+    const grades = [document.getElementById('nilai_a'), document.getElementById('nilai_b'), document.getElementById('nilai_c')];
+
+    function toggleGradeContainer() {
+      if (statusKompeten.checked) {
+        gradeContainer.style.display = 'block';
+        grades[0].required = true;
+      } else {
+        gradeContainer.style.display = 'none';
+        grades.forEach(g => {
+          g.required = false;
+          g.checked = false;
+        });
+      }
+    }
+
+    statusKompeten.addEventListener('change', toggleGradeContainer);
+    statusBelum.addEventListener('change', toggleGradeContainer);
+    
+    // Run initially
+    toggleGradeContainer();
+  });
 </script>
 
 <%- include('../partials/footer') %>

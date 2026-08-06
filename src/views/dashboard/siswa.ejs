@@ -117,7 +117,7 @@
   </div>
 
   <!-- Worship Stats -->
-  <div class="col-lg-4 col-md-12 mb-3">
+  <div class="col-lg-4 col-md-6 mb-3">
     <div class="card-glass stat-card warning">
       <h5 class="text-secondary mb-3"><i class="fa-solid fa-person-praying me-2 text-warning"></i> Praktek Ibadah</h5>
       <div class="row text-center">
@@ -136,16 +136,37 @@
       </div>
     </div>
   </div>
+
+  <!-- Tilawah Stats -->
+  <div class="col-lg-4 col-md-6 mb-3">
+    <div class="card-glass stat-card info">
+      <h5 class="text-secondary mb-3"><i class="fa-solid fa-book-open-reader me-2 text-info"></i> Tilawah Al-Qur'an</h5>
+      <div class="row text-center">
+        <div class="col-4 border-end border-secondary">
+          <h3 class="mb-0 text-accent"><%= stats.totalTilawah %></h3>
+          <small class="text-muted small">Total Diuji</small>
+        </div>
+        <div class="col-4 border-end border-secondary">
+          <h3 class="mb-0 text-success"><%= stats.kompetenTilawah %></h3>
+          <small class="text-muted small">Kompeten</small>
+        </div>
+        <div class="col-4">
+          <h3 class="mb-0 text-danger"><%= stats.belumTilawah %></h3>
+          <small class="text-muted small">Belum Lulus</small>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Recent Records Lists -->
 <div class="row">
   <!-- Recent Hafalan -->
-  <div class="col-lg-6 mb-4">
+  <div class="col-lg-4 mb-4">
     <div class="card-glass h-100">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0"><i class="fa-solid fa-microphone me-2 text-accent"></i> Hafalan Terbaru</h5>
-        <a href="/hafalan/riwayat" class="btn btn-link text-accent text-decoration-none btn-sm p-0">Semua Riwayat <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        <a href="/hafalan/riwayat" class="btn btn-link text-accent text-decoration-none btn-sm p-0">Semua <i class="fa-solid fa-arrow-right ms-1"></i></a>
       </div>
 
       <% if (recentHafalan && recentHafalan.length > 0) { %>
@@ -163,19 +184,22 @@
                 <tr>
                   <td>
                     <strong><%= r.surah_nama %></strong>
-                    <div class="text-muted small">Ayat/Surah #<%= r.surah_number %></div>
+                    <div class="text-muted small">#<%= r.surah_number %></div>
                   </td>
                   <td>
                     <span class="<%= r.status === 'Kompeten' ? 'badge-kompeten' : 'badge-belum' %>"><%= r.status %></span>
+                    <% if (r.status === 'Kompeten' && r.nilai) { %>
+                      <span class="badge bg-info text-dark rounded-pill ms-1 fw-bold" style="font-size: 0.7rem;"><%= r.nilai %></span>
+                    <% } %>
                   </td>
                   <td>
-                    <span class="small text-secondary"><%= new Date(r.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></span>
+                    <span class="small text-secondary"><%= new Date(r.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}) %></span>
                   </td>
                 </tr>
                 <% if (r.catatan) { %>
                   <tr style="background: rgba(255,255,255,0.005);">
                     <td colspan="3" class="pt-0 pb-3 ps-3 text-muted small">
-                      <i class="fa-solid fa-comment-dots me-1 text-accent"></i> <em>Catatan Guru: "<%= r.catatan %>"</em>
+                      <i class="fa-solid fa-comment-dots me-1 text-accent"></i> <em>Catatan: "<%= r.catatan.substring(0, 45) %><%= r.catatan.length > 45 ? '...' : '' %>"</em>
                     </td>
                   </tr>
                 <% } %>
@@ -185,19 +209,19 @@
         </div>
       <% } else { %>
         <div class="text-center py-5 text-secondary">
-          <i class="fa-solid fa-book-open fa-3x mb-3 text-muted"></i>
-          <p class="mb-0">Belum ada riwayat hafalan Al-Qur'an.</p>
+          <i class="fa-solid fa-book-open fa-2x mb-3 text-muted"></i>
+          <p class="mb-0">Belum ada riwayat hafalan.</p>
         </div>
       <% } %>
     </div>
   </div>
 
   <!-- Recent Worship -->
-  <div class="col-lg-6 mb-4">
+  <div class="col-lg-4 mb-4">
     <div class="card-glass h-100">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0"><i class="fa-solid fa-hands-praying me-2 text-accent"></i> Praktek Ibadah Terbaru</h5>
-        <a href="/ibadah/riwayat" class="btn btn-link text-accent text-decoration-none btn-sm p-0">Semua Riwayat <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        <h5 class="mb-0"><i class="fa-solid fa-hands-praying me-2 text-accent"></i> Praktek Ibadah</h5>
+        <a href="/ibadah/riwayat" class="btn btn-link text-accent text-decoration-none btn-sm p-0">Semua <i class="fa-solid fa-arrow-right ms-1"></i></a>
       </div>
 
       <% if (recentIbadah && recentIbadah.length > 0) { %>
@@ -215,19 +239,21 @@
                 <tr>
                   <td>
                     <strong><%= r.jenis_ibadah_id ? r.jenis_ibadah_id.nama_ibadah : 'Ibadah' %></strong>
-                    <div class="text-muted small"><%= r.jenis_ibadah_id ? r.jenis_ibadah_id.deskripsi : '' %></div>
                   </td>
                   <td>
                     <span class="<%= r.status === 'Kompeten' ? 'badge-kompeten' : 'badge-belum' %>"><%= r.status %></span>
+                    <% if (r.status === 'Kompeten' && r.nilai) { %>
+                      <span class="badge bg-info text-dark rounded-pill ms-1 fw-bold" style="font-size: 0.7rem;"><%= r.nilai %></span>
+                    <% } %>
                   </td>
                   <td>
-                    <span class="small text-secondary"><%= new Date(r.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></span>
+                    <span class="small text-secondary"><%= new Date(r.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}) %></span>
                   </td>
                 </tr>
                 <% if (r.catatan) { %>
                   <tr style="background: rgba(255,255,255,0.005);">
                     <td colspan="3" class="pt-0 pb-3 ps-3 text-muted small">
-                      <i class="fa-solid fa-comment-dots me-1 text-accent"></i> <em>Catatan Guru: "<%= r.catatan %>"</em>
+                      <i class="fa-solid fa-comment-dots me-1 text-accent"></i> <em>Catatan: "<%= r.catatan.substring(0, 45) %><%= r.catatan.length > 45 ? '...' : '' %>"</em>
                     </td>
                   </tr>
                 <% } %>
@@ -237,8 +263,63 @@
         </div>
       <% } else { %>
         <div class="text-center py-5 text-secondary">
-          <i class="fa-solid fa-hands-praying fa-3x mb-3 text-muted"></i>
-          <p class="mb-0">Belum ada riwayat praktek ibadah.</p>
+          <i class="fa-solid fa-hands-praying fa-2x mb-3 text-muted"></i>
+          <p class="mb-0">Belum ada riwayat praktek.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Recent Tilawah -->
+  <div class="col-lg-4 mb-4">
+    <div class="card-glass h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="fa-solid fa-book-open-reader me-2 text-accent"></i> Tilawah Terbaru</h5>
+        <a href="/tilawah/riwayat" class="btn btn-link text-accent text-decoration-none btn-sm p-0">Semua <i class="fa-solid fa-arrow-right ms-1"></i></a>
+      </div>
+
+      <% if (recentTilawah && recentTilawah.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-custom align-middle">
+            <thead>
+              <tr>
+                <th>Surah & Ayat</th>
+                <th>Status</th>
+                <th>Tanggal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentTilawah.forEach(r => { %>
+                <tr>
+                  <td>
+                    <strong><%= r.surah_nama %></strong>
+                    <div class="text-muted small">Ayat <%= r.ayat_start %> - <%= r.ayat_end %></div>
+                  </td>
+                  <td>
+                    <span class="<%= r.status === 'Kompeten' ? 'badge-kompeten' : 'badge-belum' %>"><%= r.status %></span>
+                    <% if (r.status === 'Kompeten' && r.nilai) { %>
+                      <span class="badge bg-info text-dark rounded-pill ms-1 fw-bold" style="font-size: 0.7rem;"><%= r.nilai %></span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <span class="small text-secondary"><%= new Date(r.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}) %></span>
+                  </td>
+                </tr>
+                <% if (r.catatan) { %>
+                  <tr style="background: rgba(255,255,255,0.005);">
+                    <td colspan="3" class="pt-0 pb-3 ps-3 text-muted small">
+                      <i class="fa-solid fa-comment-dots me-1 text-accent"></i> <em>Catatan: "<%= r.catatan.substring(0, 45) %><%= r.catatan.length > 45 ? '...' : '' %>"</em>
+                    </td>
+                  </tr>
+                <% } %>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5 text-secondary">
+          <i class="fa-solid fa-book-open-reader fa-2x mb-3 text-muted"></i>
+          <p class="mb-0">Belum ada riwayat tilawah.</p>
         </div>
       <% } %>
     </div>

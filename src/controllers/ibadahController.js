@@ -41,7 +41,7 @@ exports.showForm = async (req, res) => {
 
 // Create a new worship practice record
 exports.create = async (req, res) => {
-  const { student_id, jenis_ibadah_id, status, tanggal, catatan } = req.body;
+  const { student_id, jenis_ibadah_id, status, nilai, tanggal, catatan } = req.body;
   const currentUser = req.session.user;
 
   try {
@@ -83,6 +83,7 @@ exports.create = async (req, res) => {
       tanggal: tanggal ? new Date(tanggal) : new Date(),
       jenis_ibadah_id: ibadahType._id,
       status: status,
+      nilai: status === 'Kompeten' ? nilai : null,
       guru_id: currentUser.id,
       catatan: catatan || ''
     });

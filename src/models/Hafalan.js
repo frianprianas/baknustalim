@@ -29,6 +29,11 @@ const HafalanSchema = new mongoose.Schema({
     enum: ['Kompeten', 'Belum Kompeten'],
     required: true
   },
+  nilai: {
+    type: String,
+    enum: ['A', 'B', 'C'],
+    default: null
+  },
   nip_penilai: {
     type: String,
     required: true,

@@ -94,6 +94,7 @@ app.use('/auth', require('./routes/auth.routes'));
 app.use('/admin', require('./routes/admin.routes'));
 app.use('/hafalan', require('./routes/hafalan.routes'));
 app.use('/ibadah', require('./routes/ibadah.routes'));
+app.use('/tilawah', require('./routes/tilawah.routes'));
 app.use('/quran', require('./routes/quran.routes'));
 app.use('/tanya', require('./routes/tanya.routes'));
 app.use('/live', require('./routes/live.routes'));

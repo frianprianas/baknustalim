@@ -126,8 +126,8 @@
   <div class="col-md-4">
     <div class="card-glass stat-card warning">
       <h5 class="text-secondary mb-2"><i class="fa-solid fa-signature me-2 text-warning"></i> Total Penilaian Anda</h5>
-      <h2 class="mb-0 text-warning font-weight-bold"><%= stats.hafalanGraded + stats.ibadahGraded %></h2>
-      <small class="text-muted"><%= stats.hafalanGraded %> Hafalan &bull; <%= stats.ibadahGraded %> Praktek Ibadah</small>
+      <h2 class="mb-0 text-warning font-weight-bold"><%= stats.hafalanGraded + stats.ibadahGraded + stats.tilawahGraded %></h2>
+      <small class="text-muted"><%= stats.hafalanGraded %> Hafalan &bull; <%= stats.ibadahGraded %> Praktek &bull; <%= stats.tilawahGraded %> Tilawah</small>
     </div>
   </div>
 </div>
@@ -136,7 +136,7 @@
 <h4 class="mb-3 font-weight-bold text-primary"><i class="fa-solid fa-chart-line me-2 text-accent"></i> Rekapitulasi Capaian Sekolah & Tanya Jawab</h4>
 <div class="row mb-4">
   <!-- Hafalan Stats -->
-  <div class="col-md-4 mb-3 mb-md-0">
+  <div class="col-md-3 mb-3 mb-md-0">
     <div class="card-glass p-3 h-100">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <h6 class="text-secondary mb-0"><i class="fa-solid fa-book-open me-2 text-accent"></i> Evaluasi Hafalan (Sekolah)</h6>
@@ -151,14 +151,14 @@
           <h3 class="mb-0 text-success font-weight-bold">
             <%= stats.totalHafalan > 0 ? Math.round((stats.kompetenHafalan / stats.totalHafalan) * 100) : 0 %>%
           </h3>
-          <small class="text-muted"><%= stats.kompetenHafalan %> Setoran Lulus</small>
+          <small class="text-muted"><%= stats.kompetenHafalan %> Lulus</small>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Ibadah Stats -->
-  <div class="col-md-4 mb-3 mb-md-0">
+  <div class="col-md-3 mb-3 mb-md-0">
     <div class="card-glass p-3 h-100">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <h6 class="text-secondary mb-0"><i class="fa-solid fa-hands-praying me-2 text-accent"></i> Praktek Ibadah (Sekolah)</h6>
@@ -173,14 +173,36 @@
           <h3 class="mb-0 text-success font-weight-bold">
             <%= stats.totalIbadah > 0 ? Math.round((stats.kompetenIbadah / stats.totalIbadah) * 100) : 0 %>%
           </h3>
-          <small class="text-muted"><%= stats.kompetenIbadah %> Uji Lulus</small>
+          <small class="text-muted"><%= stats.kompetenIbadah %> Lulus</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tilawah Stats -->
+  <div class="col-md-3 mb-3 mb-md-0">
+    <div class="card-glass p-3 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h6 class="text-secondary mb-0"><i class="fa-solid fa-book-open-reader me-2 text-accent"></i> Evaluasi Tilawah (Sekolah)</h6>
+        <span class="badge px-2 py-1 small" style="background-color: rgba(22, 163, 74, 0.1); color: var(--accent-color); border: 1px solid rgba(22, 163, 74, 0.2);">Kompeten</span>
+      </div>
+      <div class="row align-items-center">
+        <div class="col-6 border-end border-light">
+          <h2 class="mb-0 text-primary font-weight-bold"><%= stats.totalTilawah %></h2>
+          <small class="text-muted">Total Penilaian</small>
+        </div>
+        <div class="col-6 ps-3">
+          <h3 class="mb-0 text-success font-weight-bold">
+            <%= stats.totalTilawah > 0 ? Math.round((stats.kompetenTilawah / stats.totalTilawah) * 100) : 0 %>%
+          </h3>
+          <small class="text-muted"><%= stats.kompetenTilawah %> Lulus</small>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Q&A Stats -->
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="card-glass p-3 h-100">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <h6 class="text-secondary mb-0"><i class="fa-solid fa-comments me-2 text-accent"></i> Tanya Yuk! Q&A</h6>

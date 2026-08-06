@@ -4,6 +4,7 @@ const KelasGuruPAI = require('../models/KelasGuruPAI');
 const JenisIbadah = require('../models/JenisIbadah');
 const Hafalan = require('../models/Hafalan');
 const PraktekIbadah = require('../models/PraktekIbadah');
+const Tilawah = require('../models/Tilawah');
 const Question = require('../models/Question');
 const mailcowService = require('../services/mailcowService');
 
@@ -25,6 +26,10 @@ exports.showDashboard = async (req, res) => {
     const totalIbadah = await PraktekIbadah.countDocuments();
     const kompetenIbadah = await PraktekIbadah.countDocuments({ status: 'Kompeten' });
 
+    // Tilawah stats
+    const totalTilawah = await Tilawah.countDocuments();
+    const kompetenTilawah = await Tilawah.countDocuments({ status: 'Kompeten' });
+
     // Q&A stats
     const totalQuestions = await Question.countDocuments();
     const answeredQuestions = await Question.countDocuments({ status: 'dijawab' });
@@ -36,6 +41,7 @@ exports.showDashboard = async (req, res) => {
         totalSiswa, totalGuru, totalTU, totalKelas, totalGuruPAI,
         totalHafalan, kompetenHafalan,
         totalIbadah, kompetenIbadah,
+        totalTilawah, kompetenTilawah,
         totalQuestions, answeredQuestions, unansweredQuestions
       }
     });
