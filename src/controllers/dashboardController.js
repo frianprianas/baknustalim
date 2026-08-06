@@ -191,7 +191,7 @@ exports.showDashboard = async (req, res) => {
         });
 
         return {
-          id: s._id,
+          id: s._id.toString(),
           nis: s.nis || '-',
           nama: s.nama,
           kelas: s.kelas_id ? s.kelas_id.nama_kelas : 'Belum Ada Kelas',
