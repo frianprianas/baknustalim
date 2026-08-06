@@ -13,19 +13,21 @@ exports.showRapot = async (req, res) => {
 
     // If logged in user is a student, they can only view their own rapot
     if (currentUser.role === 'siswa') {
-      if (siswaId && siswaId !== currentUser.id) {
+      const currentUserIdStr = String(currentUser.id);
+      if (siswaId && String(siswaId) !== currentUserIdStr) {
         return res.status(403).render('error', {
           title: 'Akses Ditolak',
           message: 'Anda tidak memiliki hak akses untuk melihat rapot siswa lain.',
           error: {}
         });
       }
-      siswaId = currentUser.id;
+      siswaId = currentUserIdStr;
     } else {
       // Guru, TU, Admin must specify student ID
       if (!siswaId) {
         return res.redirect('/dashboard');
       }
+      siswaId = String(siswaId);
     }
 
     // Fetch student profile
