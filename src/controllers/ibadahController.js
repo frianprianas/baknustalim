@@ -9,12 +9,14 @@ exports.showForm = async (req, res) => {
   try {
     const user = req.session.user;
     let students = [];
+    let classes = [];
 
     // 1. Get eligible students based on role
     if (user.role === 'admin') {
       students = await User.find({ role: 'siswa', kelas_id: { $ne: null } })
         .populate('kelas_id')
         .sort({ nama: 1 });
+      classes = await Kelas.find().sort({ nama_kelas: 1, tahun_ajaran: -1 });
     } else if (user.role === 'guru') {
       const classMappings = await KelasGuruPAI.find({ guru_id: user.id });
       const classIds = classMappings.map(m => m.kelas_id);
@@ -22,6 +24,7 @@ exports.showForm = async (req, res) => {
       students = await User.find({ role: 'siswa', kelas_id: { $in: classIds } })
         .populate('kelas_id')
         .sort({ nama: 1 });
+      classes = await Kelas.find({ _id: { $in: classIds } }).sort({ nama_kelas: 1, tahun_ajaran: -1 });
     }
 
     // 2. Get active worship categories from master data
@@ -30,6 +33,7 @@ exports.showForm = async (req, res) => {
     res.render('ibadah/form', {
       title: 'Input Praktek Ibadah - BaknusTa\'lim',
       students,
+      classes,
       listIbadah,
       error: null
     });
@@ -97,18 +101,22 @@ exports.create = async (req, res) => {
     
     // Reload form data
     let students = [];
+    let classes = [];
     if (currentUser.role === 'admin') {
       students = await User.find({ role: 'siswa', kelas_id: { $ne: null } }).populate('kelas_id').sort({ nama: 1 });
+      classes = await Kelas.find().sort({ nama_kelas: 1, tahun_ajaran: -1 });
     } else if (currentUser.role === 'guru') {
       const classMappings = await KelasGuruPAI.find({ guru_id: currentUser.id });
       const classIds = classMappings.map(m => m.kelas_id);
       students = await User.find({ role: 'siswa', kelas_id: { $in: classIds } }).populate('kelas_id').sort({ nama: 1 });
+      classes = await Kelas.find({ _id: { $in: classIds } }).sort({ nama_kelas: 1, tahun_ajaran: -1 });
     }
     const listIbadah = await JenisIbadah.find({ is_active: true }).sort({ nama_ibadah: 1 });
 
     res.render('ibadah/form', {
       title: 'Input Praktek Ibadah - BaknusTa\'lim',
       students,
+      classes,
       listIbadah,
       error: error.message
     });

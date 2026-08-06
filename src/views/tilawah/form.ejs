@@ -27,6 +27,9 @@
           <label for="class_filter" class="form-label">Filter Berdasarkan Kelas</label>
           <select class="form-select border-secondary" id="class_filter">
             <option value="">-- Semua Kelas --</option>
+            <% classes.forEach(c => { %>
+              <option value="<%= c._id %>"><%= c.nama_kelas %> (<%= c.tahun_ajaran %>)</option>
+            <% }) %>
           </select>
         </div>
 
@@ -203,25 +206,6 @@
     const studentSelect = document.getElementById('student_id');
     const classFilter = document.getElementById('class_filter');
     const originalOptions = Array.from(studentSelect.options);
-    
-    // Extract unique classes
-    const classes = {};
-    originalOptions.forEach(opt => {
-      if (!opt.value) return;
-      const classId = opt.getAttribute('data-class-id');
-      const className = opt.getAttribute('data-class-name');
-      if (classId && className) {
-        classes[classId] = className;
-      }
-    });
-    
-    // Populate class filter dropdown
-    for (const id in classes) {
-      const opt = document.createElement('option');
-      opt.value = id;
-      opt.textContent = classes[id];
-      classFilter.appendChild(opt);
-    }
     
     // Event listener to filter
     classFilter.addEventListener('change', function() {
