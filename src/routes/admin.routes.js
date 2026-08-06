@@ -36,4 +36,8 @@ router.post('/ibadah/create', adminController.createIbadah);
 router.post('/ibadah/edit/:id', adminController.updateIbadah);
 router.post('/ibadah/delete/:id', adminController.deleteIbadah);
 
+// School Settings
+router.get('/settings', adminController.getSchoolSettings);
+router.post('/settings', adminController.updateSchoolSettings);
+
 module.exports = router;

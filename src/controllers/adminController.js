@@ -6,6 +6,7 @@ const Hafalan = require('../models/Hafalan');
 const PraktekIbadah = require('../models/PraktekIbadah');
 const Tilawah = require('../models/Tilawah');
 const Question = require('../models/Question');
+const SchoolSetting = require('../models/SchoolSetting');
 const mailcowService = require('../services/mailcowService');
 
 // ================= USER MANAGEMENT =================
@@ -386,3 +387,54 @@ exports.deleteIbadah = async (req, res) => {
     res.redirect('/admin/ibadah');
   }
 };
+
+// ================= SCHOOL SETTINGS =================
+
+exports.getSchoolSettings = async (req, res) => {
+  try {
+    let setting = await SchoolSetting.findOne();
+    if (!setting) {
+      setting = new SchoolSetting(); // use default values
+    }
+
+    res.render('admin/settings', {
+      title: 'Seting Sekolah - Admin Panel',
+      setting
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('error', { title: 'Server Error', message: error.message, error });
+  }
+};
+
+exports.updateSchoolSettings = async (req, res) => {
+  try {
+    const { nama_sekolah, alamat, email, kepala_sekolah, logo_base64 } = req.body;
+    
+    if (!nama_sekolah || !alamat || !email || !kepala_sekolah) {
+      req.session.errorMessage = 'Semua field wajib diisi.';
+      return res.redirect('/admin/settings');
+    }
+
+    let setting = await SchoolSetting.findOne();
+    if (!setting) {
+      setting = new SchoolSetting();
+    }
+
+    setting.nama_sekolah = nama_sekolah;
+    setting.alamat = alamat;
+    setting.email = email;
+    setting.kepala_sekolah = kepala_sekolah;
+    if (logo_base64 !== undefined) {
+      setting.logo_base64 = logo_base64;
+    }
+
+    await setting.save();
+    req.session.successMessage = 'Seting sekolah berhasil diperbarui.';
+    res.redirect('/admin/settings');
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('error', { title: 'Server Error', message: error.message, error });
+  }
+};
+

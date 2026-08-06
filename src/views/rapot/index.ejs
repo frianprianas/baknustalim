@@ -159,14 +159,18 @@
     <!-- Official Report Header -->
     <div class="row align-items-center mb-4 pb-3 border-bottom border-secondary">
       <div class="col-3 text-center">
-        <!-- Text logo fallback if image is missing -->
-        <h4 class="mb-0 text-accent font-weight-bold d-print-none">SMK BN 666</h4>
-        <h5 class="mb-0 d-none d-print-block font-weight-bold" style="font-size: 1.5rem;">SMK</h5>
+        <% if (schoolSetting.logo_base64) { %>
+          <img src="<%= schoolSetting.logo_base64 %>" class="rapot-header-logo img-fluid" alt="Logo Sekolah" style="max-height: 80px; object-fit: contain;">
+        <% } else { %>
+          <!-- Text logo fallback if image is missing -->
+          <h4 class="mb-0 text-accent font-weight-bold d-print-none">SMK BN 666</h4>
+          <h5 class="mb-0 d-none d-print-block font-weight-bold" style="font-size: 1.5rem;">SMK</h5>
+        <% } %>
       </div>
       <div class="col-9 text-start">
-        <h3 class="mb-1 font-weight-bold text-primary text-uppercase" style="letter-spacing: 0.5px;">SMK Bakti Nusantara 666</h3>
+        <h3 class="mb-1 font-weight-bold text-primary text-uppercase" style="letter-spacing: 0.5px;"><%= schoolSetting.nama_sekolah %></h3>
         <h5 class="mb-1 text-secondary">Laporan Evaluasi Pendidikan Agama Islam & Keagamaan</h5>
-        <small class="text-muted d-block">Jalan Raya Cileunyi No. 666, Bandung &bull; Website: www.smkbn666.sch.id</small>
+        <small class="text-muted d-block"><%= schoolSetting.alamat %> &bull; Email: <%= schoolSetting.email %></small>
       </div>
     </div>
 
@@ -431,7 +435,7 @@
       <div class="col-4">
         <p>Kepala Sekolah,</p>
         <div style="height: 65px;"></div>
-        <p class="border-bottom border-secondary mx-auto font-weight-bold" style="width: 180px;">H. M. Umar, S.Pd., M.M.</p>
+        <p class="border-bottom border-secondary mx-auto font-weight-bold" style="width: 180px;"><%= schoolSetting.kepala_sekolah %></p>
       </div>
     </div>
 

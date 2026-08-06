@@ -63,6 +63,26 @@ app.use(async (req, res, next) => {
   }
 
   res.locals.currentUser = req.session.user || null;
+
+  // Fetch school settings globally
+  const SchoolSetting = require('./models/SchoolSetting');
+  try {
+    let schoolSetting = await SchoolSetting.findOne();
+    if (!schoolSetting) {
+      schoolSetting = new SchoolSetting(); // uses defaults
+    }
+    res.locals.schoolSetting = schoolSetting;
+  } catch (err) {
+    console.error('Error loading school settings globally:', err);
+    res.locals.schoolSetting = {
+      nama_sekolah: 'SMK Bakti Nusantara 666',
+      alamat: 'Jalan Raya Cileunyi No. 666, Bandung',
+      email: 'info@smkbn666.sch.id',
+      kepala_sekolah: 'H. M. Umar, S.Pd., M.M.',
+      logo_base64: ''
+    };
+  }
+
   res.locals.successMessage = req.session.successMessage || null;
   res.locals.errorMessage = req.session.errorMessage || null;
   
