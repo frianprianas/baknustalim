@@ -10,7 +10,7 @@ async function syncCsv() {
   try {
     const csvData = fs.readFileSync(csvPath, 'utf-8');
     const lines = csvData.split('\n');
-    const tahunAjaran = "2024/2025"; // Assume current academic year
+    const tahunAjaran = "2026/2027"; // Assume current academic year
     
     // First line is header: no;NIS;Nama;Kelas;EMAIL;PASSWORD
     for (let i = 1; i < lines.length; i++) {
