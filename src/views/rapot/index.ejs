@@ -1,0 +1,441 @@
+<%- include('../partials/header') %>
+
+<style>
+  /* Premium glassmorphism layout for Screen */
+  .rapot-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .rapot-header-logo {
+    max-height: 80px;
+    object-fit: contain;
+  }
+  .biodata-table td {
+    padding: 6px 12px;
+    border: none;
+    color: var(--text-primary);
+  }
+  .biodata-table td:first-child {
+    font-weight: 600;
+    width: 150px;
+    color: var(--text-secondary);
+  }
+  .rapot-section-title {
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 6px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-weight: 700;
+    color: var(--accent-color);
+  }
+  
+  /* Print Stylesheet */
+  @media print {
+    /* Hide everything that is NOT the rapot */
+    nav, footer, .d-print-none, .btn, .navbar, .sidebar, .app-header, .flash-message {
+      display: none !important;
+    }
+    
+    body {
+      background: #ffffff !important;
+      color: #000000 !important;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .container-fluid, .main-content {
+      padding: 0 !important;
+      margin: 0 !important;
+      max-width: 100% !important;
+      width: 100% !important;
+    }
+
+    .rapot-container {
+      max-width: 100% !important;
+      width: 100% !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: transparent !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .card-glass {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin-bottom: 25px !important;
+    }
+
+    /* Force table borders and styles for black & white print */
+    .table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      margin-bottom: 20px !important;
+      color: #000000 !important;
+    }
+    .table th, .table td {
+      border: 1px solid #333333 !important;
+      padding: 8px 10px !important;
+      font-size: 11px !important;
+      color: #000000 !important;
+      background-color: transparent !important;
+    }
+    .table th {
+      background-color: #f1f5f9 !important;
+      font-weight: bold !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .biodata-table td {
+      padding: 4px 6px !important;
+      font-size: 12px !important;
+      color: #000000 !important;
+    }
+    .biodata-table td:first-child {
+      width: 120px !important;
+      font-weight: bold !important;
+    }
+
+    .rapot-section-title {
+      font-size: 14px !important;
+      border-bottom: 2px solid #333333 !important;
+      color: #000000 !important;
+      margin-top: 20px !important;
+      margin-bottom: 10px !important;
+    }
+
+    .badge-kompeten {
+      background-color: transparent !important;
+      color: #000000 !important;
+      border: 1px solid #000000 !important;
+      font-weight: bold !important;
+      padding: 2px 4px !important;
+    }
+    .badge-belum {
+      background-color: transparent !important;
+      color: #555555 !important;
+      border: 1px dashed #555555 !important;
+      padding: 2px 4px !important;
+    }
+
+    /* Avoid page breaking in the middle of elements */
+    .avoid-page-break {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+    
+    .signature-row {
+      margin-top: 40px !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    h2, h3, h4, h5, h6 {
+      color: #000000 !important;
+    }
+
+    .text-success, .text-danger, .text-warning, .text-primary, .text-info {
+      color: #000000 !important;
+    }
+  }
+</style>
+
+<div class="rapot-container pb-5">
+  <!-- Action Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+    <a href="/dashboard" class="btn btn-secondary-custom">
+      <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Dashboard
+    </a>
+    <button onclick="window.print()" class="btn btn-primary-custom px-4">
+      <i class="fa-solid fa-file-pdf me-2"></i> Cetak / Simpan PDF
+    </button>
+  </div>
+
+  <div class="card-glass p-4 p-md-5">
+    <!-- Official Report Header -->
+    <div class="row align-items-center mb-4 pb-3 border-bottom border-secondary">
+      <div class="col-3 text-center">
+        <!-- Text logo fallback if image is missing -->
+        <h4 class="mb-0 text-accent font-weight-bold d-print-none">SMK BN 666</h4>
+        <h5 class="mb-0 d-none d-print-block font-weight-bold" style="font-size: 1.5rem;">SMK</h5>
+      </div>
+      <div class="col-9 text-start">
+        <h3 class="mb-1 font-weight-bold text-primary text-uppercase" style="letter-spacing: 0.5px;">SMK Bakti Nusantara 666</h3>
+        <h5 class="mb-1 text-secondary">Laporan Evaluasi Pendidikan Agama Islam & Keagamaan</h5>
+        <small class="text-muted d-block">Jalan Raya Cileunyi No. 666, Bandung &bull; Website: www.smkbn666.sch.id</small>
+      </div>
+    </div>
+
+    <!-- Student Biodata Section -->
+    <div class="row mb-4">
+      <div class="col-md-6 col-12">
+        <table class="table biodata-table mb-0">
+          <tr>
+            <td>Nama Siswa</td>
+            <td>: &nbsp; <strong><%= student.nama %></strong></td>
+          </tr>
+          <tr>
+            <td>NIS</td>
+            <td>: &nbsp; <%= student.nis || '-' %></td>
+          </tr>
+          <tr>
+            <td>Kelas</td>
+            <td>: &nbsp; <%= student.kelas_id ? student.kelas_id.nama_kelas : 'Belum Ada Kelas' %></td>
+          </tr>
+        </table>
+      </div>
+      <div class="col-md-6 col-12">
+        <table class="table biodata-table mb-0">
+          <tr>
+            <td>Tahun Ajaran</td>
+            <td>: &nbsp; <%= student.kelas_id ? student.kelas_id.tahun_ajaran : '-' %></td>
+          </tr>
+          <tr>
+            <td>Email Akun</td>
+            <td>: &nbsp; <%= student.mailcow_email || student.email || '-' %></td>
+          </tr>
+          <tr>
+            <td>Tanggal Cetak</td>
+            <td>: &nbsp; <%= new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) %></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Summary Stats Bar -->
+    <div class="row text-center mb-4 g-3 avoid-page-break">
+      <!-- Hafalan Card -->
+      <div class="col-6 col-md-3">
+        <div class="p-3 rounded" style="background-color: rgba(30, 41, 59, 0.2); border: 1px solid var(--glass-border);">
+          <h6 class="text-secondary small mb-1">Setoran Hafalan</h6>
+          <h4 class="mb-1 text-accent fw-bold"><%= stats.hafalan.kompeten %> <span class="small font-weight-normal text-muted">/ <%= stats.hafalan.total %></span></h4>
+          <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill" style="font-size: 0.7rem;">
+            <%= stats.hafalan.total > 0 ? Math.round((stats.hafalan.kompeten / stats.hafalan.total) * 100) : 0 %>% Lulus
+          </span>
+        </div>
+      </div>
+      <!-- Ibadah Card -->
+      <div class="col-6 col-md-3">
+        <div class="p-3 rounded" style="background-color: rgba(30, 41, 59, 0.2); border: 1px solid var(--glass-border);">
+          <h6 class="text-secondary small mb-1">Praktek Ibadah</h6>
+          <h4 class="mb-1 text-accent fw-bold"><%= stats.ibadah.kompeten %> <span class="small font-weight-normal text-muted">/ <%= stats.ibadah.total %></span></h4>
+          <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill" style="font-size: 0.7rem;">
+            <%= stats.ibadah.total > 0 ? Math.round((stats.ibadah.kompeten / stats.ibadah.total) * 100) : 0 %>% Lulus
+          </span>
+        </div>
+      </div>
+      <!-- Tilawah Card -->
+      <div class="col-6 col-md-3">
+        <div class="p-3 rounded" style="background-color: rgba(30, 41, 59, 0.2); border: 1px solid var(--glass-border);">
+          <h6 class="text-secondary small mb-1">Tilawah Qur'an</h6>
+          <h4 class="mb-1 text-accent fw-bold"><%= stats.tilawah.kompeten %> <span class="small font-weight-normal text-muted">/ <%= stats.tilawah.total %></span></h4>
+          <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill" style="font-size: 0.7rem;">
+            <%= stats.tilawah.total > 0 ? Math.round((stats.tilawah.kompeten / stats.tilawah.total) * 100) : 0 %>% Lulus
+          </span>
+        </div>
+      </div>
+      <!-- Amalan Card -->
+      <div class="col-6 col-md-3">
+        <div class="p-3 rounded" style="background-color: rgba(30, 41, 59, 0.2); border: 1px solid var(--glass-border);">
+          <h6 class="text-secondary small mb-1">Kepatuhan Fardhu</h6>
+          <% const farduPct = stats.amalan.fardu.expected > 0 ? Math.round((stats.amalan.fardu.done / stats.amalan.fardu.expected) * 100) : 0 %>
+          <h4 class="mb-1 text-accent fw-bold"><%= farduPct %>%</h4>
+          <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill" style="font-size: 0.7rem;">
+            <%= stats.amalan.daysFilled %> Hari Isi
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. HAFALAN TABLE -->
+    <div class="avoid-page-break">
+      <h5 class="rapot-section-title"><i class="fa-solid fa-microphone me-2"></i> I. Capaian Hafalan Al-Qur'an</h5>
+      <% if (hafalanList && hafalanList.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-custom align-middle">
+            <thead>
+              <tr>
+                <th style="width: 5%">No</th>
+                <th style="width: 25%">Surah</th>
+                <th style="width: 15%">Tanggal</th>
+                <th style="width: 15%">Status</th>
+                <th style="width: 10%">Nilai</th>
+                <th style="width: 30%">Catatan / Catatan Guru</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% hafalanList.forEach((h, index) => { %>
+                <tr>
+                  <td class="text-center"><%= index + 1 %></td>
+                  <td><strong><%= h.surah_nama %></strong> <div class="text-muted small">Surah #<%= h.surah_number %></div></td>
+                  <td><%= new Date(h.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></td>
+                  <td>
+                    <span class="<%= h.status === 'Kompeten' ? 'badge-kompeten' : 'badge-belum' %>"><%= h.status %></span>
+                  </td>
+                  <td class="text-center">
+                    <% if (h.status === 'Kompeten' && h.nilai) { %>
+                      <span class="badge bg-info text-dark rounded-pill fw-bold px-2 py-1"><%= h.nilai %></span>
+                    <% } else { %>
+                      -
+                    <% } %>
+                  </td>
+                  <td class="small text-muted"><%= h.catatan || '-' %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p class="text-muted py-2">Belum ada riwayat setoran hafalan Al-Qur'an.</p>
+      <% } %>
+    </div>
+
+    <!-- 2. IBADAH TABLE -->
+    <div class="avoid-page-break">
+      <h5 class="rapot-section-title"><i class="fa-solid fa-hands-praying me-2"></i> II. Capaian Praktek Ibadah</h5>
+      <% if (ibadahList && ibadahList.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-custom align-middle">
+            <thead>
+              <tr>
+                <th style="width: 5%">No</th>
+                <th style="width: 25%">Jenis Ibadah</th>
+                <th style="width: 15%">Tanggal</th>
+                <th style="width: 15%">Status</th>
+                <th style="width: 10%">Nilai</th>
+                <th style="width: 30%">Catatan / Catatan Guru</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% ibadahList.forEach((i, index) => { %>
+                <tr>
+                  <td class="text-center"><%= index + 1 %></td>
+                  <td><strong><%= i.jenis_ibadah_id ? i.jenis_ibadah_id.nama_ibadah : 'Ibadah' %></strong></td>
+                  <td><%= new Date(i.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></td>
+                  <td>
+                    <span class="<%= i.status === 'Kompeten' ? 'badge-kompeten' : 'badge-belum' %>"><%= i.status %></span>
+                  </td>
+                  <td class="text-center">
+                    <% if (i.status === 'Kompeten' && i.nilai) { %>
+                      <span class="badge bg-info text-dark rounded-pill fw-bold px-2 py-1"><%= i.nilai %></span>
+                    <% } else { %>
+                      -
+                    <% } %>
+                  </td>
+                  <td class="small text-muted"><%= i.catatan || '-' %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p class="text-muted py-2">Belum ada riwayat penilaian praktek ibadah.</p>
+      <% } %>
+    </div>
+
+    <!-- 3. TILAWAH TABLE -->
+    <div class="avoid-page-break">
+      <h5 class="rapot-section-title"><i class="fa-solid fa-book-open-reader me-2"></i> III. Capaian Tilawah Al-Qur'an</h5>
+      <% if (tilawahList && tilawahList.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-custom align-middle">
+            <thead>
+              <tr>
+                <th style="width: 5%">No</th>
+                <th style="width: 25%">Surah & Ayat</th>
+                <th style="width: 15%">Tanggal</th>
+                <th style="width: 15%">Status</th>
+                <th style="width: 10%">Nilai</th>
+                <th style="width: 30%">Catatan / Catatan Guru</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% tilawahList.forEach((t, index) => { %>
+                <tr>
+                  <td class="text-center"><%= index + 1 %></td>
+                  <td><strong><%= t.surah_nama %></strong> <div class="text-muted small">Ayat <%= t.ayat_start %> - <%= t.ayat_end %></div></td>
+                  <td><%= new Date(t.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) %></td>
+                  <td>
+                    <span class="<%= t.status === 'Kompeten' ? 'badge-kompeten' : 'badge-belum' %>"><%= t.status %></span>
+                  </td>
+                  <td class="text-center">
+                    <% if (t.status === 'Kompeten' && t.nilai) { %>
+                      <span class="badge bg-info text-dark rounded-pill fw-bold px-2 py-1"><%= t.nilai %></span>
+                    <% } else { %>
+                      -
+                    <% } %>
+                  </td>
+                  <td class="small text-muted"><%= t.catatan || '-' %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p class="text-muted py-2">Belum ada riwayat penilaian tilawah Al-Qur'an.</p>
+      <% } %>
+    </div>
+
+    <!-- 4. AMALAN YAUMI SUMMARY -->
+    <div class="avoid-page-break">
+      <h5 class="rapot-section-title"><i class="fa-solid fa-calendar-check me-2"></i> IV. Pembiasaan Amalan Keagamaan (Amalan Yaumi)</h5>
+      <p class="text-secondary small">Rekapitulasi pengisian pembiasaan ibadah harian siswa mandiri secara berkala di aplikasi.</p>
+      <div class="table-responsive">
+        <table class="table table-custom align-middle">
+          <thead>
+            <tr>
+              <th>Indikator Pembiasaan</th>
+              <th class="text-center">Realisasi / Target</th>
+              <th class="text-center">Persentase Kepatuhan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Kepatuhan Salat Fardhu 5 Waktu</strong></td>
+              <td class="text-center"><%= stats.amalan.fardu.done %> / <%= stats.amalan.fardu.expected %> waktu</td>
+              <td class="text-center"><%= farduPct %>%</td>
+            </tr>
+            <tr>
+              <td><strong>Kekerapan Salat Sunnah (Tahajud, Duha, Rawatib)</strong></td>
+              <td class="text-center"><%= stats.amalan.sunnah %> kali terisi</td>
+              <td class="text-center">-</td>
+            </tr>
+            <tr>
+              <td><strong>Puasa Sunnah (Senin-Kamis, Ayyamul Bidh)</strong></td>
+              <td class="text-center"><%= stats.amalan.puasa %> hari terlaksana</td>
+              <td class="text-center">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Signature Row -->
+    <div class="row signature-row text-center mt-5 avoid-page-break" style="font-size: 12px; color: var(--text-primary);">
+      <div class="col-4">
+        <p>Orang Tua / Wali Siswa,</p>
+        <div style="height: 65px;"></div>
+        <p class="border-bottom border-secondary mx-auto" style="width: 150px;"></p>
+      </div>
+      <div class="col-4">
+        <p>Wali Kelas / Guru PAI,</p>
+        <div style="height: 65px;"></div>
+        <p class="border-bottom border-secondary mx-auto font-weight-bold" style="width: 150px;">
+          <%= currentUser.role === 'guru' ? (currentUser.nama || (currentUser.profile && currentUser.profile.displayName)) : 'Guru PAI' %>
+        </p>
+      </div>
+      <div class="col-4">
+        <p>Kepala Sekolah,</p>
+        <div style="height: 65px;"></div>
+        <p class="border-bottom border-secondary mx-auto font-weight-bold" style="width: 180px;">H. M. Umar, S.Pd., M.M.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

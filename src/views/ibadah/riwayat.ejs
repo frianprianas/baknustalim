@@ -93,6 +93,11 @@
               <% if (currentUser.role !== 'siswa') { %>
                 <td>
                   <strong><%= r.siswa ? r.siswa.nama : 'Siswa Terhapus' %></strong>
+                  <% if (r.siswa_id) { %>
+                    <a href="/rapot/<%= r.siswa_id %>" class="btn btn-link btn-xs p-0 ms-2 text-primary text-decoration-none" title="Lihat Rapot Siswa">
+                      <i class="fa-solid fa-graduation-cap"></i> Rapot
+                    </a>
+                  <% } %>
                   <div class="text-accent small font-monospace"><%= r.nis %></div>
                 </td>
                 <td>
