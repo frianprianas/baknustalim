@@ -43,6 +43,10 @@ const UserSchema = new mongoose.Schema({
   last_synced_at: {
     type: Date,
     default: Date.now
+  },
+  last_active_at: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true

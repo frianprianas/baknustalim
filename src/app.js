@@ -38,6 +38,24 @@ app.use(session({
 
 // Global variables middleware for EJS templates
 app.use(async (req, res, next) => {
+  // Update user last active timestamp with 5-minute throttling
+  if (req.session && req.session.user) {
+    const now = Date.now();
+    const lastUpdate = req.session.lastActiveUpdated || 0;
+    if (now - lastUpdate > 5 * 60 * 1000) {
+      try {
+        const User = require('./models/User');
+        await User.updateOne(
+          { _id: req.session.user.id },
+          { $set: { last_active_at: new Date() } }
+        );
+        req.session.lastActiveUpdated = now;
+      } catch (err) {
+        console.error('[Middleware] Failed to update user last active time:', err);
+      }
+    }
+  }
+
   if (req.session.user && !req.session.user.profile) {
     try {
       const mailcowService = require('./services/mailcowService');

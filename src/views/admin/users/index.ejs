@@ -59,6 +59,7 @@
             <th>NIS / NIP</th>
             <th>Kelas / Guru PAI</th>
             <th>Terakhir Sinkron</th>
+            <th>Aktif Terakhir</th>
             <th class="text-end">Aksi</th>
           </tr>
         </thead>
@@ -94,6 +95,13 @@
               </td>
               <td>
                 <span class="small text-muted" style="font-size: 0.75rem;"><%= new Date(u.last_synced_at).toLocaleString('id-ID', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}) %></span>
+              </td>
+              <td>
+                <% if (u.last_active_at) { %>
+                  <span class="small text-accent" style="font-size: 0.75rem;"><%= new Date(u.last_active_at).toLocaleString('id-ID', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}) %></span>
+                <% } else { %>
+                  <span class="small text-muted" style="font-size: 0.75rem;">Belum aktif</span>
+                <% } %>
               </td>
               <td class="text-end">
                 <a href="/admin/users/edit/<%= u._id %>" class="btn btn-outline-info btn-sm rounded px-2.5">
