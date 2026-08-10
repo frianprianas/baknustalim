@@ -54,7 +54,7 @@ exports.showDashboard = async (req, res) => {
 
 exports.listUsers = async (req, res) => {
   try {
-    const { role, search } = req.query;
+    const { role, search, sortBy } = req.query;
     const filter = {};
     
     if (role) {
@@ -69,12 +69,22 @@ exports.listUsers = async (req, res) => {
       ];
     }
 
-    const users = await User.find(filter).populate('kelas_id').sort({ nama: 1 });
+    let sortOption = { nama: 1 }; // default
+    if (sortBy === 'name_desc') {
+      sortOption = { nama: -1 };
+    } else if (sortBy === 'last_active') {
+      sortOption = { last_active_at: -1 };
+    } else if (sortBy === 'role') {
+      sortOption = { role: 1, nama: 1 };
+    }
+
+    const users = await User.find(filter).populate('kelas_id').sort(sortOption);
     res.render('admin/users/index', {
       title: 'Kelola User - BaknusTa\'lim',
       users,
       roleFilter: role || '',
-      searchQuery: search || ''
+      searchQuery: search || '',
+      sortBy: sortBy || 'name_asc'
     });
   } catch (error) {
     console.error(error);

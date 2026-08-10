@@ -17,7 +17,7 @@
 <!-- Filters -->
 <div class="card-glass p-4 mb-4">
   <form action="/admin/users" method="GET" class="row g-3">
-    <div class="col-md-4">
+    <div class="col-md-3">
       <label for="role" class="form-label">Filter Role</label>
       <select class="form-select" id="role" name="role" onchange="this.form.submit()">
         <option value="">-- Semua Role --</option>
@@ -28,7 +28,17 @@
       </select>
     </div>
     
-    <div class="col-md-6">
+    <div class="col-md-3">
+      <label for="sortBy" class="form-label">Urutkan</label>
+      <select class="form-select" id="sortBy" name="sortBy" onchange="this.form.submit()">
+        <option value="name_asc" <%= sortBy === 'name_asc' ? 'selected' : '' %>>Nama (A-Z)</option>
+        <option value="name_desc" <%= sortBy === 'name_desc' ? 'selected' : '' %>>Nama (Z-A)</option>
+        <option value="last_active" <%= sortBy === 'last_active' ? 'selected' : '' %>>Aktivitas Terakhir (Terbaru)</option>
+        <option value="role" <%= sortBy === 'role' ? 'selected' : '' %>>Role</option>
+      </select>
+    </div>
+    
+    <div class="col-md-4">
       <label for="search" class="form-label">Cari Nama / Email / NIS / NIP</label>
       <input type="text" class="form-control" id="search" name="search" placeholder="Cari user..." value="<%= searchQuery %>">
     </div>
@@ -94,11 +104,11 @@
                 <% } %>
               </td>
               <td>
-                <span class="small text-muted" style="font-size: 0.75rem;"><%= new Date(u.last_synced_at).toLocaleString('id-ID', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}) %></span>
+                <span class="small text-muted" style="font-size: 0.75rem;"><%= new Date(u.last_synced_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %> WIB</span>
               </td>
               <td>
                 <% if (u.last_active_at) { %>
-                  <span class="small text-accent" style="font-size: 0.75rem;"><%= new Date(u.last_active_at).toLocaleString('id-ID', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}) %></span>
+                  <span class="small text-accent" style="font-size: 0.75rem;"><%= new Date(u.last_active_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %> WIB</span>
                 <% } else { %>
                   <span class="small text-muted" style="font-size: 0.75rem;">Belum aktif</span>
                 <% } %>
