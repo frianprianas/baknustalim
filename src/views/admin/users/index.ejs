@@ -55,7 +55,7 @@
 <div class="card-glass p-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="mb-0"><i class="fa-solid fa-table-list me-2 text-accent"></i> Daftar User Terdaftar</h5>
-    <span class="badge bg-dark border border-secondary text-accent px-3 py-2"><%= users.length %> User Ditemukan</span>
+    <span class="badge bg-dark border border-secondary text-accent px-3 py-2"><%= totalUsers %> User Ditemukan</span>
   </div>
 
   <% if (users && users.length > 0) { %>
@@ -123,6 +123,81 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+      <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center flex-wrap gap-1">
+          
+          <!-- Previous Button -->
+          <% if (currentPage > 1) { %>
+            <li class="page-item">
+              <a class="page-link shadow-sm border-0" href="/admin/users?role=<%= roleFilter %>&search=<%= searchQuery %>&sortBy=<%= sortBy %>&page=<%= currentPage - 1 %>" aria-label="Previous" style="border-radius: 8px; color: var(--accent-color); background: var(--bg-tertiary);">
+                <i class="fa-solid fa-angle-left"></i>
+              </a>
+            </li>
+          <% } else { %>
+            <li class="page-item disabled">
+              <span class="page-link shadow-sm border-0" style="border-radius: 8px; background: var(--bg-tertiary); opacity: 0.5;">
+                <i class="fa-solid fa-angle-left"></i>
+              </span>
+            </li>
+          <% } %>
+
+          <!-- Page Numbers -->
+          <% 
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+          %>
+          
+          <% if (startPage > 1) { %>
+            <li class="page-item">
+              <a class="page-link shadow-sm border-0" href="/admin/users?role=<%= roleFilter %>&search=<%= searchQuery %>&sortBy=<%= sortBy %>&page=1" style="border-radius: 8px; color: var(--accent-color); background: var(--bg-tertiary);">1</a>
+            </li>
+            <% if (startPage > 2) { %>
+              <li class="page-item disabled"><span class="page-link border-0 bg-transparent" style="color: var(--text-secondary);">...</span></li>
+            <% } %>
+          <% } %>
+
+          <% for (let i = startPage; i <= endPage; i++) { %>
+            <% if (i === currentPage) { %>
+              <li class="page-item active">
+                <span class="page-link shadow-sm border-0" style="border-radius: 8px; background-color: var(--accent-color); color: white; font-weight: bold;"><%= i %></span>
+              </li>
+            <% } else { %>
+              <li class="page-item">
+                <a class="page-link shadow-sm border-0" href="/admin/users?role=<%= roleFilter %>&search=<%= searchQuery %>&sortBy=<%= sortBy %>&page=<%= i %>" style="border-radius: 8px; color: var(--accent-color); background: var(--bg-tertiary);"><%= i %></a>
+              </li>
+            <% } %>
+          <% } %>
+
+          <% if (endPage < totalPages) { %>
+            <% if (endPage < totalPages - 1) { %>
+              <li class="page-item disabled"><span class="page-link border-0 bg-transparent" style="color: var(--text-secondary);">...</span></li>
+            <% } %>
+            <li class="page-item">
+              <a class="page-link shadow-sm border-0" href="/admin/users?role=<%= roleFilter %>&search=<%= searchQuery %>&sortBy=<%= sortBy %>&page=<%= totalPages %>" style="border-radius: 8px; color: var(--accent-color); background: var(--bg-tertiary);"><%= totalPages %></a>
+            </li>
+          <% } %>
+
+          <!-- Next Button -->
+          <% if (currentPage < totalPages) { %>
+            <li class="page-item">
+              <a class="page-link shadow-sm border-0" href="/admin/users?role=<%= roleFilter %>&search=<%= searchQuery %>&sortBy=<%= sortBy %>&page=<%= currentPage + 1 %>" aria-label="Next" style="border-radius: 8px; color: var(--accent-color); background: var(--bg-tertiary);">
+                <i class="fa-solid fa-angle-right"></i>
+              </a>
+            </li>
+          <% } else { %>
+            <li class="page-item disabled">
+              <span class="page-link shadow-sm border-0" style="border-radius: 8px; background: var(--bg-tertiary); opacity: 0.5;">
+                <i class="fa-solid fa-angle-right"></i>
+              </span>
+            </li>
+          <% } %>
+
+        </ul>
+      </nav>
+    <% } %>
   <% } else { %>
     <div class="text-center py-5 text-secondary">
       <i class="fa-solid fa-users-slash fa-3x mb-3 text-muted"></i>

@@ -69,22 +69,40 @@ exports.listUsers = async (req, res) => {
       ];
     }
 
-    let sortOption = { nama: 1 }; // default
-    if (sortBy === 'name_desc') {
+    const activeSort = sortBy || 'last_active';
+    let sortOption = { last_active_at: -1 }; // default: last active first
+    if (activeSort === 'name_asc') {
+      sortOption = { nama: 1 };
+    } else if (activeSort === 'name_desc') {
       sortOption = { nama: -1 };
-    } else if (sortBy === 'last_active') {
-      sortOption = { last_active_at: -1 };
-    } else if (sortBy === 'role') {
+    } else if (activeSort === 'role') {
       sortOption = { role: 1, nama: 1 };
     }
 
-    const users = await User.find(filter).populate('kelas_id').sort(sortOption);
+    // Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const totalUsers = await User.countDocuments(filter);
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    const users = await User.find(filter)
+      .populate('kelas_id')
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
+
     res.render('admin/users/index', {
       title: 'Kelola User - BaknusTa\'lim',
       users,
       roleFilter: role || '',
       searchQuery: search || '',
-      sortBy: sortBy || 'name_asc'
+      sortBy: activeSort,
+      currentPage: page,
+      totalPages,
+      totalUsers,
+      limit
     });
   } catch (error) {
     console.error(error);
