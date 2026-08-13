@@ -94,6 +94,34 @@ exports.create = async (req, res) => {
 
     await record.save();
 
+    // Send email notification (non-blocking)
+    try {
+      const mailerService = require('../services/mailerService');
+      const formattedDate = new Date(record.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      const graderName = currentUser.nama || 'Guru PAI';
+
+      const bodyHtml = `
+        <p>Halo <b>${student.nama}</b>,</p>
+        <p>Penilaian praktek ibadah baru telah diinput oleh <b>${graderName}</b> pada tanggal <b>${formattedDate}</b>:</p>
+        <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
+            <tr><td style='padding: 6px 0; font-weight: bold; width: 120px;'>Jenis Ibadah:</td><td>${ibadahType.nama_ibadah || ibadahType.nama}</td></tr>
+            <tr><td style='padding: 6px 0; font-weight: bold;'>Status:</td><td><span style='background-color: ${record.status === 'Kompeten' ? '#d1fae5; color: #065f46;' : '#fef3c7; color: #92400e;'} padding: 2px 6px; border-radius: 4px; font-size: 13px;'>${record.status}</span></td></tr>
+            <tr><td style='padding: 6px 0; font-weight: bold;'>Nilai:</td><td>${record.nilai || '-'}</td></tr>
+            <tr><td style='padding: 6px 0; font-weight: bold;'>Catatan Guru:</td><td>${record.catatan || '-'}</td></tr>
+        </table>
+        <p style='margin-top: 15px;'>Terus tingkatkan semangat beribadah Anda. Semoga berkah!</p>
+      `;
+
+      mailerService.sendNotification(
+        student.mailcow_email,
+        `[BaknusTa'lim] Nilai Praktek Ibadah Baru: ${ibadahType.nama_ibadah || ibadahType.nama}`,
+        "Penilaian Praktek Ibadah Selesai",
+        bodyHtml
+      );
+    } catch (mailErr) {
+      console.error('[IbadahMail] Error sending email:', mailErr);
+    }
+
     req.session.successMessage = `Berhasil menyimpan nilai praktek ibadah untuk ${student.nama}.`;
     res.redirect('/ibadah/riwayat');
   } catch (error) {

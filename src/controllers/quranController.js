@@ -118,6 +118,33 @@ exports.addBookmark = async (req, res) => {
     const { updateUserPoints } = require('../services/pointsService');
     await updateUserPoints(currentUser.id);
 
+    // Send email notification (non-blocking)
+    const User = require('../models/User');
+    User.findById(currentUser.id).then(async (userObj) => {
+      if (userObj) {
+        const mailerService = require('../services/mailerService');
+        const surahObj = await Surah.findOne({ number: parseInt(surah_number) });
+        const surahName = surahObj ? surahObj.name_latin : `Surah ${surah_number}`;
+        
+        const bodyHtml = `
+          <p>Halo <b>${userObj.nama}</b>,</p>
+          <p>Anda baru saja menandai (bookmark) ayat Al-Qur'an pada halaman bacaan Anda:</p>
+          <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
+              <tr><td style='padding: 6px 0; font-weight: bold; width: 120px;'>Surah:</td><td>${surahName} (Surah ke-${surah_number})</td></tr>
+              <tr><td style='padding: 6px 0; font-weight: bold;'>Ayat:</td><td>Ayat ${ayat_number}</td></tr>
+              <tr><td style='padding: 6px 0; font-weight: bold;'>Catatan:</td><td>${catatan || '-'}</td></tr>
+          </table>
+          <p style='margin-top: 15px;'>Semoga istiqomah dalam membaca dan mempelajari Al-Qur'an.</p>
+        `;
+        mailerService.sendNotification(
+          userObj.mailcow_email, 
+          "[BaknusTa'lim] Notifikasi Penanda (Bookmark) Al-Qur'an", 
+          "Bookmark Berhasil Disimpan", 
+          bodyHtml
+        );
+      }
+    }).catch(err => console.error('[BookmarkMail] Error sending notification:', err));
+
     res.json({ success: true, message: 'Bookmark berhasil disimpan.' });
   } catch (error) {
     console.error(error);

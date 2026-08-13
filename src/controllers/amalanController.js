@@ -112,6 +112,45 @@ exports.saveForm = async (req, res) => {
     const { updateUserPoints } = require('../services/pointsService');
     await updateUserPoints(user.id);
 
+    // Send email notification (non-blocking)
+    User.findById(user.id).then((userObj) => {
+      if (userObj) {
+        const mailerService = require('../services/mailerService');
+        const formattedDate = new Date(logDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        let amalanDetails = '';
+        if (hasHalangan) {
+          amalanDetails = '<p>Status: <b>Sedang Halangan (Mendapatkan dispensasi ibadah)</b></p>';
+        } else {
+          const farduList = Object.entries(sholat_fardu).filter(([_, checked]) => checked).map(([name]) => name.charAt(0).toUpperCase() + name.slice(1)).join(', ') || '-';
+          const sunnahList = Object.entries(sholat_sunnah).filter(([_, checked]) => checked).map(([name]) => name.charAt(0).toUpperCase() + name.slice(1)).join(', ') || '-';
+          const puasaList = Object.entries(parsedPuasa).filter(([_, checked]) => checked).map(([name]) => name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' ')).join(', ') || '-';
+          
+          amalanDetails = `
+            <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
+                <tr><td style='padding: 6px 0; font-weight: bold; width: 120px;'>Shalat Fardu:</td><td>${farduList}</td></tr>
+                <tr><td style='padding: 6px 0; font-weight: bold;'>Shalat Sunnah:</td><td>${sunnahList}</td></tr>
+                <tr><td style='padding: 6px 0; font-weight: bold;'>Puasa:</td><td>${puasaList}</td></tr>
+            </table>
+          `;
+        }
+
+        const bodyHtml = `
+          <p>Halo <b>${userObj.nama}</b>,</p>
+          <p>Laporan checklist amalan yaumi Anda untuk tanggal <b>${formattedDate}</b> telah berhasil disimpan:</p>
+          ${amalanDetails}
+          <p style='margin-top: 15px;'>Terima kasih telah mengisi amalan harian Anda. Semoga istiqomah!</p>
+        `;
+        
+        mailerService.sendNotification(
+          userObj.mailcow_email, 
+          `[BaknusTa'lim] Laporan Amalan Yaumi - ${formattedDate}`, 
+          "Checklist Amalan Berhasil Disimpan", 
+          bodyHtml
+        );
+      }
+    }).catch(err => console.error('[AmalanMail] Error sending notification:', err));
+
     req.session.successMessage = `Berhasil menyimpan checklist amalan untuk tanggal ${new Date(logDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
     res.redirect('/amalan');
   } catch (error) {
