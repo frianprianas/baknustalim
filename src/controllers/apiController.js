@@ -3,6 +3,8 @@ const AmalanYaumi = require('../models/AmalanYaumi');
 const Hafalan = require('../models/Hafalan');
 const Tilawah = require('../models/Tilawah');
 const PraktekIbadah = require('../models/PraktekIbadah');
+const Bookmark = require('../models/Bookmark');
+const Surah = require('../models/Surah');
 
 exports.getDashboardStats = async (req, res) => {
   try {
@@ -82,11 +84,12 @@ exports.getUserStats = async (req, res) => {
     }
 
     // Retrieve last activities from all activity tracking schemas
-    const [lastTilawah, lastHafalan, lastAmalan, lastPraktek] = await Promise.all([
+    const [lastTilawah, lastHafalan, lastAmalan, lastPraktek, lastBookmark] = await Promise.all([
       Tilawah.findOne({ siswa_id: user._id }).sort({ updatedAt: -1 }).lean(),
       Hafalan.findOne({ siswa_id: user._id }).sort({ updatedAt: -1 }).lean(),
       AmalanYaumi.findOne({ siswa_id: user._id }).sort({ updatedAt: -1 }).lean(),
-      PraktekIbadah.findOne({ siswa_id: user._id }).populate('jenis_ibadah_id').sort({ updatedAt: -1 }).lean()
+      PraktekIbadah.findOne({ siswa_id: user._id }).populate('jenis_ibadah_id').sort({ updatedAt: -1 }).lean(),
+      Bookmark.findOne({ user_id: user._id }).sort({ updatedAt: -1 }).lean()
     ]);
 
     // Find the absolute latest activity by comparing timestamps
@@ -161,6 +164,24 @@ exports.getUserStats = async (req, res) => {
             status: lastPraktek.status,
             nilai: lastPraktek.nilai,
             catatan: lastPraktek.catatan
+          }
+        };
+      }
+    }
+
+    if (lastBookmark) {
+      const time = new Date(lastBookmark.updatedAt || lastBookmark.createdAt).getTime();
+      if (time > latestTime) {
+        latestTime = time;
+        const surah = await Surah.findOne({ number: lastBookmark.surah_number }).lean();
+        latestActivity = {
+          tipe: 'Bookmark',
+          waktu: lastBookmark.updatedAt || lastBookmark.createdAt,
+          detail: {
+            surah_number: lastBookmark.surah_number,
+            surah_nama: surah ? surah.name_latin : 'Tidak Diketahui',
+            ayat_number: lastBookmark.ayat_number,
+            catatan: lastBookmark.catatan
           }
         };
       }
