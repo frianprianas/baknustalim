@@ -119,6 +119,54 @@ exports.answerQuestion = async (req, res, next) => {
     question.tanggal_dijawab = new Date();
     await question.save();
 
+    // Send email notification (non-blocking)
+    try {
+      const mailerService = require('../services/mailerService');
+      const askingUser = await User.findById(question.user_id);
+      const teacherObj = await User.findById(user.id);
+
+      if (askingUser && askingUser.mailcow_email) {
+        const studentBodyHtml = `
+          <p>Halo <b>${askingUser.nama}</b>,</p>
+          <p>Pertanyaan Anda telah dijawab oleh Ust/Ustdzah <b>${teacherObj ? teacherObj.nama : 'Guru PAI'}</b> pada fitur Tanya Yuk! BaknusTa'lim:</p>
+          <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
+              <tr><td style='padding: 6px 0; font-weight: bold; width: 120px;'>Pertanyaan:</td><td>${question.pertanyaan}</td></tr>
+              <tr><td style='padding: 6px 0; font-weight: bold;'>Jawaban:</td><td>${question.jawaban}</td></tr>
+          </table>
+          <p style='margin-top: 15px;'>Semoga ilmunya bermanfaat!</p>
+        `;
+
+        mailerService.sendNotification(
+          askingUser.mailcow_email,
+          `[BaknusTa'lim] Jawaban Pertanyaan dari ${teacherObj ? teacherObj.nama : 'Guru PAI'}`,
+          "Pertanyaan Anda Telah Dijawab",
+          studentBodyHtml
+        );
+      }
+
+      if (teacherObj && teacherObj.mailcow_email) {
+        const teacherBodyHtml = `
+          <p>Halo <b>${teacherObj.nama}</b>,</p>
+          <p>Anda telah berhasil menjawab pertanyaan dari siswa <b>${askingUser ? askingUser.nama : 'Siswa'}</b>:</p>
+          <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
+              <tr><td style='padding: 6px 0; font-weight: bold; width: 120px;'>Nama Siswa:</td><td>${askingUser ? askingUser.nama : '-'}</td></tr>
+              <tr><td style='padding: 6px 0; font-weight: bold;'>Pertanyaan:</td><td>${question.pertanyaan}</td></tr>
+              <tr><td style='padding: 6px 0; font-weight: bold;'>Jawaban Anda:</td><td>${question.jawaban}</td></tr>
+          </table>
+          <p style='margin-top: 15px;'>Terima kasih telah memberikan bimbingan kepada siswa.</p>
+        `;
+
+        mailerService.sendNotification(
+          teacherObj.mailcow_email,
+          `[BaknusTa'lim - Salinan Guru] Konfirmasi Jawaban Pertanyaan: ${askingUser ? askingUser.nama : 'Siswa'}`,
+          "Konfirmasi Jawaban Pertanyaan",
+          teacherBodyHtml
+        );
+      }
+    } catch (mailErr) {
+      console.error('[TanyaMail] Error sending notification email:', mailErr);
+    }
+
     req.session.successMessage = 'Pertanyaan berhasil dijawab!';
     res.redirect('/tanya');
   } catch (err) {

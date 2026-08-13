@@ -125,12 +125,39 @@ exports.create = async (req, res) => {
         <p style='margin-top: 15px;'>Terus tingkatkan bacaan Al-Qur'an Anda. Semoga berkah!</p>
       `;
 
+      // 1. Send email notification to Student
       mailerService.sendNotification(
         student.mailcow_email,
         `[BaknusTa'lim] Nilai Tilawah Baru: Surah ${record.surah_nama}`,
         "Penilaian Tilawah Selesai",
         bodyHtml
       );
+
+      // 2. Send email copy/confirmation to Teacher (Guru PAI / Grader)
+      User.findById(currentUser.id).then(teacherObj => {
+        if (teacherObj && teacherObj.mailcow_email) {
+          const teacherBodyHtml = `
+            <p>Halo <b>${teacherObj.nama}</b>,</p>
+            <p>Anda telah berhasil menginput nilai tilawah Al-Qur'an untuk siswa <b>${student.nama}</b> pada tanggal <b>${formattedDate}</b>:</p>
+            <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
+                <tr><td style='padding: 6px 0; font-weight: bold; width: 120px;'>Nama Siswa:</td><td>${student.nama}</td></tr>
+                <tr><td style='padding: 6px 0; font-weight: bold;'>Surah:</td><td>${record.surah_nama} (Surah ke-${record.surah_number})</td></tr>
+                <tr><td style='padding: 6px 0; font-weight: bold;'>Ayat:</td><td>Ayat ${record.ayat_start} s.d. ${record.ayat_end}</td></tr>
+                <tr><td style='padding: 6px 0; font-weight: bold;'>Status:</td><td><span style='background-color: ${record.status === 'Kompeten' ? '#d1fae5; color: #065f46;' : '#fef3c7; color: #92400e;'} padding: 2px 6px; border-radius: 4px; font-size: 13px;'>${record.status}</span></td></tr>
+                <tr><td style='padding: 6px 0; font-weight: bold;'>Nilai:</td><td>${record.nilai || '-'}</td></tr>
+                <tr><td style='padding: 6px 0; font-weight: bold;'>Catatan Guru:</td><td>${record.catatan || '-'}</td></tr>
+            </table>
+            <p style='margin-top: 15px;'>Arsip penilaian ini tersimpan otomatis di BaknusTa'lim.</p>
+          `;
+
+          mailerService.sendNotification(
+            teacherObj.mailcow_email,
+            `[BaknusTa'lim - Salinan Guru] Konfirmasi Penilaian Tilawah: ${student.nama} - Surah ${record.surah_nama}`,
+            "Konfirmasi Penilaian Tilawah",
+            teacherBodyHtml
+          );
+        }
+      }).catch(err => console.error('[TilawahMail] Error sending teacher copy:', err));
     } catch (mailErr) {
       console.error('[TilawahMail] Error sending email:', mailErr);
     }
