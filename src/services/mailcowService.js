@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const { ImapFlow } = require('imapflow');
 const User = require('../models/User');
 
-const API_URL = process.env.MAILCOW_API_URL || 'http://mail.smk.baktinusantara666.sch.id';
+const API_URL = process.env.MAILCOW_API_URL || 'https://mail.smk.baktinusantara666.sch.id';
 const API_KEY = process.env.MAILCOW_API_KEY || '925B68-0FF6BB-36B760-F6C051-AAF343';
 const MAIL_HOST = process.env.MAILCOW_MAIL_HOST || 'mail.smk.baktinusantara666.sch.id';
 const SMTP_PORT = parseInt(process.env.MAILCOW_SMTP_PORT) || 465;
