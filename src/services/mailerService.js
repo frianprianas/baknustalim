@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 const MAIL_HOST = process.env.MAILCOW_MAIL_HOST || 'mail.smk.baktinusantara666.sch.id';
 const SMTP_PORT = parseInt(process.env.MAILCOW_SMTP_PORT) || 465;
 const SMTP_USER = process.env.SMTP_USER || 'admin@smk.baktinusantara666.sch.id';
-const SMTP_PASS = process.env.SMTP_PASS || 'Buhun666';
+const SMTP_PASS = process.env.SMTP_PASS || 'buhun666';
 
 const transporter = nodemailer.createTransport({
   host: MAIL_HOST,
