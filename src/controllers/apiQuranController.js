@@ -343,6 +343,11 @@ exports.addBookmark = async (req, res) => {
       });
     }
 
+    // Send email notification (non-blocking)
+    const mailerService = require('../services/mailerService');
+    mailerService.sendBookmarkNotification(req.user, surahNum, ayatNum, catatan)
+      .catch(err => console.error('[ApiBookmarkMail] Error sending notification:', err));
+
     res.json({
       success: true,
       message: 'Ayat berhasil ditambahkan ke bookmark.',
