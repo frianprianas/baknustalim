@@ -131,6 +131,8 @@ app.use('/', require('./routes/index.routes'));
 app.use('/auth', require('./routes/auth.routes'));
 app.use('/admin', require('./routes/admin.routes'));
 app.use('/api', require('./routes/api.routes'));
+app.use('/api/v1/quran', require('./routes/api.quran.routes'));
+app.use('/api/v1/auth', require('./routes/api.auth.routes'));
 app.use('/hafalan', require('./routes/hafalan.routes'));
 app.use('/ibadah', require('./routes/ibadah.routes'));
 app.use('/tilawah', require('./routes/tilawah.routes'));
