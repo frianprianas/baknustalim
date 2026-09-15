@@ -1,3 +1,20 @@
+/**
+ * ============================================================================
+ * ⚠️ PERINGATAN KRITIS / CRITICAL CORE SERVICE - JANGAN DIUSIK ATAU DIHAPUS ⚠️
+ * ============================================================================
+ * Layanan pengiriman email ini (mailerService) adalah FITUR UTAMA & WAJIB
+ * pada aplikasi Baknus Ta'lim (termasuk notifikasi bookmark, hafalan, ibadah, dll).
+ *
+ * ATURAN BAKU:
+ * 1. DILARANG menghapus, menonaktifkan, atau me-bypass fungsi sendNotification
+ *    dan sendBookmarkNotification.
+ * 2. Pengirim default adalah admin@smk.baktinusantara666.sch.id (pass: buhun666)
+ *    pada host mail.smk.baktinusantara666.sch.id port 465 (SSL/TLS).
+ * 3. Konfigurasi TLS { rejectUnauthorized: false } WAJIB dipertahankan.
+ * 4. Jika ada perubahan controller, pastikan pemanggilan fungsi pengiriman
+ *    email bookmark TETAP AKTIF baik untuk Web maupun REST API (Flutter).
+ * ============================================================================
+ */
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 
@@ -187,6 +204,23 @@ async function sendBookmarkNotification(user, surahNumber, ayatNumber, catatan) 
     console.error('[BookmarkMail] Error sending bookmark notification:', err);
   }
 }
+
+
+// ============================================================================
+// 🛡️ RUNTIME INTEGRITY GUARD: Validasi Konfigurasi SMTP saat Aplikasi Dijalankan
+// ============================================================================
+(function checkEmailServiceIntegrity() {
+  if (!MAIL_HOST || !SMTP_USER || !SMTP_PASS) {
+    console.error('\n' + '!'.repeat(80));
+    console.error('🚨 [PERINGATAN KRITIS] KONFIGURASI EMAIL SMTP BAKNUSTA\'LIM HILANG ATAU DIUSIK!');
+    console.error('Host:', MAIL_HOST || 'TIDAK TERDEFINISI');
+    console.error('User:', SMTP_USER || 'TIDAK TERDEFINISI');
+    console.error('Pastikan SMTP_USER=admin@smk.baktinusantara666.sch.id dan SMTP_PASS=buhun666 tetap aktif!');
+    console.error('!'.repeat(80) + '\n');
+  } else {
+    console.log(`🛡️ [EmailGuard] Layanan Notifikasi Email Aktif (${SMTP_USER} via ${MAIL_HOST}:${SMTP_PORT})`);
+  }
+})();
 
 module.exports = {
   sendNotification,
