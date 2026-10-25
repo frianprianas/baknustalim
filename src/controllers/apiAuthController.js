@@ -28,8 +28,13 @@ exports.login = async (req, res) => {
     // 2. Fetch or create local user
     let user = await User.findOne({ mailcow_email: emailLower });
     if (!user) {
-      await mailcowService.syncUsersFromMailcow();
-      user = await User.findOne({ mailcow_email: emailLower });
+      try {
+        await mailcowService.syncUsersFromMailcow();
+        user = await User.findOne({ mailcow_email: emailLower });
+      } catch (syncErr) {
+        console.warn(`[ApiAuth] Mailcow sync error for ${emailLower}: ${syncErr.message}`);
+      }
+
       if (!user) {
         const localPart = emailLower.split('@')[0];
         const isNumeric = /^\d+$/.test(localPart);

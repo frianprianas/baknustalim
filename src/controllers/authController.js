@@ -26,7 +26,7 @@ exports.login = async (req, res) => {
       emailLower = `${emailLower}@smk.baktinusantara666.sch.id`;
     }
     
-    // 1. Verify credentials via Mailcow (SMTP/IMAP)
+    // 1. Verify credentials via Mailcow (IMAP/SMTP)
     await mailcowService.authenticateUser(emailLower, password);
 
     // 2. Fetch local user representation
@@ -35,8 +35,12 @@ exports.login = async (req, res) => {
     if (!user) {
       console.log(`User ${emailLower} not found in database after authentication. Running sync...`);
       // Sync users from Mailcow to see if they exist in the mailbox list
-      await mailcowService.syncUsersFromMailcow();
-      user = await User.findOne({ mailcow_email: emailLower });
+      try {
+        await mailcowService.syncUsersFromMailcow();
+        user = await User.findOne({ mailcow_email: emailLower });
+      } catch (syncErr) {
+        console.warn(`[Auth] Mailcow sync error during login for ${emailLower}: ${syncErr.message}`);
+      }
       
       // Fallback: If still not found (e.g. new mailbox or API lag), create a local entry
       if (!user) {
@@ -80,7 +84,7 @@ exports.login = async (req, res) => {
 
     console.log(`User ${emailLower} logged in successfully with role: ${user.role}`);
     
-    // 4. Redirect to intended page or dashboard
+    // 5. Redirect to intended page or dashboard
     const redirectTo = req.session.redirectTo || '/dashboard';
     delete req.session.redirectTo;
     res.redirect(redirectTo);

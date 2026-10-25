@@ -2,15 +2,26 @@ const nodemailer = require('nodemailer');
 const { ImapFlow } = require('imapflow');
 const User = require('../models/User');
 
-const API_URL = process.env.MAILCOW_API_URL || 'https://mail.smk.baktinusantara666.sch.id';
-const API_KEY = process.env.MAILCOW_API_KEY || '925B68-0FF6BB-36B760-F6C051-AAF343';
-const MAIL_HOST = process.env.MAILCOW_MAIL_HOST || 'mail.smk.baktinusantara666.sch.id';
-const SMTP_PORT = parseInt(process.env.MAILCOW_SMTP_PORT) || 465;
-const IMAP_PORT = parseInt(process.env.MAILCOW_IMAP_PORT) || 993;
-const AUTH_METHOD = process.env.MAILCOW_AUTH_METHOD || 'SMTP';
+const API_URL = process.env.MAILCOW_API_URL || 'https://baknusmail.smkbn666.sch.id';
+const API_KEY = process.env.MAILCOW_API_KEY || 'BAKNUS_ATTEND_SECRET';
+const MAIL_HOST = process.env.MAILCOW_MAIL_HOST || 'baknusmail.smkbn666.sch.id';
+const SMTP_PORT = parseInt(process.env.MAILCOW_SMTP_PORT, 10) || 465;
+const IMAP_PORT = parseInt(process.env.MAILCOW_IMAP_PORT, 10) || 993;
+const AUTH_METHOD = process.env.MAILCOW_AUTH_METHOD || 'IMAP';
 
 /**
- * Authenticate user credentials by attempting SMTP or IMAP connection to Mailcow.
+ * Return candidate hostnames to try in case of server migration/domain fallback.
+ */
+function getCandidateHosts() {
+  const hosts = [];
+  if (process.env.MAILCOW_MAIL_HOST) hosts.push(process.env.MAILCOW_MAIL_HOST);
+  hosts.push('baknusmail.smkbn666.sch.id');
+  hosts.push('mail.smk.baktinusantara666.sch.id');
+  return Array.from(new Set(hosts.filter(Boolean)));
+}
+
+/**
+ * Authenticate user credentials by attempting IMAP (primary) and SMTP (fallback) to Mailcow.
  * Returns true if successful, throws error otherwise.
  */
 async function authenticateUser(email, password) {
@@ -27,41 +38,73 @@ async function authenticateUser(email, password) {
     }
   }
 
-  // Try SMTP first (default)
-  if (AUTH_METHOD === 'SMTP') {
-    try {
-      const transporter = nodemailer.createTransport({
-        host: MAIL_HOST,
-        port: SMTP_PORT,
-        secure: SMTP_PORT === 465,
-        auth: {
-          user: email,
-          pass: password
-        },
-        connectionTimeout: 5000,
-        greetingTimeout: 5000
-      });
-      await transporter.verify();
-      return true;
-    } catch (smtpError) {
-      console.warn(`SMTP Authentication failed for ${email}: ${smtpError.message}. Trying IMAP fallback...`);
+  const hostsToTry = getCandidateHosts();
+  let lastError = null;
+
+  for (const host of hostsToTry) {
+    if (AUTH_METHOD === 'SMTP') {
+      // 1. Try SMTP first
+      try {
+        const okSmtp = await authenticateViaSMTP(email, password, host, SMTP_PORT);
+        if (okSmtp) return true;
+      } catch (smtpErr) {
+        lastError = smtpErr;
+        console.warn(`[MailcowAuth] SMTP (${host}:${SMTP_PORT}) failed for ${email}: ${smtpErr.message}`);
+      }
+
       // Fallback to IMAP
-      return await authenticateViaIMAP(email, password);
+      try {
+        const okImap = await authenticateViaIMAP(email, password, host, IMAP_PORT, IMAP_PORT === 993);
+        if (okImap) return true;
+      } catch (imapErr) {
+        lastError = imapErr;
+        console.warn(`[MailcowAuth] IMAP fallback (${host}:${IMAP_PORT}) failed for ${email}: ${imapErr.message}`);
+      }
+    } else {
+      // 1. Try IMAP first (default - reliable protocol used in BaknusAttend)
+      try {
+        const okImap = await authenticateViaIMAP(email, password, host, IMAP_PORT, IMAP_PORT === 993);
+        if (okImap) return true;
+      } catch (imapErr) {
+        lastError = imapErr;
+        console.warn(`[MailcowAuth] IMAP (${host}:${IMAP_PORT}) failed for ${email}: ${imapErr.message}`);
+
+        // Try IMAP port 143 if 993 timed out or was closed
+        if (IMAP_PORT === 993) {
+          try {
+            const ok143 = await authenticateViaIMAP(email, password, host, 143, false);
+            if (ok143) return true;
+          } catch (imap143Err) {
+            console.warn(`[MailcowAuth] IMAP (${host}:143) failed: ${imap143Err.message}`);
+          }
+        }
+      }
+
+      // 2. Fallback to SMTP
+      try {
+        const okSmtp = await authenticateViaSMTP(email, password, host, SMTP_PORT);
+        if (okSmtp) return true;
+      } catch (smtpErr) {
+        lastError = smtpErr;
+        console.warn(`[MailcowAuth] SMTP (${host}:${SMTP_PORT}) failed for ${email}: ${smtpErr.message}`);
+      }
     }
-  } else {
-    // Primary IMAP
-    return await authenticateViaIMAP(email, password);
   }
+
+  throw new Error(lastError ? 'Email atau password Mailcow salah.' : 'Tidak dapat terhubung ke server Mailcow.');
 }
 
-async function authenticateViaIMAP(email, password) {
+async function authenticateViaIMAP(email, password, host = MAIL_HOST, port = IMAP_PORT, secure = true) {
   const client = new ImapFlow({
-    host: MAIL_HOST,
-    port: IMAP_PORT,
-    secure: true,
+    host,
+    port,
+    secure,
     auth: {
       user: email,
       pass: password
+    },
+    tls: {
+      rejectUnauthorized: false
     },
     logger: false,
     connectionTimeout: 5000
@@ -72,9 +115,28 @@ async function authenticateViaIMAP(email, password) {
     await client.logout();
     return true;
   } catch (imapError) {
-    console.error(`IMAP Authentication failed for ${email}: ${imapError.message}`);
-    throw new Error('Email atau password Mailcow salah.');
+    throw new Error(imapError.message || 'Email atau password Mailcow salah.');
   }
+}
+
+async function authenticateViaSMTP(email, password, host = MAIL_HOST, port = SMTP_PORT) {
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: {
+      user: email,
+      pass: password
+    },
+    tls: {
+      rejectUnauthorized: false
+    },
+    connectionTimeout: 5000,
+    greetingTimeout: 5000
+  });
+
+  await transporter.verify();
+  return true;
 }
 
 /**
